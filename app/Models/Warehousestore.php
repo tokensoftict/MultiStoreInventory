@@ -30,7 +30,6 @@ use Spatie\Activitylog\Traits\LogsActivity;
  */
 class Warehousestore extends Model
 {
-    use LogsActivity;
 
     protected $table = 'warehousestores';
 

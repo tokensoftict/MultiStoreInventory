@@ -201,7 +201,7 @@ class StockController extends Controller
         $data['title2'] = "Today's Stock Log";
         $data['stores'] = Warehousestore::all();
         $data['logs'] = StockLogItem::with(['user','stock','operation','warehousestore'])->where('log_date',dailyDate())->orderBy('log_date','DESC')->get();
-        return setPageContent("stock.stocklog.form",$data);
+        return view("stock.stocklog.form",$data);
     }
 
     public function usage_log_report(Request $request)
@@ -238,7 +238,7 @@ class StockController extends Controller
     {
         $log = StockLogItem::with(['user','stock','operation','warehousestore'])->find($id);
 
-        foreach ($log->stockLogOperation()->get() as $operation)
+        foreach ($log->operation()->get() as $operation)
         {
             $operation->returnStockBack();
             $operation->delete();
@@ -260,13 +260,13 @@ class StockController extends Controller
             $data['to']  = date('Y-m-t');
         }
 
-        $data['sales'] = InvoiceItem::where('stock_id',$id)->whereBetween('invoice_date',[ $data['from'] , $data['to'] ])->get();
+        $data['sales'] = InvoiceItem::where('stock_id',$id)->where('selling_price','>', 0)->whereBetween('invoice_date',[ $data['from'] , $data['to'] ])->get();
         $data['transfers'] = StockTransferItem::where('stock_id',$id)->whereBetween('transfer_date',[ $data['from'] , $data['to']])->get();
         $data['purchases'] = PurchaseOrderItem::where('stock_id',$id)->whereBetween('created_at',[ $data['from'] , $data['to']])->get();
         $data['returns'] = ReturnLog::where('stock_id',$id)->whereBetween('date_added',[ $data['from'] , $data['to']])->get();
         $data['stock'] = Stock::find($id);
         $data['title'] = "Stock / Product Report for ".$data['stock']->name;
-        return setPageContent("stock.product_report",$data);
+        return view("stock.product_report",$data);
     }
 
 
@@ -313,12 +313,12 @@ class StockController extends Controller
         }
 
         $data['title'] = "Import New Stock";
-        return setPageContent("stock.import_new_stock",$data);
+        return view("stock.import_new_stock",$data);
     }
 
 
     public function export_current_stock()
     {
-        return Excel::download(new CurrentStockExport(), "Available-stock-".date('Y-m-d').'.xlsx');
+        return Excel::download(new CurrentStockExport(), \request()->has('template') ? 'Stock-Template.xlsx' : "Available-stock-".date('Y-m-d').'.xlsx');
     }
 }

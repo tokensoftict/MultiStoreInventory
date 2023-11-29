@@ -44,14 +44,14 @@ class InvoiceController extends Controller
         $data = [];
         $data['title'] = 'Draft Invoice List';
         $data['invoices'] = Invoice::with(['created_user','customer'])->where('warehousestore_id', getActiveStore()->id)->where('status','DRAFT')->where('invoice_date',date('Y-m-d'))->get();
-        return setPageContent('invoice.draft-invoice',$data);
+        return view('invoice.draft-invoice',$data);
     }
 
     public function paid(){
         $data = [];
         $data['title'] = 'Completed Invoice List';
         $data['invoices'] = Invoice::with(['created_user','customer'])->where('warehousestore_id', getActiveStore()->id)->where('status','COMPLETE')->where('invoice_date',date('Y-m-d'))->get();
-        return setPageContent('invoice.paid-invoice',$data);
+        return view('invoice.paid-invoice',$data);
     }
 
     public function update(Request $request, $id){

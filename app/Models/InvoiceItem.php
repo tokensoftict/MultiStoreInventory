@@ -45,7 +45,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 class InvoiceItem extends Model
 {
 
-    use LogsActivity;
+
 
 	protected $table = 'invoice_items';
 

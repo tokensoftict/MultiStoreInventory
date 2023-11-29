@@ -35,7 +35,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  */
 class CreditPaymentLog extends Model
 {
-    use LogsActivity;
+
 
 	protected $table = 'credit_payment_logs';
 

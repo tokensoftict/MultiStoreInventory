@@ -31,7 +31,7 @@ class Group extends Model
 {
 	use SoftDeletes;
 
-    use LogsActivity;
+
 
 	protected $table = 'groups';
 

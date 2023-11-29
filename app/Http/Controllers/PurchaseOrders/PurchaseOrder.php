@@ -28,9 +28,9 @@ class PurchaseOrder extends Controller
 
 
     public function index(){
-        $data['title'] = 'List Purchase Orders';
+        $data['title'] = "List Today's Purchase Orders";
         $data['purchase_orders'] = Po::with(['supplier','purchase_order_items','user','created_user'])->where('date_created',date('Y-m-d'))->orderBy('id','DESC')->get();
-        return setPageContent('purchaseorder.list', $data);
+        return view('purchaseorder.list', $data);
     }
 
 

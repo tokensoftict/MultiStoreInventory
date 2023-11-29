@@ -1,12 +1,10 @@
 <?php
 
-namespace App\Http\Controllers\StockManager;
+namespace App\Http\Controllers\StockTransfer;
 
 use App\Classes\Settings;
 use App\Http\Controllers\Controller;
-use App\Models\Stock;
 use App\Models\StockTransfer;
-use App\Models\StockTransferBackup;
 use App\Models\Warehousestore;
 use Illuminate\Http\Request;
 
@@ -16,6 +14,13 @@ class StockTransferController extends Controller
 
     public function __construct(Settings $_settings){
         $this->settings = $_settings;
+    }
+
+
+    public function index(){
+        $data['title'] = "List Today's Stock Transfer";
+        $data['transfers'] = StockTransfer::with(['store_to','store_from','user'])->where('transfer_date', date('Y-m-d'))->orderBy('id','DESC')->get();
+        return view('stock.transfer.index',$data);
     }
 
     public function add_transfer(Request $request)
@@ -44,27 +49,8 @@ class StockTransferController extends Controller
 
     public function delete_transfer($id)
     {
-
         $transfer = StockTransfer::with(['store_to','store_from','user'])->find($id);
-
-        $from_store = getActualStore($transfer->product_type, $transfer->from);
-
-        $to_store = getActualStore($transfer->product_type, $transfer->to);
-
-        foreach ($transfer->operation()->where('store',$from_store)->get() as $from_transfers)
-        {
-            $from_transfers->returnStockBack();
-            $from_transfers->delete();
-        }
-
-        foreach ($transfer->operation()->where('store',$to_store)->get() as $to_transfers)
-        {
-            $to_transfers->minusStockBack();
-            $to_transfers->delete();
-        }
-
         $transfer->delete();
-
         return redirect()->route('stocktransfer.add_transfer')->with('success','Stock has been deleted successfully!');
     }
 

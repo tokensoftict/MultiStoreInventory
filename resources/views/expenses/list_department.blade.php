@@ -31,10 +31,10 @@
                                     <input type="text" class="form-control datepicker js-datepicker" data-min-view="2" data-date-format="yyyy-mm-dd" style="background-color: #FFF; color: #000;"  value="{{ $to }}" name="to" placeholder="TO"/>
                                 </div>
                                 <div class="col-sm-3">
-                                    <label>Department</label>
-                                    <select class="form-control" name="department">
-                                        @foreach($depts as $_dept)
-                                            <option {{ $department == $_dept ? "selected" : "" }} value="{{ $_dept }}">{{ $_dept }}</option>
+                                    <label>Store</label>
+                                    <select class="form-control" name="warehousestore_id">
+                                        @foreach($stores as $store)
+                                            <option {{ $store['id'] == $warehousestore_id ? "selected" : "" }} value="{{ $store['id'] }}">{{ $store['name'] }}</option>
                                         @endforeach
                                     </select>
                                 </div>

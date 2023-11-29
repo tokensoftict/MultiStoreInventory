@@ -98,13 +98,13 @@
                                                 @if(userCanView('invoiceandsales.view'))
                                                     <li><a href="{{ route('invoiceandsales.view',$invoice->invoice->id) }}">View Invoice</a></li>
                                                 @endif
-                                                @if(userCanView('invoiceandsales.pos_print'))
+                                                @if(userCanView('invoiceandsales.pos_print') && $invoice->sub_total > -1)
                                                     <li><a href="{{ route('invoiceandsales.pos_print',$invoice->invoice->id) }}">Print Invoice Pos</a></li>
                                                 @endif
-                                                @if(userCanView('invoiceandsales.print_afour'))
+                                                @if(userCanView('invoiceandsales.print_afour') && $invoice->sub_total > -1)
                                                     <li><a href="{{ route('invoiceandsales.print_afour',$invoice->invoice->id) }}">Print Invoice A4</a></li>
                                                 @endif
-                                                @if(userCanView('invoiceandsales.print_way_bill'))
+                                                @if(userCanView('invoiceandsales.print_way_bill') && $invoice->sub_total > -1)
                                                     <li><a href="{{ route('invoiceandsales.print_way_bill',$invoice->invoice->id) }}">Print Waybill</a></li>
                                                 @endif
                                             </ul>

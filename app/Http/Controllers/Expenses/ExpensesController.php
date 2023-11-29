@@ -10,9 +10,9 @@ use Illuminate\Http\Request;
 class ExpensesController extends Controller
 {
     public function index(){
-        $data['title'] = "List Expenses";
+        $data['title'] = "List Today's Expenses";
         $data['expenses'] = Expense::with(['expenses_type','user'])->where('expense_date',dailyDate())->get();
-        return setPageContent('expenses.list',$data);
+        return view('expenses.list',$data);
     }
 
 
@@ -20,7 +20,8 @@ class ExpensesController extends Controller
         $data['title'] = "New Expenses";
         $data['expenses_types'] = ExpensesType::all();
         $data['expenses'] = new Expense();
-        return setPageContent('expenses.new',$data);
+        $data['stores'] = getMyAccessStore('name_and_id');
+        return view('expenses.new',$data);
     }
 
 
@@ -43,6 +44,7 @@ class ExpensesController extends Controller
         $data['title'] = "Update Expenses";
         $data['expenses'] = Expense::find($id);
         $data['expenses_types'] = ExpensesType::all();
+        $data['stores'] = getMyAccessStore('name_and_id');
         return setPageContent('expenses.new',$data);
     }
 
@@ -69,37 +71,5 @@ class ExpensesController extends Controller
 
     }
 
-
-    public function expenses_report_by_type(Request $request){
-        if($request->get('from') && $request->get('to')){
-            $data['from'] = $request->get('from');
-            $data['to'] = $request->get('to');
-            $data['type'] = $request->get('type');
-        }else{
-            $data['from'] = date('Y-m-01');
-            $data['to'] = date('Y-m-t');
-            $data['type'] = 1;
-        }
-
-        $data['types'] = ExpensesType::all();
-        $data['title'] = "List Expenses";
-        $data['expenses'] = Expense::with(['expenses_type','user'])->where('expenses_type_id', $data['type'])->whereBetween('expense_date',[ $data['from'], $data['to']])->get();
-        return setPageContent('expenses.list_by_type',$data);
-    }
-
-
-    public function expenses_report_by_department(Request $request){
-        if($request->get('from') && $request->get('to')){
-            $data['from'] = $request->get('from');
-            $data['to'] = $request->get('to');
-            $data['department'] = $request->get('department');
-        }else{
-            $data['from'] = date('Y-m-01');
-            $data['to'] = date('Y-m-t');
-        }
-        $data['title'] = "List Expenses";
-        $data['expenses'] = Expense::with(['expenses_type','user'])->where('department', $data['department'])->whereBetween('expense_date',[ $data['from'], $data['to']])->get();
-        return setPageContent('expenses.list_department',$data);
-    }
 
 }

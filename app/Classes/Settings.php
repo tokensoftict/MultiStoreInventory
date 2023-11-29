@@ -16,6 +16,6 @@ class Settings extends Valuestore
         return json_decode(json_encode($this->all()));
     }
 
-    public static  $reports = [10,11,12,13,14,15,16,17,18,19,20];
+    public static  $reports = [11,12,13,14,15,16,17,18,19,20];
 
 }

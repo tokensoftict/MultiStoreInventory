@@ -105,7 +105,7 @@
                                             <td>{{ $transfer->store_to->name }}</td>
                                             <td>{!! $transfer->stock_transfer->status == "COMPLETE" ? label( $transfer->stock_transfer->status,'success') : label( $transfer->status,'primary') !!}</td>
                                             <td>{{ convert_date($transfer->transfer_date) }}</td>
-                                            <td>{{ convert_date($transfer->product_type) }}</td>
+                                            <td>{{ $transfer->product_type }}</td>
                                             <td>{{ number_format($transfer->total_price,2) }}</td>
                                             <td>{{ $transfer->user->name }}</td>
                                         </tr>

@@ -25,6 +25,8 @@
                                            style="display: inline-block;">{{ $errors->first('name') }}</label>
                                 @endif
                             </div>
+                            <input  type="hidden"  value="Branch" required class="form-control" name="branch_name" placeholder="Branch Name"/>
+                            <!--
                             <div class="form-group">
                                 <label>Branch Name</label>
                                 <input  type="text"  value="{{ old('branch_name',@$store->branch_name) }}" required class="form-control" name="branch_name" placeholder="Branch Name"/>
@@ -33,6 +35,7 @@
                                            style="display: inline-block;">{{ $errors->first('branch_name') }}</label>
                                 @endif
                             </div>
+                            -->
                             <div class="form-group">
                                 <label>VAT</label>
                                 <input  type="text"  value="{{ old('tax',@$store->tax) }}"  class="form-control" name="tax" placeholder="VAT"/>

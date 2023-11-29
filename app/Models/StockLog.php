@@ -32,7 +32,6 @@ use Spatie\Activitylog\Traits\LogsActivity;
  */
 class StockLog extends Model
 {
-    use LogsActivity;
 
     protected $table = 'stock_logs';
 

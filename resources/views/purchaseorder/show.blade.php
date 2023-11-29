@@ -28,6 +28,7 @@
                                         {{ $settings->first_address  }}<br>
                                         Created By : {{ $porder->created_user->name }}<br>
                                         Date : {{ str_date($porder->date_created) }}<br>
+                                        Store : {{ $porder->warehousestore->name ?? "" }}<br>
                                     </address>
                                 </div>
                                 <div class="col-xs-6 text-right"><strong>Supplier:</strong><br>

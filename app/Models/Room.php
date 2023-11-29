@@ -34,7 +34,6 @@ class Room extends Model
 {
 	use SoftDeletes;
 
-    use LogsActivity;
 
 	protected $table = 'rooms';
 

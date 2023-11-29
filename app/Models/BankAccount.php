@@ -28,7 +28,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 class BankAccount extends Model
 {
 
-    use LogsActivity;
+
 
 	protected $table = 'bank_accounts';
 

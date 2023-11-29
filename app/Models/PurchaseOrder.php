@@ -6,94 +6,100 @@
 
 namespace App\Models;
 
-use App\PoItem;
 use Carbon\Carbon;
-use http\Env\Request;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Auth;
-use Spatie\Activitylog\Traits\LogsActivity;
-
 
 /**
  * Class PurchaseOrder
- *
+ * 
  * @property int $id
- * @property float $total
  * @property int|null $supplier_id
  * @property Carbon|null $date_created
  * @property Carbon|null $date_approved
  * @property Carbon|null $date_completed
+ * @property int|null $warehousestore_id
+ * @property float $total
+ * @property string $status
  * @property int|null $created_by
  * @property int|null $updated_by
  * @property int|null $approved_by
- * @property string|null $status
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- *
+ * 
  * @property User|null $user
  * @property Supplier|null $supplier
+ * @property Warehousestore|null $warehousestore
  * @property Collection|PurchaseOrderItem[] $purchase_order_items
+ * @property Collection|SupplierCreditPaymentHistory[] $supplier_credit_payment_histories
  *
  * @package App\Models
  */
 class PurchaseOrder extends Model
 {
-    use LogsActivity;
+	protected $table = 'purchase_orders';
 
-    protected $table = 'purchase_orders';
+	protected $casts = [
+		'supplier_id' => 'int',
+		'warehousestore_id' => 'int',
+		'total' => 'float',
+		'created_by' => 'int',
+		'updated_by' => 'int',
+		'approved_by' => 'int'
+	];
 
-    protected $casts = [
-        'supplier_id' => 'int',
-        'created_by' => 'int',
-        'updated_by' => 'int',
-        'approved_by' => 'int',
-        'total' => 'float'
-    ];
+	protected $dates = [
+		'date_created',
+		'date_approved',
+		'date_completed'
+	];
 
-    protected $dates = [
-        'date_created',
-        'date_approved',
-        'date_completed'
-    ];
-
-    protected $fillable = [
-        'supplier_id',
-        'date_created',
-        'date_approved',
-        'date_completed',
-        'total',
-        'status',
-        'created_by',
-        'updated_by',
-        'approved_by'
-    ];
+	protected $fillable = [
+		'supplier_id',
+		'date_created',
+		'date_approved',
+		'date_completed',
+		'warehousestore_id',
+		'total',
+		'status',
+		'created_by',
+		'updated_by',
+		'approved_by'
+	];
 
     public function user()
     {
         return $this->belongsTo(User::class, 'updated_by');
     }
+	public function updated_user()
+	{
+		return $this->belongsTo(User::class, 'updated_by');
+	}
 
     public function created_user()
     {
-        return $this->belongsTo(User::class, 'updated_by');
+        return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function approved_user()
-    {
-        return $this->belongsTo(User::class, 'approved_by');
-    }
+	public function supplier()
+	{
+		return $this->belongsTo(Supplier::class);
+	}
 
-    public function supplier()
-    {
-        return $this->belongsTo(Supplier::class);
-    }
+	public function warehousestore()
+	{
+		return $this->belongsTo(Warehousestore::class);
+	}
 
-    public function purchase_order_items()
-    {
-        return $this->hasMany(PurchaseOrderItem::class);
-    }
+	public function purchase_order_items()
+	{
+		return $this->hasMany(PurchaseOrderItem::class);
+	}
 
+	public function supplier_credit_payment_histories()
+	{
+		return $this->hasMany(SupplierCreditPaymentHistory::class);
+	}
 
     public function complete(){
         if($this->status  == "COMPLETE") return redirect()->route('purchaseorders.index')->with('success','Purchase Order has been completed successfully!');
@@ -104,7 +110,7 @@ class PurchaseOrder extends Model
                 'expiry_date' => NULL,
                 $purchase->store => $purchase->qty,
                 //'cost_price' =>$purchase->cost_price,
-               // 'selling_price' =>$purchase->selling_price,
+                // 'selling_price' =>$purchase->selling_price,
                 'supplier_id' => $this->supplier_id,
                 'stock_id' => $purchase->stock_id
             ]);
@@ -146,6 +152,7 @@ class PurchaseOrder extends Model
             'date_created' => $request->date_created,
             'date_approved' => $request->date_created,
             'date_completed' => $request->date_created,
+            'warehousestore_id' => getStoreIDFromName($request->get('store')),
             'status' => "DRAFT",
             'updated_by' => auth()->id(),
             'approved_by' => auth()->id()
@@ -188,6 +195,7 @@ class PurchaseOrder extends Model
             'date_approved' => $request->date_created,
             'date_completed' => $request->date_created,
             'status' => "DRAFT",
+            'warehousestore_id' => getStoreIDFromName($request->get('store')),
             'created_by' => auth()->id(),
             'updated_by' => auth()->id(),
             'approved_by' => auth()->id(),

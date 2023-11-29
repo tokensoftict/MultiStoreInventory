@@ -33,57 +33,67 @@
                         @if(isset($expenses->id))
                             <form  action="{{ route('expenses.update',$expenses->id) }}" enctype="multipart/form-data" method="post">
                                 {{ method_field('PUT') }}
-                        @else
-                        <form  action="{{ route('expenses.store') }}" enctype="multipart/form-data" method="post">
-                        @endif
-                            <div class="panel-body">
-                                {{ csrf_field() }}
-                                <div class="col-md-12">
-
-                                    <div class="form-group">
-                                        <label>Date <span  style="color:red;">*</span></label>
-                                        <input type="text" value="{{ old('expense_date', (isset($expenses->expense_date) ? $expenses->expense_date : date('Y-m-d'))) }}" required  value="{{ date('Y-m-d') }}" data-min-view="2" data-date-format="yyyy-mm-dd" class="form-control datepicker js-datepicker" id="invoice_date" name="expense_date" placeholder="Date"/>
-                                        @if ($errors->has('expense_date'))
-                                            <label for="name-error" class="error"
-                                                   style="display: inline-block;">{{ $errors->first('expense_date') }}</label>
+                                @else
+                                    <form  action="{{ route('expenses.store') }}" enctype="multipart/form-data" method="post">
                                         @endif
-                                    </div>
+                                        <div class="panel-body">
+                                            {{ csrf_field() }}
+                                            <div class="col-md-12">
 
-                                    <div class="form-group">
-                                        <label>Amount <span  style="color:red;">*</span></label>
-                                        <input type="text" value="{{ old('amount',$expenses->amount) }}" required  class="form-control" name="amount" placeholder="Amount"/>
-                                        @if ($errors->has('amount'))
-                                            <label for="name-error" class="error"
-                                                   style="display: inline-block;">{{ $errors->first('amount') }}</label>
-                                        @endif
-                                    </div>
+                                                <div class="form-group">
+                                                    <label>Date <span  style="color:red;">*</span></label>
+                                                    <input type="text" value="{{ old('expense_date', (isset($expenses->expense_date) ? $expenses->expense_date : date('Y-m-d'))) }}" required  value="{{ date('Y-m-d') }}" data-min-view="2" data-date-format="yyyy-mm-dd" class="form-control datepicker js-datepicker" id="invoice_date" name="expense_date" placeholder="Date"/>
+                                                    @if ($errors->has('expense_date'))
+                                                        <label for="name-error" class="error"
+                                                               style="display: inline-block;">{{ $errors->first('expense_date') }}</label>
+                                                    @endif
+                                                </div>
 
-                                        <input type="hidden" name="department" value="STORE"/>
+                                                <div class="form-group">
+                                                    <label>Amount <span  style="color:red;">*</span></label>
+                                                    <input type="text" value="{{ old('amount',$expenses->amount) }}" required  class="form-control" name="amount" placeholder="Amount"/>
+                                                    @if ($errors->has('amount'))
+                                                        <label for="name-error" class="error"
+                                                               style="display: inline-block;">{{ $errors->first('amount') }}</label>
+                                                    @endif
+                                                </div>
 
-                                    <div class="form-group">
-                                        <label>Expenses Type<span  style="color:red;">*</span></label>
-                                        <select required class="form-control" name="expenses_type_id">
-                                            <option value="">-Select Type-</option>
-                                            @foreach($expenses_types as $type)
-                                                <option {{ old('expenses_type_id',$expenses->expenses_type_id) ? 'selected' : '' }} value="{{ $type->id }}">{{ $type->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Description / Purpose <span  style="color:red;">*</span></label>
-                                        <textarea class="form-control" style="height: 100px" required name="purpose">{{ old('purpose',$expenses->purpose) }}</textarea>
-                                        @if ($errors->has('purpose'))
-                                            <label for="name-error" class="error"
-                                                   style="display: inline-block;">{{ $errors->first('purpose') }}</label>
-                                        @endif
-                                    </div>
+                                                <input type="hidden" name="department" value="STORE"/>
 
-                                </div>
-                            </div>
-                            <div class="panel-footer">
-                                <center> <input class="btn btn-info btn-sm" type="submit" name="save" value="Save Expense"></center>
-                            </div>
-                        </form>
+                                                <div class="form-group">
+                                                    <label>Store<span  style="color:red;">*</span></label>
+                                                    <select required class="form-control" name="warehousestore_id">
+                                                        @foreach($stores as $store)
+                                                            <option {{ old('warehousestore_id',$expenses->warehousestore_id ?? getActiveStore()->id) ? 'selected' : '' }} value="{{ $store['id'] }}">{{ $store['name'] }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+
+
+                                                <div class="form-group">
+                                                    <label>Expenses Type<span  style="color:red;">*</span></label>
+                                                    <select required class="form-control" name="expenses_type_id">
+                                                        <option value="">-Select Type-</option>
+                                                        @foreach($expenses_types as $type)
+                                                            <option {{ old('expenses_type_id',$expenses->expenses_type_id) ? 'selected' : '' }} value="{{ $type->id }}">{{ $type->name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Description / Purpose <span  style="color:red;">*</span></label>
+                                                    <textarea class="form-control" style="height: 100px" required name="purpose">{{ old('purpose',$expenses->purpose) }}</textarea>
+                                                    @if ($errors->has('purpose'))
+                                                        <label for="name-error" class="error"
+                                                               style="display: inline-block;">{{ $errors->first('purpose') }}</label>
+                                                    @endif
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                        <div class="panel-footer">
+                                            <center> <input class="btn btn-info btn-sm" type="submit" name="save" value="Save Expense"></center>
+                                        </div>
+                                    </form>
                     </div>
                 </section>
             </div>

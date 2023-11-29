@@ -35,7 +35,6 @@ class Stockbatch extends Model
 {
 	protected $table = 'stockbatches';
 
-    use LogsActivity;
 
 	protected $casts = [
 		'quantity' => 'int',

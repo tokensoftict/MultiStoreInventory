@@ -25,8 +25,6 @@ class RoomType extends Model
 {
 	protected $table = 'room_types';
 
-    use LogsActivity;
-
 	protected $casts = [
 		'status' => 'bool'
 	];

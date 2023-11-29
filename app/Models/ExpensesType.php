@@ -24,7 +24,6 @@ use Spatie\Activitylog\Traits\LogsActivity;
 class ExpensesType extends Model
 {
 
-    use LogsActivity;
 
 	protected $table = 'expenses_types';
 

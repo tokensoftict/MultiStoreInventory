@@ -34,7 +34,6 @@ use Spatie\Activitylog\Traits\LogsActivity;
  */
 class Task extends Model
 {
-    use LogsActivity;
 
 	protected $table = 'tasks';
 

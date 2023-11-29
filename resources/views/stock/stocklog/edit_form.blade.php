@@ -42,20 +42,22 @@
                                 @endif
                             </div>
 
-                                <div class="form-group">
-                                    <label>Select Product Type</label>
-                                    <select required id="product_type" name="product_type" class="form-control select2">
-                                        @foreach(config('stock_type_name.'.config('app.store')) as $key=>$type)
-                                            <option  {{ $log->product_type == $type ? "selected" : "" }}  value="{{ $type }}">{{ $key }}</option>
-                                        @endforeach
-                                    </select>
-                                    @if ($errors->has('product_type'))
-                                        <label for="name-error" class="error"
-                                               style="display: inline-block;">{{ $errors->first('product_type') }}</label>
-                                    @endif
-                                </div>
-                                <input type="hidden" id="department" name="department" value="STORE" />
-                            @endif
+                            <div class="form-group">
+                                <label>Select Product Type</label>
+                                <select required id="product_type" name="product_type" class="form-control select2">
+                                    @foreach(config('stock_type_name.'.config('app.store')) as $key=>$type)
+                                        <option  {{ $log->product_type == $type ? "selected" : "" }}  value="{{ $type }}">{{ $key }}</option>
+                                    @endforeach
+                                </select>
+                                @if ($errors->has('product_type'))
+                                    <label for="name-error" class="error"
+                                           style="display: inline-block;">{{ $errors->first('product_type') }}</label>
+                                @endif
+                            </div>
+                            <input type="hidden" id="department" name="department" value="STORE" />
+
+
+                            <input type="hidden" id="store" name="store" value="{{ $log->warehousestore_id }}" />
 
                             <div class="form-group">
                                 <label>Select Store</label>

@@ -6,6 +6,7 @@ namespace App\Console\Commands;
 use App\Classes\Sql;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -52,16 +53,19 @@ class TaskGenerate extends Command
             'Settings' => 'Settings',
             'CustomerManager'=>'Customer Manager',
             'StockManager'=>"Stock Manager",
+            'StockTransfer'=>"Stock Transfer",
             'InvoiceAndSales'=>"Invoice & Sales",
             'PurchaseOrders'=>"Purchase Orders",
+            'Expenses'=>"Expenses Manager",
             'PurchaseReport'=>"Supplier & Purchase Order Reports",
             'InvoiceReport'=>"Invoice Reports",
             'CashBook'=>"Cash Book",
             'PaymentReport'=>"Payment Report",
-            'Expenses'=>"Expenses Manager",
+            'ExpensesReport' => 'Expenses Report',
             'StockCounting' => 'Stock Counting',
             'StockTransferReport' => 'Stock Transfer Report',
-            'CashBookReport' => 'Cash Book Report'
+            'CashBookReport' => 'Cash Book Report',
+            'CustomerReport' => 'Customer Report'
         ];
 
         $taskList = DB::table('tasks')->pluck('route', 'id');
@@ -254,6 +258,9 @@ class TaskGenerate extends Command
 
         print "\n" . (count($taskOrder) - 1) . " module(s) and $count task(s) were generated";
         print "\n";
+        Artisan::call('cache:clear');
+        print "\n";
+        print "Cache Cleared successfully";
     }
 
     public static function getTaskName($name, $controllerMethod, $controller, $module, $method)

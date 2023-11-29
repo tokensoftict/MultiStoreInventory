@@ -25,7 +25,6 @@ use Spatie\Activitylog\Traits\LogsActivity;
  */
 class FailedJob extends Model
 {
-    use LogsActivity;
 
 	protected $table = 'failed_jobs';
 	public $timestamps = false;

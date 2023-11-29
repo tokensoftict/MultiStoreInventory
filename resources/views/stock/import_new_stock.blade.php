@@ -21,6 +21,8 @@
                                 <input type="file" class="form-control" name="excel_file"/>
                             </div>
                             <button type="submit" class="btn btn-default">Upload</button>
+
+                            <a href="{{ route('stock.export_current_stock') }}?template=true" target="new" class="pull-right">Download Template</a>
                         </form>
                     </div>
                 </section>

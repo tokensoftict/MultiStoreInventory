@@ -32,7 +32,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  */
 class StockTransfer extends Model
 {
-    use LogsActivity;
+
 
     protected $table = 'stock_transfers';
 
@@ -81,7 +81,7 @@ class StockTransfer extends Model
     public function complete()
     {
 
-        if($this->status == "COMPLETE") return redirect()->route('stocktransfer.transfer_report')->with('success','stock transfer was completed successfully');
+        if($this->status == "COMPLETE") return redirect()->route('stocktransfer.index')->with('success','stock transfer was completed successfully');
 
         $from_store = getActualStore($this->type, $this->from);
 
@@ -108,7 +108,7 @@ class StockTransfer extends Model
                     'user_id' =>  auth()->id(),
                     'selling_price' => $item->selling_price,
                     'cost_price' => $item->cost_price,
-                    'operation_type' => "App\\Models\\StockTransferItem",
+                    'operation_type' => StockTransferItem::class,
                     'operation_id' => $item->id,
                     'quantity' => $batch['qty'],
                     'store' => $from_store,
@@ -125,7 +125,7 @@ class StockTransfer extends Model
                     'user_id' =>  auth()->id(),
                     'selling_price' => $item->selling_price,
                     'cost_price' => $item->cost_price,
-                    'operation_type' => "App\\Models\\StockTransferItem",
+                    'operation_type' => StockTransferItem::class,
                     'operation_id' => $item->id,
                     'quantity' => $batch['qty'],
                     'store' => $to_store,
@@ -139,7 +139,7 @@ class StockTransfer extends Model
         $this->status = "COMPLETE";
         $this->update();
 
-        return redirect()->route('stocktransfer.transfer_report')->with('success','stock transfer was completed successfully');
+        return redirect()->route('stocktransfer.index')->with('success','stock transfer was completed successfully');
 
     }
 
@@ -187,7 +187,7 @@ class StockTransfer extends Model
             return $transfer->complete();
         }
 
-        return redirect()->route('stocktransfer.transfer_report')->with('success','stock transfer has ben draft successfully');
+        return redirect()->route('stocktransfer.index')->with('success','stock transfer has ben draft successfully');
     }
 
     public static function updateStockTransfer($request, $id){

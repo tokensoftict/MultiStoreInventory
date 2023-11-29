@@ -63,7 +63,7 @@ class WarehouseAndShopController extends Controller
 
         $validate =  Warehousestore::$update;
 
-        $validate['name'] = "required|unique:warehousestore,name,".$id;
+        $validate['name'] = "required|unique:warehousestores,name,".$id;
 
         $request->validate($validate);
 

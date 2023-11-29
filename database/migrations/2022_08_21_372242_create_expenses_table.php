@@ -17,6 +17,7 @@ class CreateExpensesTable extends Migration
             $table->id();
             $table->decimal('amount',12,5);
             $table->string('department')->default('STORE');
+            $table->foreignId('warehousestore_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('expenses_type_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
             $table->date('expense_date');

@@ -31,7 +31,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  */
 class Cashbook extends Model
 {
-    use LogsActivity;
+
 
 	protected $table = 'cashbook';
 

@@ -34,7 +34,6 @@ use Spatie\Activitylog\Traits\LogsActivity;
  */
 class PurchaseOrderItem extends Model
 {
-    use LogsActivity;
 
 	protected $table = 'purchase_order_items';
 

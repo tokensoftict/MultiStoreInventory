@@ -30,7 +30,6 @@ use Spatie\Activitylog\Traits\LogsActivity;
  */
 class Module extends Model
 {
-    use LogsActivity;
 
 	protected $table = 'modules';
 

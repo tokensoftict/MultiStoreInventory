@@ -58,7 +58,7 @@ class ImportNewStock  implements ToModel,WithHeadingRow
 
         $stock['yard_cost_price'] = (empty($row['yard_cost_price']) ? 0 : $row['yard_cost_price']);
 
-        $stock['type'] = empty($row['product_type']) ? "NORMAL" : $row['product_type'];
+        $stock['type'] = "NORMAL";//empty($row['product_type']) ? "NORMAL" : strtoupper($row['product_type']);
 
         return new Stock($stock);
     }

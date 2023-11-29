@@ -49,7 +49,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  */
 class Invoice extends Model
 {
-    use LogsActivity;
+
 
     protected $table = 'invoices';
 
@@ -628,12 +628,12 @@ class Invoice extends Model
     //for return Invoice update
 
     public static function validateReturnInvoiceProduct($products,$store,$request){
-        /*
+
         $invoice_paper_number_count = Invoice::where('invoice_paper_number',$request->get('invoice_paper_number'))->count();
 
         if ($invoice_paper_number_count == 0)
             return  ['status'=>true,'error'=>true, 'singleError'=>"Invoice Number entered does not exist, please check invoice number and try again"];
-        */
+
 
         $status = false;
         $report = [];
@@ -673,7 +673,7 @@ class Invoice extends Model
 
         $invoice_paper_number_count = Invoice::where('invoice_paper_number',$invoice_paper_number)->count();
 
-        if ($invoice_paper_number_count > 0) $invoice_paper_number = $invoice_paper_number."-".mt_rand();
+        if ($invoice_paper_number_count > 0) $invoice_paper_number = $invoice_paper_number."-RETURN-".mt_rand();
 
 
         $invoice_data = [

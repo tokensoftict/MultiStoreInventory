@@ -31,7 +31,6 @@ use Spatie\Activitylog\Traits\LogsActivity;
  */
 class Supplier extends Model
 {
-    use LogsActivity;
 
 	protected $table = 'supplier';
 

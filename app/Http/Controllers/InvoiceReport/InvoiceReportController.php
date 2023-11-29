@@ -25,7 +25,7 @@ class InvoiceReportController extends Controller
         }
         $data['title'] = "Daily Invoice Report";
         $data['invoices'] = Invoice::with(['created_user','customer'])->where('warehousestore_id', getActiveStore()->id)->where('status', $data['status'])->where('invoice_date', $data['date'])->get();
-        return setPageContent('invoicereport.daily',$data);
+        return view('invoicereport.daily',$data);
     }
 
     public function monthly(Request $request){
@@ -40,7 +40,7 @@ class InvoiceReportController extends Controller
         }
         $data['title'] = "Monthly Invoice Report";
         $data['invoices'] = Invoice::with(['created_user','customer'])->where('warehousestore_id', getActiveStore()->id)->where('status', $data['status'])->whereBetween('invoice_date', [$data['from'],$data['to']])->get();
-        return setPageContent('invoicereport.monthly',$data);
+        return view('invoicereport.monthly',$data);
     }
 
 
@@ -57,8 +57,23 @@ class InvoiceReportController extends Controller
         $data['customers'] = Customer::all();
         $data['title'] = "Monthly Customer Invoice Report";
         $data['invoices'] = Invoice::with(['created_user','customer'])->where('warehousestore_id',getActiveStore()->id)->where('customer_id', $data['customer'])->where('status', "COMPLETE")->whereBetween('invoice_date', [$data['from'],$data['to']])->get();
-        return setPageContent('invoicereport.customer_monthly',$data);
+        return view('invoicereport.customer_monthly',$data);
     }
+
+    public function store_monthly(Request $request){
+
+
+        $data['from'] = $request->get('from', date('Y-m-01'));
+        $data['to'] = $request->get('to', date('Y-m-t'));
+        $data['stores'] = getMyAccessStore('name_and_id');
+        $data['warehousestore_id'] = $request->get('warehousestore_id', getActiveStore()->id);
+
+        $data['customers'] = Customer::all();
+        $data['title'] = "Monthly Invoice Report By Store";
+        $data['invoices'] = Invoice::with(['created_user','customer'])->where('warehousestore_id',$data['warehousestore_id'])->where('status', "COMPLETE")->whereBetween('invoice_date', [$data['from'],$data['to']])->get();
+        return view('invoicereport.store_monthly',$data);
+    }
+
 
     public function product_monthly(Request $request){
         if($request->get('from') && $request->get('to')){
@@ -84,7 +99,7 @@ class InvoiceReportController extends Controller
         $data['customers'] = Customer::all();
         $data['title'] = "Product Invoice Report";
         $data['invoices'] =  $lists ;
-        return setPageContent('invoicereport.product_monthly',$data);
+        return view('invoicereport.product_monthly',$data);
     }
 
 

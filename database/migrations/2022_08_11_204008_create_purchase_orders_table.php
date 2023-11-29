@@ -20,6 +20,7 @@ class CreatePurchaseOrdersTable extends Migration
             $table->date("date_created")->nullable();
             $table->date("date_approved")->nullable();
             $table->date("date_completed")->nullable();
+            $table->foreignId('warehousestore_id')->nullable()->constrained()->nullOnDelete();
             $table->decimal('total',20,5)->default(0);
             $table->string('status')->default('DRAFT');
             $table->unsignedBigInteger("created_by")->nullable();

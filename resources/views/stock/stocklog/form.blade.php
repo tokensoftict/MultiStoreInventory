@@ -42,7 +42,7 @@
                             </tr>
                             </thead>
                             <tbody>
-                                @forelse($logs as $log)
+                            @forelse($logs as $log)
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
                                     <td>{{ $log->stock->name }}</td>
@@ -63,9 +63,9 @@
                                         @endif
                                     </td>
                                 </tr>
-                                 @empty
+                            @empty
 
-                                 @endforelse
+                            @endforelse
                             </tbody>
                         </table>
                     </div>
@@ -102,32 +102,23 @@
                                 @endif
                             </div>
 
-                                <div class="form-group">
-                                    <label>Select Product Type</label>
-                                    <select required id="product_type" name="product_type" class="form-control select2">
-                                        @foreach(config('stock_type_name.'.config('app.store')) as $key=>$type)
-                                            <option  value="{{ $type }}">{{ $key }}</option>
-                                        @endforeach
-                                    </select>
-                                    @if ($errors->has('product_type'))
-                                        <label for="name-error" class="error"
-                                               style="display: inline-block;">{{ $errors->first('product_type') }}</label>
-                                    @endif
-                                </div>
-                                <input type="hidden" id="department" name="department" value="STORE" />
-
                             <div class="form-group">
-                                <label>Select Store</label>
-                                <select required id="store" name="store" class="form-control select2">
-                                    @foreach($stores as $store)
-                                        <option  value="{{ $store->id }}">{{ $store->name }}</option>
+                                <label>Select Product Type</label>
+                                <select required id="product_type" name="product_type" class="form-control select2">
+                                    @foreach(config('stock_type_name.'.config('app.store')) as $key=>$type)
+                                        <option  value="{{ $type }}">{{ $key }}</option>
                                     @endforeach
                                 </select>
-                                @if ($errors->has('store'))
+                                @if ($errors->has('product_type'))
                                     <label for="name-error" class="error"
-                                           style="display: inline-block;">{{ $errors->first('store') }}</label>
+                                           style="display: inline-block;">{{ $errors->first('product_type') }}</label>
                                 @endif
                             </div>
+                            <input type="hidden" id="department" name="department" value="STORE" />
+
+
+                            <input type="hidden" id="store" name="store" value="{{ getActiveStore()->id }}" />
+
                             <div class="form-group">
                                 <label>Date</label>
                                 <input class="form-control datepicker js-datepicker" data-min-view="2" data-date-format="yyyy-mm-dd" style="background-color: #FFF; color: #000;"  name="date_created" value="{{ \Carbon\Carbon::today()->toDateString() }}"/>

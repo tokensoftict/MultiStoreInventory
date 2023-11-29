@@ -26,7 +26,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  */
 class Permission extends Model
 {
-    use LogsActivity;
+
 
 	protected $table = 'permissions';
 

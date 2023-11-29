@@ -94,20 +94,16 @@ class PaymentReportController extends Controller
 
     public function income_analysis_by_department(Request $request)
     {
-        if($request->get('from') && $request->get('to')){
-            $data['from'] = $request->get('from');
-            $data['to'] = $request->get('to');
-            $data['department'] = $request->get('department');
-        }else{
-            $data['from'] = date('Y-m-01');
-            $data['to'] = date('Y-m-t');
-        }
+        $data['from'] = $request->get('from', date('Y-m-01'));
+        $data['to'] = $request->get('to', date('Y-m-t'));
+        $data['warehousestore_id'] = $request->get('warehousestore_id', getActiveStore()->id);
+        $data['stores'] = getMyAccessStore('name_and_id');
 
-        $data['expenses'] = Expense::with(['expenses_type','user'])->where('department', $data['department'])->whereBetween('expense_date',[ $data['from'], $data['to']])->get();
-        $data['payments'] = PaymentMethodTable::with(['warehousestore','payment','customer','user','payment_method','invoice'])->where('department', $data['department'])->where('warehousestore_id',getActiveStore()->id)->whereBetween('payment_date', [$data['from'],$data['to']])->orderBy('id','DESC')->get();
+        $data['expenses'] = Expense::with(['expenses_type','user'])->where('warehousestore_id', $data['warehousestore_id'])->whereBetween('expense_date',[ $data['from'], $data['to']])->get();
+        $data['payments'] = PaymentMethodTable::with(['warehousestore','payment','customer','user','payment_method','invoice'])->where('warehousestore_id', $data['warehousestore_id'])->where('warehousestore_id',getActiveStore()->id)->whereBetween('payment_date', [$data['from'],$data['to']])->orderBy('id','DESC')->get();
 
-        $data['title'] = "Income Analysis By Department";
-        return setPageContent('paymentreport.income_analysis_by_department',$data);
+        $data['title'] = "Income Analysis By Store";
+        return view('paymentreport.income_analysis_by_department',$data);
     }
 
 }

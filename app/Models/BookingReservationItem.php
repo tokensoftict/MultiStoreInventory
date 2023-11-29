@@ -42,7 +42,7 @@ class BookingReservationItem extends Model
 {
 	use SoftDeletes;
 
-    use LogsActivity;
+
 
 	protected $table = 'booking_reservation_items';
 

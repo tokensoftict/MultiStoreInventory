@@ -35,7 +35,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  */
 class PaymentMethodTable extends Model
 {
-    use LogsActivity;
+
 
 	protected $table = 'payment_method_table';
 

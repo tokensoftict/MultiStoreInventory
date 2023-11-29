@@ -39,7 +39,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  */
 class ReturnLog extends Model
 {
-    use LogsActivity;
+
 
 	protected $table = 'return_logs';
 

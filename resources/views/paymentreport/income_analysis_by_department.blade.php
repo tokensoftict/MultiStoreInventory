@@ -34,10 +34,10 @@
                                     <input type="text" class="form-control datepicker js-datepicker" data-min-view="2" data-date-format="yyyy-mm-dd" style="background-color: #FFF; color: #000;"  value="{{ $to }}" name="to" placeholder="TO"/>
                                 </div>
                                 <div class="col-sm-3">
-                                    <label>Department</label>
-                                    <select class="form-control" name="department">
-                                        @foreach($depts as $_dept)
-                                            <option {{ $department == $_dept ? "selected" : "" }} value="{{ $_dept }}">{{ $_dept }}</option>
+                                    <label>Store</label>
+                                    <select class="form-control" name="warehousestore_id">
+                                        @foreach($stores as $store)
+                                            <option {{ $store['id'] == $warehousestore_id ? "selected" : "" }} value="{{ $store['id'] }}">{{ $store['name'] }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -108,7 +108,7 @@
                                     <th>By</th>
                                     <th>Type</th>
                                     <th>Amount</th>
-                                    <th>Department</th>
+                                    <th>Store</th>
                                     <th>Date</th>
                                 </tr>
                                 </thead>
@@ -126,7 +126,7 @@
                                         <td>{{ $expense->user->name }}</td>
                                         <td>{{ $expense->expenses_type->name }}</td>
                                         <td>{{ number_format($expense->amount,2) }}</td>
-                                        <td>{{ $expense->department }}</td>
+                                        <td>{{ $expense->warehousestore->name }}</td>
                                         <td>{{ convert_date($expense->expense_date) }}</td>
 
                                     </tr>
@@ -140,7 +140,6 @@
                                     <th></th>
                                     <th>Total</th>
                                     <th>{{ number_format($total,2) }}</th>
-                                    <th></th>
                                     <th></th>
                                     <th></th>
                                 </tr>

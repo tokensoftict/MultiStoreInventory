@@ -591,6 +591,7 @@ function getActualStore($product_type,$store_selected){
 }
 
 
+
 function getActiveStore($force = false){
 
     if(session()->has('activeStore')) {
@@ -598,6 +599,25 @@ function getActiveStore($force = false){
     }
 
     return Warehousestore::select('id','name','packed_column','yard_column')->where('default',1)->where('status',1)->first();
+}
+
+
+function getMyAccessStore($column = "all")
+{
+    $data = request()->user()->userstoremappers->map(function($storemapper){
+        return [
+            'id' => $storemapper->warehousestore->id,
+            'name' => $storemapper->warehousestore->name,
+            'packed_column' => $storemapper->warehousestore->packed_column,
+            'yard_column' => $storemapper->warehousestore->yard_column,
+        ];
+    });
+
+    if($column == "id") return $data->map(function($store){ return $store['id']; })->toArray();
+
+    if($column == "name_and_id") return $data->map(function($store){ return ['id'=>$store['id'], 'name' => $store['name']]; })->toArray();
+
+    return $data;
 }
 
 function getStockActualCostPrice($stock,$product_type){
@@ -609,6 +629,15 @@ function getStockActualCostPrice($stock,$product_type){
 
     return $stock->cost_price;
 
+}
+
+function getStoreIDFromName($name)
+{
+    return Warehousestore::where(function($query) use ($name){
+        $query->orWhere('packed_column', $name)
+        ->orWhere('yard_column', $name)
+            ->orWhere('name', $name);
+    })->first()->id;
 }
 
 function getStockActualSellingPrice($stock,$product_type){

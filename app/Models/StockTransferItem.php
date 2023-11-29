@@ -36,7 +36,6 @@ use Spatie\Activitylog\Traits\LogsActivity;
  */
 class StockTransferItem extends Model
 {
-    use LogsActivity;
 
 	protected $table = 'stock_transfer_items';
 

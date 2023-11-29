@@ -23,7 +23,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  */
 class ProductCategory extends Model
 {
-    use LogsActivity;
+
 
 	protected $table = 'product_category';
 
