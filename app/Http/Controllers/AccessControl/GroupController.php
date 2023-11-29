@@ -60,7 +60,7 @@ class GroupController extends Controller
     {
         $data['title'] = "View User Group";
         $data['group'] = Group::findOrFail($id);
-        return setPageContent('access-control.view-user-group', $data)->layout('layouts.base');
+        return view('access-control.view-user-group', $data);
     }
 
     public function edit($id)
