@@ -68,6 +68,7 @@ class UserController extends Controller
 
         DB::transaction(function () use ($data, $userdata, &$res){
             $new_user = new User();
+            unset($userdata['store']);
             $new_user = $new_user->updateOrCreate($userdata);
         });
 
@@ -129,6 +130,7 @@ class UserController extends Controller
 
         DB::transaction(function () use ($data, $id,$userdata, &$res, &$userStore) {
             $new_user = User::find($id);
+            unset($userdata['store']);
             $new_user->update($userdata);
 
             $userStore = collect($userStore)->map(function($store) use(&$id){
