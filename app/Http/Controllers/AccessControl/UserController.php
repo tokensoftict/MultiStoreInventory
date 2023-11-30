@@ -33,6 +33,7 @@ class UserController extends Controller
         $data['groups'] = Group::where('status', '1')->get(['id', 'name']);
         $data['user'] = new User();
         $data['stores'] = Warehousestore::where('status', 1)->get();
+        $data['mystores'] = \request()->user()->userstoremappers->pluck('warehousestore_id')->toArray();
         return view('user.add-user', $data);
     }
 
