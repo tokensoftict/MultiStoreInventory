@@ -70,7 +70,7 @@ class StockCountingController extends Controller
         set_time_limit(0);
         ini_set('memory_limit', '1024M');
         Excel::import(new StockTakingItemImport($stockTaking), request()->file('excel_file'));
-        return redirect()->route('import_excel',$id)->with('success','Stock Counting Import was completed  successfully!..');
+        return redirect()->route('counting.import_excel',$id)->with('success','Stock Counting Import was completed  successfully!..');
     }
 
 }
