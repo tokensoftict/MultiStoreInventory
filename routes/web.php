@@ -186,7 +186,9 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
                 Route::get('{id}/show', ['as' => 'show', 'uses' => 'CustomerController@show']);
                 Route::get('{id}/edit', ['as' => 'edit', 'uses' => 'CustomerController@edit']);
                 Route::put('{id}', ['as' => 'update', 'uses' => 'CustomerController@update']);
-           });
+                Route::match(['get','post'],'/add_payment', ['as' => 'add_payment', 'uses' => 'CustomerController@add_payment', 'custom_label'=>"Add Credit Payment" ,'visible' => false]);
+
+            });
 
         });
 
