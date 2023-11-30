@@ -56,8 +56,8 @@
                                 <th>#</th>
                                 <th>Debit</th>
                                 <th>Credit</th>
-                                <th>Date</th>
                                 <th>Reference</th>
+                                <th>Date</th>
                                 <th>Bank</th>
                                 <th>Balance</th>
                                 <th>Added By</th>
