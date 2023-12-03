@@ -263,12 +263,21 @@ class StockController extends Controller
             $data['to']  = date('Y-m-t');
         }
 
-        $data['sales'] = InvoiceItem::with(['stock'])->where('stock_id',$id)->where('selling_price','>', 0)->whereBetween('invoice_date',[ $data['from'] , $data['to'] ])->get();
-        $data['transfers'] = StockTransferItem::with('stock')->where('stock_id',$id)->whereBetween('transfer_date',[ $data['from'] , $data['to']])->get();
-        $data['purchases'] = PurchaseOrderItem::with('stock')->where('stock_id',$id)->whereBetween('created_at',[ $data['from'] , $data['to']])->get();
-        $data['returns'] = ReturnLog::with('stock')->where('stock_id',$id)->whereBetween('date_added',[ $data['from'] , $data['to']])->get();
-        $data['adjustments'] = StockQuantityAdjustment::with('stock')->where('stock_id', $id)->whereBetween('date_adjusted', [ $data['from'] , $data['to']])->get();
-        $data['logs'] = StockLogItem::with(['user','stock','operation','warehousestore', 'stock_log_usages_type'])->where('stock_id', $id)->whereBetween('log_date',[$data['from'], $data['to']])->get();
+        $data['sales'] = InvoiceItem::with(['stock'])->where('warehousestore_id', getActiveStore()->id)->where('stock_id',$id)->where('selling_price','>', 0)->whereBetween('invoice_date',[ $data['from'] , $data['to'] ])->get();
+        $data['transfers'] = StockTransferItem::with('stock')
+            ->where(function($query){
+                $query->orWhere('from', getActiveStore()->id)
+                    ->orWhere('to', getActiveStore()->id);
+            })
+            ->where('stock_id',$id)->whereBetween('transfer_date',[ $data['from'] , $data['to']])->get();
+        $data['purchases'] = PurchaseOrderItem::with('stock')
+            ->whereHas('purchase_order', function ($query){
+                $query->where('warehousestore_id', getActiveStore()->id);
+            })
+            ->where('stock_id',$id)->whereBetween('created_at',[ $data['from'] , $data['to']])->get();
+        $data['returns'] = ReturnLog::with('stock')->where('warehousestore_id', getActiveStore()->id)->where('stock_id',$id)->whereBetween('date_added',[ $data['from'] , $data['to']])->get();
+        $data['adjustments'] = StockQuantityAdjustment::with('stock')->where('warehousestore_id', getActiveStore()->id)->where('stock_id', $id)->whereBetween('date_adjusted', [ $data['from'] , $data['to']])->get();
+        $data['logs'] = StockLogItem::with(['user','stock','operation','warehousestore', 'stock_log_usages_type'])->where('warehousestore_id', getActiveStore()->id)->where('stock_id', $id)->whereBetween('log_date',[$data['from'], $data['to']])->get();
         $data['stock'] = Stock::find($id);
         $data['title'] = "Stock / Product Report for ".$data['stock']->name;
         return view("stock.product_report",$data);
