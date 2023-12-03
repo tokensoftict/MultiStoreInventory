@@ -4,19 +4,31 @@ namespace App\Exports;
 
 use App\Models\Stock;
 use App\Models\Stockbatch;
+use App\Models\Warehousestore;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 
 class StockExport implements FromCollection, WithHeadings
 {
-    /**
+
+
+    protected $stockTaking;
+
+    public function __construct($stockTaking)
+    {
+        $this->stockTaking = $stockTaking;
+    }
+
+        /**
      * @return \Illuminate\Support\Collection
      */
     public function collection()
     {
-        $packed_column = getActiveStore()->packed_column;
-        $yard_column = getActiveStore()->yard_column;
+        $store = Warehousestore::find($this->stockTaking->warehousestore_id);
+
+        $packed_column = $store->packed_column;
+        $yard_column = $store->yard_column;
 
         $stocks =  DB::table('stockbatches')->select(
             'stocks.id',

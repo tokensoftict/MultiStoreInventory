@@ -60,7 +60,7 @@ class StockCountingController extends Controller
 
         $tk = StockTaking::findorfail($id);
 
-        return Excel::download(new StockExport, $tk->name.'.xlsx');
+        return Excel::download(new StockExport($tk), $tk->name.'-'.$tk->warehousestore->name.'.xlsx');
     }
 
     public function import_excel($id, Request $request)
@@ -71,7 +71,7 @@ class StockCountingController extends Controller
 
         Excel::import(new StockTakingItemImport($stockTaking), $request->file('excel_file'));
 
-        return redirect()->route('counting.import_excel',$id)->with('success','Stock Counting Import was completed  successfully!..');
+        return redirect()->route('counting.show',$id)->with('success','Stock Counting Import was completed  successfully!..');
     }
 
 }
