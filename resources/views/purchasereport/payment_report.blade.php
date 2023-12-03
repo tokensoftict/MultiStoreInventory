@@ -50,6 +50,7 @@
                                     <th>#</th>
                                     <th>Supplier</th>
                                     <th>Phone Number</th>
+                                    <th>Payment Method</th>
                                     <th>Amount</th>
                                     <th>Date</th>
                                     <th>By</th>
@@ -65,8 +66,9 @@
                                         @endphp
                                         <tr>
                                             <td>{{ $loop->iteration }}</td>
-                                            <td>{{ $history->supplier->firstname }} {{ $history->supplier->lastname }}</td>
-                                            <td>{{ $history->supplier->phone_number }}</td>
+                                            <td>{{ $history->supplier->name }}</td>
+                                            <td>{{ $history->supplier->phonenumber }}</td>
+                                            <td>{{ $history->payment_method->name ?? "" }}</td>
                                             <td>{{ number_format($history->amount,2) }}</td>
                                             <td>{{ convert_date($history->payment_date) }}</td>
                                             <td>{{ $history->user->name }}</td>
@@ -75,6 +77,7 @@
                                 </tbody>
                                 <tfoot>
                                     <tr>
+                                        <th></th>
                                         <th></th>
                                         <th></th>
                                         <th>Total :</th>

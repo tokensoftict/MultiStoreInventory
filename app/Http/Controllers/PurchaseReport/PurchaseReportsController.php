@@ -102,7 +102,7 @@ class PurchaseReportsController extends Controller
 
         $data['title'] = "Supplier Payment Report";
         $data['histories'] = $history;
-        return setPageContent('purchasereport.payment_report',$data);
+        return view('purchasereport.payment_report',$data);
     }
 
 
@@ -119,7 +119,7 @@ class PurchaseReportsController extends Controller
 
         $data['title'] = "Balance Sheet";
 
-        return setPageContent('purchasereport.balance_sheet',$data);
+        return view('purchasereport.balance_sheet',$data);
     }
 
 }

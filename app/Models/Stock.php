@@ -299,7 +299,7 @@ class Stock extends Model
 
         $stock->update();
 
-        $batches = $stock->getSaleableBatches('quantity', $num_qty_to_convert);
+        $batches = $stock->getSaleableBatches(getActiveStore()->packed_column, $num_qty_to_convert);
         foreach ($batches as $key=>$batch){
             $b = Stockbatch::find($key);
             //$b->yard_cost_price = $request->yard_cost_price;
@@ -318,6 +318,30 @@ class Stock extends Model
     {
         $stock = Stock::findorfail($request->stock_id);
 
+        $stockLogCreate = [];
+
+        $stockLogCreate[] = [
+            'stock_id' => $request->stock_id,
+            'user_id' => auth()->id(),
+            'date_adjusted' => date('Y-m-d'),
+            'from' => $stock->available_quantity,
+            'to' => $request->packed_qty,
+            'type' => 'PACKED',
+            'warehousestore_id' => getActiveStore()->id,
+            'changed_column' => getActiveStore()->packed_column,
+        ];
+
+        $stockLogCreate[] = [
+            'stock_id' => $request->stock_id,
+            'user_id' => auth()->id(),
+            'date_adjusted' => date('Y-m-d'),
+            'from' => $stock->available_yard_quantity,
+            'to' => $request->yard_qty,
+            'type' => 'YARD',
+            'warehousestore_id' => getActiveStore()->id,
+            'changed_column' => getActiveStore()->yard_column,
+        ];
+
         foreach ($stock->stockBatches()->get() as $batch)
         {
             $batch->{ getActiveStore()->packed_column } = 0;
@@ -331,6 +355,11 @@ class Stock extends Model
         $recentBatch->{ getActiveStore()->packed_column } = $request->packed_qty;
         $recentBatch->{ getActiveStore()->yard_column } = $request->yard_qty;
         $recentBatch->update();
+
+        foreach ($stockLogCreate as $create)
+        {
+            StockQuantityAdjustment::create($create);
+        }
 
         return redirect()->route('stock.quick')->with('success','Stock Quantity has been adjusted successfully!');
 

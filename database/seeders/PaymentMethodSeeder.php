@@ -19,6 +19,7 @@ class PaymentMethodSeeder extends Seeder
             ['name'=>"POS","status"=>1] ,
             ['name'=>"TRANSFER","status"=>1] ,
             ['name'=>"CREDIT","status"=>1],
+            ['name'=>"CHEQUE","status"=>1],
         ];
 
         DB::table('payment_method')->insert($payment_method);

@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\StockTransfer;
 use App\Models\Warehousestore;
 use Illuminate\Http\Request;
+use PDF;
 
 class StockTransferController extends Controller
 {
@@ -75,9 +76,12 @@ class StockTransferController extends Controller
 
         $data['transfer'] = $transfer;
 
+        $data['store'] = $this->settings->store();
+
         $data['logo'] = $this->settings;
 
-        return view("print.print_transfer",$data);
+        $pdf = PDF::loadView("print.transfer_print",$data);
+        return $pdf->stream('document.pdf');
     }
 
 

@@ -79,7 +79,7 @@ class ImportExistingStock implements ToCollection,WithHeadingRow
 
             if(!empty($row['type']))
             {
-                $stock->type = $row['product_type'];
+                $stock->type = strtoupper($row['product_type']) == "SINGLE" ? "NORMAL" : strtoupper($row['product_type']);
             }
 
             $stock->update();

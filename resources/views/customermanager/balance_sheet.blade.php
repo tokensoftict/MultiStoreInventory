@@ -63,7 +63,7 @@
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $history->amount < 0  ? number_format($history->amount,2) : "" }}</td>
-                                <td>{{ $history->amount > 0  ? number_format($history->amount,2) : "" }}</td>
+                                <td>{{ $history->amount > 0  ? number_format($history->amount,2) : "" }}{{  ($history->amount > 0 ?  "(".($history->payment_method_table->payment_method->name ?? "").")"  : "") }}</td>
                                 <td>{{ convert_date2($history->payment_date) }}</td>
                                 <td>{{ number_format(($opening),2) }}</td>
                             </tr>

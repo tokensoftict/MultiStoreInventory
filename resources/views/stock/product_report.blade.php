@@ -56,6 +56,14 @@
                                         <th>Total Quantity  Returns</th>
                                         <th>{{ $returns->sum('quantity_before') }}</th>
                                     </tr>
+                                    <tr>
+                                        <th>Total Adjustment  Counts</th>
+                                        <th>{{ $adjustments->count() }}</th>
+                                    </tr>
+                                    <tr>
+                                        <th>Total Logs</th>
+                                        <th>{{ $logs->count() }}</th>
+                                    </tr>
                                 </table>
                             </div>
                             <div class="col-sm-4"></div>
@@ -224,6 +232,87 @@
                             </div>
                         </div>
 
+
+                        <br/>  <br/>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <h4>Product Quantity Adjust History</h4>
+                                <table class="table table-bordered table-responsive table convert-data-table table-striped" id="invoice-list" style="font-size: 12px">
+                                    <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Stock</th>
+                                        <th>User</th>
+                                        <th>From</th>
+                                        <th>To</th>
+                                        <th>Date</th>
+                                        <th>Type</th>
+                                        <th>Selling Price</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    @foreach($adjustments as $adjustment)
+                                        <tr>
+                                            <td>{{ $loop->iteration }}</td>
+                                            <td>{{ $adjustment->stock->name }}</td>
+                                            <td>{{ $adjustment->user->name }}</td>
+                                            <td>{{ $adjustment->from}}</td>
+                                            <td>{{ $adjustment->to }}</td>
+                                            <td>{{ convert_date2($adjustment->date_adjusted) }}</td>
+                                            <td>{{ $adjustment->type }}</td>
+                                            <td>{{ number_format($adjustment->selling_price,2) }}</td>
+                                        </tr>
+                                    @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+
+                        <br/>  <br/>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <h4>Product / Stock Logs  History</h4>
+                                <table class="table table-bordered table-responsive table convert-data-table table-striped" style="font-size: 10px">
+                                    <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Stock</th>
+                                        <th>Quantity</th>
+                                        <th>Date</th>
+                                        <th>Product Type</th>
+                                        <th>Usage Type</th>
+                                        <th>Department</th>
+                                        <th>Selling Price</th>
+                                        <th>Total Selling</th>
+                                        <th>Cost Price</th>
+                                        <th>Total Cost</th>
+                                        <th>By</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    @forelse($logs as $log)
+                                        <tr>
+                                            <td>{{ $loop->iteration }}</td>
+                                            <td>{{ $log->stock->name }}</td>
+                                            <td>{{ $log->quantity }}</td>
+                                            <td>{{ convert_date2($log->log_date) }}</td>
+                                            <td>{{ array_search($log->product_type,config('stock_type_name.'.config('app.store'))) }}</td>
+                                            <td>{{ $log->stock_log_usages_type->name ?? "" }}</td>
+                                            <td>{{ $log->department }}</td>
+                                            <td>{{ number_format($log->selling_price,2) }}</td>
+                                            <td>{{ number_format(($log->selling_price * $log->quantity ),2) }}</td>
+                                            <td>{{ number_format($log->cost_price,2) }}</td>
+                                            <td>{{ number_format(($log->cost_price * $log->quantity ),2) }}</td>
+                                            <td>{{ $log->user->name }}</td>
+                                        </tr>
+                                    @empty
+
+                                    @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
 
                     </div>
                 </section>

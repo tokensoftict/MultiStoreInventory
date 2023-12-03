@@ -631,8 +631,8 @@ class Invoice extends Model
 
         $invoice_paper_number_count = Invoice::where('invoice_paper_number',$request->get('invoice_paper_number'))->count();
 
-        if ($invoice_paper_number_count == 0)
-            return  ['status'=>true,'error'=>true, 'singleError'=>"Invoice Number entered does not exist, please check invoice number and try again"];
+        //if ($invoice_paper_number_count == 0)
+        //    return  ['status'=>true,'error'=>true, 'singleError'=>"Invoice Number entered does not exist, please check invoice number and try again"];
 
 
         $status = false;

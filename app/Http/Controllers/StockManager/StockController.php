@@ -17,6 +17,8 @@ use App\Models\Stock;
 use App\Models\Stockbatch;
 use App\Models\StockLog;
 use App\Models\StockLogItem;
+use App\Models\StockLogUsagesType;
+use App\Models\StockQuantityAdjustment;
 use App\Models\StockTransferItem;
 use App\Models\Supplier;
 use App\Models\Warehousestore;
@@ -194,13 +196,13 @@ class StockController extends Controller
     public function add_log(Request $request){
 
         if($request->getMethod() == "POST"){
-
             return StockLogItem::createStockLog($request);
         }
         $data['title'] = "New Stock Log";
         $data['title2'] = "Today's Stock Log";
         $data['stores'] = Warehousestore::all();
-        $data['logs'] = StockLogItem::with(['user','stock','operation','warehousestore'])->where('log_date',dailyDate())->orderBy('log_date','DESC')->get();
+        $data['usages'] = StockLogUsagesType::where('status', 1)->get();
+        $data['logs'] = StockLogItem::with(['user','stock','operation','warehousestore', 'stock_log_usages_type'])->where('log_date',dailyDate())->orderBy('log_date','DESC')->get();
         return view("stock.stocklog.form",$data);
     }
 
@@ -215,8 +217,8 @@ class StockController extends Controller
             $data['to']  = date('Y-m-t');
         }
 
-        $data['logs'] = StockLogItem::with(['user','stock','operation','warehousestore'])->whereBetween('log_date',[$data['from'], $data['to']])->get();
-        return setPageContent("stock.stocklog.stocklog_report",$data);
+        $data['logs'] = StockLogItem::with(['user','stock','operation','warehousestore', 'stock_log_usages_type'])->whereBetween('log_date',[$data['from'], $data['to']])->get();
+        return view("stock.stocklog.stocklog_report",$data);
     }
 
 
@@ -226,7 +228,8 @@ class StockController extends Controller
         $data['title'] = "Edit Stock Log";
         $data['log'] = StockLogItem::with(['user','stock','operation'])->find($id);
         $data['stores'] = Warehousestore::all();
-        return setPageContent("stock.stocklog.edit_form",$data);
+        $data['usages'] = StockLogUsagesType::where('status', 1)->get();
+        return view("stock.stocklog.edit_form",$data);
     }
 
     public function update_log(Request $request, $id)
@@ -260,10 +263,12 @@ class StockController extends Controller
             $data['to']  = date('Y-m-t');
         }
 
-        $data['sales'] = InvoiceItem::where('stock_id',$id)->where('selling_price','>', 0)->whereBetween('invoice_date',[ $data['from'] , $data['to'] ])->get();
-        $data['transfers'] = StockTransferItem::where('stock_id',$id)->whereBetween('transfer_date',[ $data['from'] , $data['to']])->get();
-        $data['purchases'] = PurchaseOrderItem::where('stock_id',$id)->whereBetween('created_at',[ $data['from'] , $data['to']])->get();
-        $data['returns'] = ReturnLog::where('stock_id',$id)->whereBetween('date_added',[ $data['from'] , $data['to']])->get();
+        $data['sales'] = InvoiceItem::with(['stock'])->where('stock_id',$id)->where('selling_price','>', 0)->whereBetween('invoice_date',[ $data['from'] , $data['to'] ])->get();
+        $data['transfers'] = StockTransferItem::with('stock')->where('stock_id',$id)->whereBetween('transfer_date',[ $data['from'] , $data['to']])->get();
+        $data['purchases'] = PurchaseOrderItem::with('stock')->where('stock_id',$id)->whereBetween('created_at',[ $data['from'] , $data['to']])->get();
+        $data['returns'] = ReturnLog::with('stock')->where('stock_id',$id)->whereBetween('date_added',[ $data['from'] , $data['to']])->get();
+        $data['adjustments'] = StockQuantityAdjustment::with('stock')->where('stock_id', $id)->whereBetween('date_adjusted', [ $data['from'] , $data['to']])->get();
+        $data['logs'] = StockLogItem::with(['user','stock','operation','warehousestore', 'stock_log_usages_type'])->where('stock_id', $id)->whereBetween('log_date',[$data['from'], $data['to']])->get();
         $data['stock'] = Stock::find($id);
         $data['title'] = "Stock / Product Report for ".$data['stock']->name;
         return view("stock.product_report",$data);

@@ -26,6 +26,10 @@ class CurrentStockExport implements FromCollection, WithHeadings
             'stocks.yard_selling_price',
             'stocks.yard_cost_price',
             'stocks.type',
+            DB::raw('(CASE
+                WHEN stocks.type = "NORMAL" THEN "SINGLE"
+                ELSE stocks.type
+             END) AS type'),
             'product_category.name as category_name',
             'manufacturers.name as manufacturer_name',
             DB::raw('SUM(stockbatches.'.$packed_column.') as bundle_quantity'),

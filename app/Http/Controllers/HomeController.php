@@ -105,4 +105,10 @@ class HomeController extends Controller
         return redirect()->route('dashboard');
     }
 
+
+    public function switch()
+    {
+        session()->remove('activeStore');
+        return redirect()->route('dashboard');
+    }
 }

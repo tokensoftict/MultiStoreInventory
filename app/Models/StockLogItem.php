@@ -8,7 +8,6 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
  * Class StockLogItem
@@ -26,8 +25,10 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property Carbon $log_date
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ * @property int|null $stock_log_usages_type_id
  * 
  * @property Stock $stock
+ * @property StockLogUsagesType|null $stock_log_usages_type
  * @property User|null $user
  * @property Warehousestore|null $warehousestore
  *
@@ -35,7 +36,6 @@ use Spatie\Activitylog\Traits\LogsActivity;
  */
 class StockLogItem extends Model
 {
-
 	protected $table = 'stock_log_items';
 
 	protected $casts = [
@@ -44,7 +44,8 @@ class StockLogItem extends Model
 		'warehousestore_id' => 'int',
 		'selling_price' => 'float',
 		'cost_price' => 'float',
-		'quantity' => 'int'
+		'quantity' => 'int',
+		'stock_log_usages_type_id' => 'int'
 	];
 
 	protected $dates = [
@@ -61,12 +62,18 @@ class StockLogItem extends Model
 		'quantity',
 		'usage_type',
 		'department',
-		'log_date'
+		'log_date',
+		'stock_log_usages_type_id'
 	];
 
 	public function stock()
 	{
 		return $this->belongsTo(Stock::class);
+	}
+
+	public function stock_log_usages_type()
+	{
+		return $this->belongsTo(StockLogUsagesType::class);
 	}
 
 	public function user()
@@ -85,39 +92,42 @@ class StockLogItem extends Model
         return $this->morphMany(StockLogOperation::class,'operation');
     }
 
-
-    public static function createStockLog($request){
+    public static function createStockLog($request)
+    {
 
         $store_column = getActualStore($request->product_type, $request->store);
 
         $stock = Stock::findorfail($request->stock_id);
 
-        $batches =  $stock->getSaleableBatches($store_column,$request->qty);
+        $batches = $stock->getSaleableBatches($store_column, $request->qty);
 
-        if($batches == false){
-            return redirect()->route('stocklog.add_log')->with('error','Not enough quantity to log stock, please check available quantity');
+        if ($batches == false) {
+            return redirect()->route('stocklog.add_log')->with('error', 'Not enough quantity to log stock, please check available quantity');
         }
+
+        $usage = StockLogUsagesType::findorfail($request->usage_type);
 
         $logItem = StockLogItem::create(
             [
-                'stock_id'=>$stock->id,
-                'quantity'=>$request->qty,
-                'usage_type'=>$request->usage_type,
-                'department'=>$request->department,
+                'stock_id' => $stock->id,
+                'quantity' => $request->qty,
+                'usage_type' => $usage->name,
+                'stock_log_usages_type_id' => $request->usage_type,
+                'department' => $request->department,
                 'log_date' => $request->date_created,
-                'warehousestore_id'=>$request->store,
-                'cost_price'=>getStockActualCostPrice($stock, $request->product_type),
+                'warehousestore_id' => $request->store,
+                'cost_price' => getStockActualCostPrice($stock, $request->product_type),
                 'product_type' => $request->product_type,
-                'selling_price'=>getStockActualSellingPrice($stock,$request->product_type),
+                'selling_price' => getStockActualSellingPrice($stock, $request->product_type),
                 'user_id' => auth()->id(),
             ]
         );
 
 
-        foreach ($batches as $key => $batch){
+        foreach ($batches as $key => $batch) {
             StockLogOperation::createOperationLog([
                 'stock_id' => $stock->id,
-                'user_id' =>  auth()->id(),
+                'user_id' => auth()->id(),
                 'selling_price' => $logItem->selling_price,
                 'cost_price' => $logItem->cost_price,
                 'operation_type' => "App\\Models\\StockLogItem",
@@ -125,47 +135,49 @@ class StockLogItem extends Model
                 'quantity' => $batch['qty'],
                 'store' => $store_column,
                 'stockbatch_id' => $key,
-                'log_date' =>  $request->date_created
+                'log_date' => $request->date_created
             ]);
         }
 
         $stock->removeSaleableBatches($batches);
 
-        return redirect()->route('stocklog.add_log')->with('success','Stock Log has been created successfully!');
+        return redirect()->route('stocklog.add_log')->with('success', 'Stock Log has been created successfully!');
 
     }
 
-
-
-    public static function updateStockLog($id, $request){
+    public static function updateStockLog($id, $request)
+    {
 
         $store_column = getActualStore($request->product_type, $request->store);
 
-	    $log = StockLogItem::with(['user','stock','operation','warehousestore'])->find($id);
+        $log = StockLogItem::with(['user', 'stock', 'operation', 'warehousestore'])->find($id);
 
-	    foreach($log->operation as $operation){
-	        $operation->returnStockBack();
+        foreach ($log->operation as $operation) {
+            $operation->returnStockBack();
         }
 
-        $batches = $log->stock->getSaleableBatches($store_column,$request->qty);
+        $batches = $log->stock->getSaleableBatches($store_column, $request->qty);
 
-        if($batches == false){
-            foreach($log->operation as $operation){
+        if ($batches == false) {
+            foreach ($log->operation as $operation) {
                 $operation->minusStockBack();
             }
-            return redirect()->route('stocklog.add_log')->with('error','Not enough quantity to log stock, please check available quantity');
+            return redirect()->route('stocklog.add_log')->with('error', 'Not enough quantity to log stock, please check available quantity');
         }
+
+        $usage = StockLogUsagesType::findorfail($request->usage_type);
 
         $log->update(
             [
-                'quantity'=>$request->qty,
-                'usage_type'=>$request->usage_type,
-                'department'=>$request->department,
+                'quantity' => $request->qty,
+                'usage_type' => $usage->name,
+                'stock_log_usages_type_id' => $request->usage_type,
+                'department' => $request->department,
                 'log_date' => $request->date_created,
-                'warehousestore_id'=>$request->store,
-                'cost_price'=>getStockActualCostPrice($log->stock, $request->product_type),
+                'warehousestore_id' => $request->store,
+                'cost_price' => getStockActualCostPrice($log->stock, $request->product_type),
                 'product_type' => $request->product_type,
-                'selling_price'=>getStockActualSellingPrice($log->stock,$request->product_type),
+                'selling_price' => getStockActualSellingPrice($log->stock, $request->product_type),
                 'user_id' => auth()->id(),
             ]
         );
@@ -173,10 +185,10 @@ class StockLogItem extends Model
 
         $log->operation()->delete();
 
-        foreach ($batches as $key => $batch){
+        foreach ($batches as $key => $batch) {
             StockLogOperation::createOperationLog([
                 'stock_id' => $log->stock->id,
-                'user_id' =>  auth()->id(),
+                'user_id' => auth()->id(),
                 'selling_price' => $log->selling_price,
                 'cost_price' => $log->cost_price,
                 'operation_type' => "App\\Models\\StockLogItem",
@@ -184,14 +196,13 @@ class StockLogItem extends Model
                 'quantity' => $batch['qty'],
                 'store' => $store_column,
                 'stockbatch_id' => $key,
-                'log_date' =>  $request->date_created
+                'log_date' => $request->date_created
             ]);
         }
 
         $log->stock->removeSaleableBatches($batches);
 
-        return redirect()->route('stocklog.add_log')->with('success','Stock Log has been updated successfully!');
+        return redirect()->route('stocklog.add_log')->with('success', 'Stock Log has been updated successfully!');
 
     }
-
 }

@@ -49,7 +49,7 @@
                                     <td>{{ $log->quantity }}</td>
                                     <td>{{ convert_date2($log->log_date) }}</td>
                                     <td>{{ array_search($log->product_type,config('stock_type_name.'.config('app.store'))) }}</td>
-                                    <td>{{ $log->usage_type }}</td>
+                                    <td>{{ $log->stock_log_usages_type->name ?? "" }}</td>
                                     <td>{{ $log->department }}</td>
                                     <td>{{ number_format($log->selling_price,2) }}</td>
                                     <td>{{ number_format($log->cost_price,2) }}</td>
@@ -94,7 +94,9 @@
                             <div class="form-group" >
                                 <label>Select Usage Type</label>
                                 <select required id="usage_type" name="usage_type" class="form-control">
-                                    <option value="DAMAGES">DAMAGES</option>
+                                    @foreach($usages as $usage)
+                                        <option value="{{ $usage->id }}">{{ $usage->name }}</option>
+                                    @endforeach
                                 </select>
                                 @if ($errors->has('usage_type'))
                                     <label for="name-error" class="error"

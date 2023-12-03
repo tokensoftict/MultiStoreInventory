@@ -18,6 +18,7 @@ Route::match(['post','get'],'/', "HomeController@index")->name('home');
 Route::get('/login','HomeController@index')->name('login');
 Route::post('/login','HomeController@process_login')->name('process_login');
 Route::get('/logout','HomeController@logout')->name('logout');
+Route::get('/switch','HomeController@switch')->name('switch');
 
 Route::match(['post','get'],'/myprofile','HomeController@myprofile')->name('myprofile');
 
@@ -73,11 +74,11 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
                 Route::put('{id}', ['as' => 'update', 'uses' => 'UserController@update']);
                 Route::delete('{id}', ['as' => 'destroy', 'uses' => 'UserController@destroy']);
             });
-
+/*
             Route::prefix('audit')->as('audit.')->group(function () {
                 Route::match(['get','post'],'', ['as' => 'index', 'uses' => 'AuditsController@index', 'visible' => true, 'custom_label'=>'Audit Logs']);
             });
-
+*/
         });
 
         Route::prefix('settings')->namespace('Settings')->group(function () {
@@ -168,6 +169,20 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
                 Route::get('{id}/set_as_default', ['as' => 'set_as_default', 'uses' => 'WarehouseAndShopController@set_as_default']);
                 Route::delete('{id}', ['as' => 'destroy', 'uses' => 'WarehouseAndShopController@destroy']);
             });
+
+
+            Route::prefix('stock_log_usage_type')->as('stock_log_usage_type.')->group(function () {
+                Route::get('', ['as' => 'index', 'uses' => 'StockLogUsageTypeController@index', 'custom_label'=>'List Stock Usage Log Type', 'visible' => true]);
+                Route::get('list', ['as' => 'list', 'uses' => 'StockLogUsageTypeController@listAll']);
+                Route::get('create', ['as' => 'create', 'uses' => 'StockLogUsageTypeController@create']);
+                Route::post('', ['as' => 'store', 'uses' => 'StockLogUsageTypeController@store']);
+                Route::get('{id}', ['as' => 'show', 'uses' => 'StockLogUsageTypeController@show']);
+                Route::get('{id}/edit', ['as' => 'edit', 'uses' => 'StockLogUsageTypeController@edit']);
+                Route::get('{id}/toggle', ['as' => 'toggle', 'uses' => 'StockLogUsageTypeController@toggle']);
+                Route::put('{id}', ['as' => 'update', 'uses' => 'StockLogUsageTypeController@update']);
+                Route::delete('{id}', ['as' => 'destroy', 'uses' => 'StockLogUsageTypeController@destroy']);
+            });
+
 
             Route::prefix('store_settings')->as('store_settings.')->group(function () {
                 Route::get('', ['as' => 'view', 'uses' => 'StoreSettings@show', 'visible' => true]);
@@ -316,7 +331,7 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
                 Route::post('', ['as' => 'store', 'uses' => 'StockCountingController@store']);
                 Route::get('{id}/show', ['as' => 'show', 'uses' => 'StockCountingController@show']);
                 Route::get('{id}/delete', ['as' => 'destroy', 'uses' => 'StockCountingController@destroy']);
-                Route::get('{id}/export_excel', ['as' => 'export_excel', 'uses' => 'StockCountingController@export_excel']);
+                Route::match(['get','post'],'{id}/export_excel', ['as' => 'export_excel', 'uses' => 'StockCountingController@export_excel']);
                 Route::match(['get','post'],'{id}/import_excel', ['as' => 'import_excel', 'uses' => 'StockCountingController@import_excel']);
             });
 

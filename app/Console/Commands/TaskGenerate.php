@@ -258,7 +258,7 @@ class TaskGenerate extends Command
 
         print "\n" . (count($taskOrder) - 1) . " module(s) and $count task(s) were generated";
         print "\n";
-        Artisan::call('cache:clear');
+        Cache::flush();
         print "\n";
         print "Cache Cleared successfully";
     }

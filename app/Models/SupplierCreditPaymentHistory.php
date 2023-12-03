@@ -58,6 +58,11 @@ class SupplierCreditPaymentHistory extends Model
 		'payment_date'
 	];
 
+    public function payment_method()
+    {
+        return $this->belongsTo(PaymentMethod::class, 'payment_method_id');
+    }
+
 	public function payment_method_table()
 	{
 		return $this->belongsTo(PaymentMethodTable::class, 'payment_method_id');

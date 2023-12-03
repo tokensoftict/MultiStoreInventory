@@ -10,6 +10,9 @@
         $(".select-customer").select2({
             placeholder: "Select a Customer"
         });
+        $(".select-category").select2({
+            placeholder: "Select a Category"
+        });
 
         $(".select-store").select2({
             placeholder: "Select a Store"

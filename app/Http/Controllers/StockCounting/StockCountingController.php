@@ -6,6 +6,7 @@ use App\Exports\StockExport;
 use App\Http\Controllers\Controller;
 use App\Imports\StockTakingItemImport;
 use App\Impots\Stockimports;
+use App\Models\ProductCategory;
 use App\Models\Stock;
 use App\Models\StockTaking;
 use App\Models\Warehousestore;
@@ -42,6 +43,7 @@ class StockCountingController extends Controller
     {
         $data['title'] = 'View Stock Counting';
         $data['counting'] = StockTaking::with(['user','warehousestore','stock_taking_items'])->findorfail($id);
+        $data['categories'] = ProductCategory::where('status', 1)->get();
         return setPageContent('stockcounting.show', $data);
     }
 
@@ -54,22 +56,21 @@ class StockCountingController extends Controller
     }
 
 
-    public function export_excel($id){
+    public function export_excel($id, Request $request){
 
         $tk = StockTaking::findorfail($id);
 
         return Excel::download(new StockExport, $tk->name.'.xlsx');
     }
 
-    public function import_excel(Request $request, $id)
+    public function import_excel($id, Request $request)
     {
         $stockTaking = StockTaking::findorfail($id);
 
         $stockTaking->stock_taking_items()->delete();
 
-        set_time_limit(0);
-        ini_set('memory_limit', '1024M');
-        Excel::import(new StockTakingItemImport($stockTaking), request()->file('excel_file'));
+        Excel::import(new StockTakingItemImport($stockTaking), $request->file('excel_file'));
+
         return redirect()->route('counting.import_excel',$id)->with('success','Stock Counting Import was completed  successfully!..');
     }
 

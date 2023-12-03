@@ -34,7 +34,9 @@
                             <div class="form-group">
                                 <label>Select Usage Type</label>
                                 <select required id="usage_type" name="usage_type" class="form-control">
-                                    <option {{ $log->usage_type == "DAMAGES" ? "selected" : "" }}  value="DAMAGES">DAMAGES</option>
+                                    @foreach($usages as $usage)
+                                        <option {{ $log->usage_type == $usage->id ? "selected" : "" }} value="{{ $usage->id }}">{{ $usage->name }}</option>
+                                    @endforeach
                                 </select>
                                 @if ($errors->has('usage_type'))
                                     <label for="name-error" class="error"

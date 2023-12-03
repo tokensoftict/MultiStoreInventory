@@ -40,7 +40,7 @@ class CustomerReportController extends Controller
 
         $data['title'] = "Customer Payment Report";
         $data['histories'] = $history;
-        return setPageContent('customermanager.payment_report',$data);
+        return view('customermanager.payment_report',$data);
     }
 
 
@@ -69,7 +69,7 @@ class CustomerReportController extends Controller
 
         $data['title'] = "Balance Sheet";
 
-        return setPageContent('customermanager.balance_sheet',$data);
+        return view('customermanager.balance_sheet',$data);
     }
 
 }

@@ -27,6 +27,9 @@
                             <ul class="dropdown-menu dropdown-menu-usermenu pull-right">
                                 <li><a href="{{ route('myprofile') }}"><i class="fa fa-user"></i> My Profile</a></li>
                                 <li class="divider"></li>
+                                @if(request()->user()->userstoremappers->count() > 1)
+                                    <li><a href="{{ route('switch') }}"><i class="fa fa-refresh"></i>Switch Store</a></li>
+                                @endif
                                 <li><a href="{{ route('logout') }}"><i class="fa fa-sign-out"></i> Log Out</a></li>
                             </ul>
                         </li>

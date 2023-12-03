@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Group;
 use App\Models\Module;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Validator;
 
 
@@ -102,6 +103,8 @@ class GroupController extends Controller
             $request->session()->flash('error', 'Privileges was not assigned successfully');
             if (!empty($postData['privileges'])) {
                 $grpassign = $this->assignGroupPrivileges($postData);
+                Cache::forget('route-permission-'.$postData['group_id']);
+                loadUserMenu($postData['group_id']);
                return  !empty($grpassign) ? redirect()->back()->with('success','Privileges assigned successfully') : redirect()->back()->with('error','Privileges was not assigned successfully');
             }
         }

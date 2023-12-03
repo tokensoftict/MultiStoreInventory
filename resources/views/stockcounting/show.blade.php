@@ -6,6 +6,7 @@
     <link href="{{ asset('bower_components/datatables-colvis/css/dataTables.colVis.css') }}" rel="stylesheet">
     <link href="{{ asset('bower_components/datatables-responsive/css/responsive.dataTables.scss') }}" rel="stylesheet">
     <link href="{{ asset('bower_components/datatables-scroller/css/scroller.dataTables.scss') }}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('bower_components/select2/dist/css/select2.min.css') }}">
 @endpush
 
 @section('content')
@@ -27,7 +28,7 @@
                             @endif
 
                             @if(userCanView('counting.export_excel'))
-                                <a  href="{{ route('counting.export_excel',$counting->id) }}" class="btn btn-sm btn-primary"><i class="fa fa-plus"></i> Export Excel</a>
+                                <a  href="#" data-toggle="modal" data-target="#export_excel" class="btn btn-sm btn-primary"><i class="fa fa-plus"></i> Export Excel</a>
                                 &nbsp; &nbsp; &nbsp;
                             @endif
                             @if(userCanView('counting.import_excel'))
@@ -121,6 +122,36 @@
             </form>
         </div>
     @endif
+
+    @if(userCanView('counting.export_excel'))
+        <div id="export_excel" class="modal fade" role="dialog">
+            <form action="{{ route('counting.export_excel',$counting->id) }}" method="post" enctype="multipart/form-data">
+                {{ csrf_field() }}
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h4 class="modal-title">Export Stock</h4>
+                        </div>
+                        <div class="modal-body">
+                           <div class="form-group">
+                               <label>Select Categories</label>
+                               <select name="categories[]" multiple class="form-control  select-category">
+                                   <option value="all">All Categories</option>
+                                   @foreach($categories as $category)
+                                       <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                   @endforeach
+                               </select>
+                           </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-default">Export</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    @endif
 @endsection
 
 
@@ -131,5 +162,7 @@
     <script data-turbolinks-eval="false" data-turbo-eval="false"  src="{{ asset('bower_components/datatables-colvis/js/dataTables.colVis.js') }}"></script>
     <script data-turbolinks-eval="false" data-turbo-eval="false"  src="{{ asset('bower_components/datatables-responsive/js/dataTables.responsive.js') }}"></script>
     <script data-turbolinks-eval="false" data-turbo-eval="false"  src="{{ asset('bower_components/datatables-scroller/js/dataTables.scroller.js') }}"></script>
+    <script data-turbolinks-eval="false" data-turbo-eval="false" src="{{ asset('bower_components/select2/dist/js/select2.min.js') }}"></script>
+    <script data-turbolinks-eval="false" data-turbo-eval="false" src="{{ asset('assets/js/init-select2.js') }}"></script>
     <script src="{{ asset('assets/js/init-datatables.js') }}"></script>
 @endpush
