@@ -45,7 +45,7 @@
                             <div class="panel text-center">
                                 <a href="{{ route('selected-store', $store->warehousestore_id) }}">
                                     <div class="state-title">
-                                        <span class="value">{{ $store->warehousestore->name }}</span>
+                                        <span class="value" style="font-size: 22px; font-weight: bolder">{{ $store->warehousestore->name }}</span>
                                         <span class="info">Click to Select</span>
                                     </div>
                                     <div class="progress-bar-danger">
