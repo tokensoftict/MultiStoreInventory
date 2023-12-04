@@ -49,7 +49,7 @@
                                     <thead>
                                     <tr>
                                         <th class="text-left">Name</th>
-                                        <th class="text-center">Cost Price</th>
+                                        <th class="text-center">Selling Price</th>
                                         <th class="text-center">Quantity</th>
                                         <th class="text-right">Total Selling Price</th>
                                     </tr>

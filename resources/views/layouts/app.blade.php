@@ -128,6 +128,18 @@
         window.validating_modal_show = false;
         $("#validateInvoice").modal("hide");
     }
+
+
+    window.addEventListener('load', function (){
+        $(document).ready(function(){
+            $('input[type=submit], button[type=submit]').click(function() {
+                $('input[type=submit], button[type=submit]').attr('disabled', 'disabled');
+                $(this).parents('form').append('<input type="hidden" name="'+$(this).attr('name')+'" value="'+$(this).val()+'" />');
+                $(this).parents('form').submit();
+            });
+        })
+    });
+
 </script>
 </body>
 </html>

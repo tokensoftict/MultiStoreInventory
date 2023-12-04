@@ -109,6 +109,19 @@ class Invoice extends Model
     }
 
 
+    public function getTotalAmountPaidAttribute()
+    {
+        if($this->getAttribute('status') === "DRAFT") return 0;
+
+        return $this->paymentMethodTable->sum(function($payment){
+            if($payment['payment_method_id'] !== 4){
+                return $payment['amount'];
+            }else{
+                return 0;
+            }
+        });
+    }
+
     public function warehousestore()
     {
         return $this->belongsTo(Warehousestore::class);

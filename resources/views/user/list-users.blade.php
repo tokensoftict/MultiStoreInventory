@@ -13,6 +13,11 @@
                         </span>
                     </header>
                     <div class="panel-body">
+                        @if(session('success'))
+                            {!! alert_success(session('success')) !!}
+                        @elseif(session('error'))
+                            {!! alert_error(session('error')) !!}
+                        @endif
                         <div class="table-responsive">
                             <table class="table table-bordered table-striped" id="user-list">
                                 <thead>

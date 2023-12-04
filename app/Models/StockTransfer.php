@@ -233,7 +233,7 @@ class StockTransfer extends Model
         $transfer->stock_transfer_items() ->saveMany($transfer_item);
 
 
-        return redirect()->route('stocktransfer.transfer_report')->with('success','stock transfer has ben updated successfully');
+        return redirect()->route('stocktransfer.index')->with('success','stock transfer has ben updated successfully');
     }
 
 /*

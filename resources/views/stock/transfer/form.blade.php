@@ -69,7 +69,7 @@
                     </div>
                     <div class="panel-body">
                         <div class="col-md-12">
-                            <form action="" onsubmit="return add_item();">
+                            <form action="">
                                 <div class="row">
                                     <div class="col-sm-5">
                                         <label>Select Stock</label>
@@ -84,7 +84,7 @@
                                         <input type="number" max="0" class="form-control" id="qty"/>
                                     </div>
                                     <div class="col-sm-2">
-                                        <button class="btn btn-sm btn-primary" style="margin-top: 25px;" type="submit">Add Stock</button>
+                                        <button class="btn btn-sm btn-primary" onclick="return add_item();" style="margin-top: 25px;" type="button">Add Stock</button>
                                     </div>
                                 </div>
                                 <br/>
@@ -119,7 +119,7 @@
                                                 <tr>
                                                     <th class="text-left">Name</th>
                                                     <th class="text-center">Quantity</th>
-                                                    <th class="text-right">Cost Price</th>
+                                                    <th class="text-right">Selling Price</th>
                                                     <th class="text-right">Total</th>
                                                     <th>Action</th>
                                                 </tr>
@@ -203,12 +203,13 @@
             $("#products").on('change',function(eventData){
                 var data = $(this).select2('data');
                 data = data[0];
+                if(data) {
+                    $('#av_qty').html(data['available_quantity']);
+                    $('#qty').attr('max', data['available_quantity']);
 
-                $('#av_qty').html(data['available_quantity']);
-                $('#qty').attr('max',data['available_quantity']);
-
-                $('#qty').attr('data-cost-price',data['cost_price'])
-                $('#qty').attr('data-selling-price',data['cost_price'])
+                    $('#qty').attr('data-cost-price', data['cost_price'])
+                    $('#qty').attr('data-selling-price', data['cost_price'])
+                }
             });
 
         });
@@ -216,6 +217,7 @@
         function add_item(){
             if(document.getElementById($("#products option:selected").val()+"-row")){
                 $("#qty").val("");
+                $('#av_qty').html('');
                 $("#cost_price").val("");
                 alert("Item already exits, Please check and try again");
                 return false;
@@ -235,8 +237,9 @@
             html+='<td><button class="btn btn-sm btn-danger" onclick="remove_item(this)">Remove</button></td>';
             html+="</tr>";
 
-            $("#products").select2("val","");
+            $("#products").val('').trigger('change')
             $("#qty").val("");
+            $('#av_qty').html('');
             $("#cost_price").val("");
             $("#appender").append(html);
             total();

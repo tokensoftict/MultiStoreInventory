@@ -65,7 +65,7 @@ class StockTransferController extends Controller
 
         $data['transfer'] = $transfer;
 
-        return setPageContent("stock.transfer.show",$data);
+        return view("stock.transfer.show",$data);
     }
 
 

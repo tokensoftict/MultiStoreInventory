@@ -38,6 +38,7 @@
                     <div class="panel-body">
                         @php
                             $all_total=0;
+                            $totalCredit = 0;
                         @endphp
                         @foreach($payment_methods as $payment_method)
 
@@ -64,6 +65,9 @@
                                         @php
                                             $total+=$payment->amount;
                                             $all_total+=$payment->amount;
+                                            if($payment_method->id === 4){
+                                                $totalCredit+=$payment->amount;
+                                            }
                                         @endphp
                                         <tr>
                                             <td>{{ $loop->iteration }}</td>
@@ -93,7 +97,10 @@
                                 </tfoot>
                             </table>
                         @endforeach
-                        <h2 class="pull-right">Grand Total : {{ number_format($all_total,2) }}</h2>
+                        <div class="pull-right">
+                        <h2>Total Credit : {{ number_format($totalCredit,2) }}</h2>
+                        <h2>Grand Total : {{ number_format($all_total - $totalCredit,2) }}</h2>
+                        </div>
                     </div>
                 </section>
 

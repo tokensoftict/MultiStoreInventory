@@ -84,6 +84,8 @@ class User extends Authenticatable
         'email_verified_at',
         'password',
         'status',
+        'customer_type',
+        'customer_id',
         'last_login',
         'remember_token'
     ];

@@ -66,16 +66,31 @@ class UserController extends Controller
 
         $userdata['password'] = bcrypt( $userdata['password']);
 
-        DB::transaction(function () use ($data, $userdata, &$res){
+        DB::transaction(function () use ($data, $userdata, &$res, &$request){
             $new_user = new User();
             unset($userdata['store']);
+
             $new_user = $new_user->updateOrCreate($userdata);
+
+            $userStore = $request->get('store', []);
+
+            $userStore = collect($userStore)->map(function($store) use(&$id){
+                return [
+                    'user_id' => $id,
+                    'warehousestore_id' => $store
+                ];
+            })->toArray();
+
+            $new_user->userstoremappers()->delete();
+
+            $new_user->userstoremappers()->createMany($userStore);
+
         });
 
         if ($request->ajax()) {
             return response()->json($res);
         } else {
-            return redirect()->route('user.create')->with('success', 'User updated successfully!');
+            return redirect()->route('user.create')->with('success', 'User added successfully!');
 
         }
     }
@@ -148,7 +163,7 @@ class UserController extends Controller
         if ($request->ajax()) {
             return response()->json($res);
         } else {
-            return redirect()->route('user.edit',[$id])->with('success', 'User updated successfully!');
+            return redirect()->route('user.index')->with('success', 'User updated successfully!');
         }
 
     }

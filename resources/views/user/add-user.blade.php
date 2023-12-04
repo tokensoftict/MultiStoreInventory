@@ -108,6 +108,8 @@
                                                 <br/>
                                             </div>
                                         </div>
+                                        <input type="hidden" name="customer_type" value="0"/>
+                                        <input type="hidden" name="customer_id" value="0"/>
                                         <div class="panel-footer">
                                             <center>
                                                 @if(!isset($user->id))

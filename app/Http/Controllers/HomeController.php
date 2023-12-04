@@ -35,6 +35,12 @@ class HomeController extends Controller
         if (auth()->attempt($credentials)) {
             $stores = $request->user()->userstoremappers()->get();
 
+            if($request->user()->status == 0){
+                auth()->logout();
+                session()->flash('message', 'Your account has been deactivated, Please contact administrator');
+                return redirect()->back();
+            }
+
             if($stores->count() === 0){
                 // no stores assign to this user
                 return redirect()->route('no-store');
