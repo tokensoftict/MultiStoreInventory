@@ -35,8 +35,9 @@ class StockExport implements FromCollection, WithHeadings
             'stocks.name',
             DB::raw('SUM(stockbatches.' . $packed_column . ') as bundle_quantity'),
             DB::raw('SUM(stockbatches.' . $yard_column . ') as yard_quantity'),
-            'product_category.name',
-        )->join('stocks', 'stocks.id', '=', 'stockbatches.stock_id')
+            'product_category.name as cat_name',
+        )
+            ->join('stocks', 'stocks.id', '=', 'stockbatches.stock_id')
             ->join('product_category', 'stocks.product_category_id','=','product_category.id')
             ->where('stocks.status', 1)
             ->groupBy('stocks.id')

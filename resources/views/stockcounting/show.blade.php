@@ -137,7 +137,7 @@
                            <div class="form-group">
                                <label>Select Categories</label>
                                <select name="categories[]" multiple class="form-control  select-category">
-                                   <option value="all">All Categories</option>
+                                   <option value="all">All Products</option>
                                    @foreach($categories as $category)
                                        <option value="{{ $category->id }}">{{ $category->name }}</option>
                                    @endforeach
