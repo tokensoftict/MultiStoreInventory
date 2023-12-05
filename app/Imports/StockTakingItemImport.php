@@ -30,7 +30,8 @@ class StockTakingItemImport implements ToModel,WithHeadingRow
 
         $this->stockTaking->status = 'Uploaded';
         $this->stockTaking->update();
-
+        $row['counted_bundle_quantity'] = empty($row['counted_bundle_quantity']) ? 0 : $row['counted_bundle_quantity'];
+        $row['counted_yard_quantity'] = empty($row['counted_yard_quantity']) ? 0 : $row['counted_yard_quantity'];
         return new StockTakingItem([
             'name' => $this->stockTaking->name,
             'stock_id' =>$row['id'],

@@ -33,8 +33,8 @@ class StockExport implements FromCollection, WithHeadings
         $stocks =  DB::table('stockbatches')->select(
             'stocks.id',
             'stocks.name',
-            DB::raw('SUM(stockbatches.' . $packed_column . ') as bundle_quantity'),
-            DB::raw('SUM(stockbatches.' . $yard_column . ') as yard_quantity'),
+            //DB::raw('SUM(stockbatches.' . $packed_column . ') as bundle_quantity'),
+            //DB::raw('SUM(stockbatches.' . $yard_column . ') as yard_quantity'),
             'product_category.name as cat_name',
         )
             ->join('stocks', 'stocks.id', '=', 'stockbatches.stock_id')
@@ -63,8 +63,8 @@ class StockExport implements FromCollection, WithHeadings
         return [
             'ID',
             'NAME',
-            'BUNDLE QUANTITY',
-            'YARD QUANTITY',
+            //'BUNDLE QUANTITY',
+            //'YARD QUANTITY',
             'CATEGORY',
             'COUNTED BUNDLE QUANTITY',
             'COUNTED YARD QUANTITY',
