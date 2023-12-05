@@ -3,6 +3,7 @@
 namespace App\Imports;
 
 use App\Models\Stock;
+use App\Models\StockTaking;
 use App\Models\StockTakingItem;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
@@ -17,7 +18,7 @@ class StockTakingItemImport implements ToModel,WithHeadingRow
 
     protected $stockTaking;
 
-    public function __construct($stockTaking)
+    public function __construct(StockTaking $stockTaking)
     {
         $this->stockTaking = $stockTaking;
     }
@@ -25,8 +26,6 @@ class StockTakingItemImport implements ToModel,WithHeadingRow
     public function model(array $row)
     {
         $stock = Stock::find($row['id']);
-
-
 
         if(!$stock) return null;
 
@@ -37,8 +36,8 @@ class StockTakingItemImport implements ToModel,WithHeadingRow
         return new StockTakingItem([
             'name' => $this->stockTaking->name,
             'stock_id' =>$row['id'],
-            'available_quantity' =>$stock->available_quantity,
-            'available_yard_quantity' => $stock->available_yard_quantity,
+            'available_quantity' =>$stock->getCustomAvailableQuantityAttribute($this->stockTaking->warehousestore->packed_column),
+            'available_yard_quantity' => $stock->getCustomAvailableYardQuantityAttribute($this->stockTaking->warehousestore->yard_column),
             'counted_available_quantity' => $row['counted_bundle_quantity'],
             'counted_yard_quantity' => $row['counted_yard_quantity'],
             'available_quantity_diff' => ( $row['counted_bundle_quantity'] - $stock->available_quantity),

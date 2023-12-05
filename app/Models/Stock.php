@@ -215,12 +215,26 @@ class Stock extends Model
         $store = getActiveStore();
         return $this->stockBatches()->where($store->packed_column, ">", "0")->sum($store->packed_column);
     }
-//available_yard_quantity
+
     public function getAvailableYardQuantityAttribute(){
         if(!$this->stockBatches()->exists()) return 0;
         $store = getActiveStore();
         return $this->stockBatches()->where($store->yard_column, ">", "0")->sum($store->yard_column);
     }
+
+
+    public function getCustomAvailableQuantityAttribute($column){
+        if(!$this->stockBatches()->exists()) return 0;
+        return $this->stockBatches()->where($column, ">", "0")->sum($column);
+    }
+
+    public function getCustomAvailableYardQuantityAttribute($column){
+        if(!$this->stockBatches()->exists()) return 0;
+        return $this->stockBatches()->where($column, ">", "0")->sum($column);
+    }
+
+
+
 
     public function getRecentBatchesForReturn($from, $quantity)
     {
