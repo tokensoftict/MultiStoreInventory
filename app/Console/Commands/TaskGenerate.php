@@ -61,6 +61,7 @@ class TaskGenerate extends Command
             'InvoiceReport'=>"Invoice Reports",
             'CashBook'=>"Cash Book",
             'PaymentReport'=>"Payment Report",
+            'StockReport'=>"Stock Report",
             'ExpensesReport' => 'Expenses Report',
             'StockCounting' => 'Stock Counting',
             'StockTransferReport' => 'Stock Transfer Report',

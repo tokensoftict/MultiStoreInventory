@@ -330,9 +330,9 @@
     <script>
         productfindurl = "{{ route('findstock') }}"
     </script>
-    <script data-turbolinks-eval="false" data-turbo-eval="false" src="{{ asset('bower_components/select2/dist/js/select2.min.js') }}"></script>
-    <script data-turbolinks-eval="false" data-turbo-eval="false" src="{{ asset('assets/js/init-select2.js') }}"></script>
-    <script data-turbolinks-eval="false" data-turbo-eval="false" src="{{ asset('bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js') }}"></script>
+    <script   src="{{ asset('bower_components/select2/dist/js/select2.min.js') }}"></script>
+    <script   src="{{ asset('assets/js/init-select2.js') }}"></script>
+    <script   src="{{ asset('bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js') }}"></script>
     <script  src="{{ asset('assets/js/init-datepicker.js') }}"></script>
     <script  type='text/javascript' src="{{asset('assets/js/autocomplete.js?v='.mt_rand())}}"></script>
 

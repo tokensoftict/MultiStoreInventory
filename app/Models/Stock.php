@@ -20,6 +20,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property string|null $description
  * @property string|null $code
  * @property int|null $product_category_id
+ * @property int|null $reorder_level
  * @property int|null $manufacturer_id
  * @property float|null $selling_price
  * @property float|null $cost_price
@@ -77,7 +78,8 @@ class Stock extends Model
         'expiry',
         'status',
         'user_id',
-        'last_updated_by'
+        'last_updated_by',
+        'reorder_level'
     ];
 
     public static $validation = [
@@ -106,7 +108,8 @@ class Stock extends Model
         'expiry',
         'status',
         'user_id',
-        'last_updated_by'
+        'last_updated_by',
+        'reorder_level'
     ];
     protected $appends = ['available_quantity','available_yard_quantity'];
 

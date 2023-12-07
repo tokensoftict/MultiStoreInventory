@@ -28,7 +28,7 @@
     @stack('css')
 
     <script src="{{ asset('assets/js/modernizr-custom.js') }}"></script>
-    <!-- <script  src="{{ asset('js/app.js') }}"  data-turbolinks-eval="false" data-turbo-eval="false"></script>-->
+    <!-- <script  src="{{ asset('js/app.js') }}"   ></script>-->
     <script>let productfindurl = ""; window.validating_modal_show = false;</script>
 </head>
 
@@ -68,13 +68,13 @@
     @include('layouts.footer')
 </div>
 
-<script  data-turbolinks-eval="false" data-turbo-eval="false" src="{{ asset('bower_components/jquery/dist/jquery.min.js') }}"></script>
-<script data-turbolinks-eval="false" data-turbo-eval="false" src="{{ asset('bower_components/jquery/dist/jquery-ui.min.js') }}"></script>
-<script  data-turbolinks-eval="false" data-turbo-eval="false" src="{{ asset('bower_components/bootstrap/dist/js/bootstrap.min.js') }}"></script>
-<script  data-turbolinks-eval="false" data-turbo-eval="false" src="{{ asset('bower_components/jquery.nicescroll/dist/jquery.nicescroll.min.js') }}"></script>
-<script  data-turbolinks-eval="false" data-turbo-eval="false" src="{{ asset('bower_components/autosize/dist/autosize.min.js') }}"></script>
-<script  data-turbolinks-eval="false" data-turbo-eval="false" src="{{ asset('assets/js/bootstrap-submenu/js/bootstrap-submenu.js') }}"></script>
-<script  data-turbolinks-eval="false" data-turbo-eval="false" src="{{ asset('assets/js/bootstrap-hover-dropdown.js') }}"></script>
+<script    src="{{ asset('bower_components/jquery/dist/jquery.min.js') }}"></script>
+<script   src="{{ asset('bower_components/jquery/dist/jquery-ui.min.js') }}"></script>
+<script    src="{{ asset('bower_components/bootstrap/dist/js/bootstrap.min.js') }}"></script>
+<script    src="{{ asset('bower_components/jquery.nicescroll/dist/jquery.nicescroll.min.js') }}"></script>
+<script    src="{{ asset('bower_components/autosize/dist/autosize.min.js') }}"></script>
+<script    src="{{ asset('assets/js/bootstrap-submenu/js/bootstrap-submenu.js') }}"></script>
+<script    src="{{ asset('assets/js/bootstrap-hover-dropdown.js') }}"></script>
 
 </body>
 </html>

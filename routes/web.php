@@ -234,7 +234,6 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
 
             Route::prefix('stocklog')->as('stocklog.')->group(function () {
                 Route::match(['post','get'],'add_log', ['as' => 'add_log', 'uses' => 'StockController@add_log', 'visible'=>true,'custom_label'=>'Add Stock Log']);
-                Route::match(['post','get'],'usage_log_report', ['as' => 'usage_log_report', 'uses' => 'StockController@usage_log_report', 'visible'=>true,'custom_label'=>'Stock Log Report']);
                 Route::get('{id}/edit', ['as' => 'edit', 'uses' => 'StockController@edit_log']);
                 Route::put('{id}', ['as' => 'update', 'uses' => 'StockController@update_log']);
                 Route::get('{id}/delete_log', ['as' => 'delete_log', 'uses' => 'StockController@delete_log']);
@@ -361,10 +360,16 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
 
             });
 
-            Route::prefix('expensesReport')->as('ExpensesReport.')->namespace('ExpensesReport')->group(function(){
-                Route::match(['get','post'],'/expenses_report_by_type', ['as' => 'expenses_report_by_type', 'uses' => 'ExpensesReportController@expenses_report_by_type', 'visible' => true, "custom_label"=>"Expenses By Type"]);
-                Route::match(['get','post'],'/expenses_report_by_store', ['as' => 'expenses_report_by_store', 'uses' => 'ExpensesReportController@expenses_report_by_store', 'visible' => true, "custom_label"=>"Expenses By Store"]);
+            Route::prefix('stockReport')->as('StockReport.')->namespace('StockReport')->group(function(){
+                Route::match(['post','get'],'usage_log_report', ['as' => 'usage_log_report', 'uses' => 'StockReportController@usage_log_report', 'visible'=>false,'custom_label'=>'Stock Log Report']);
+                Route::match(['post','get'],'near_out_of_stock', ['as' => 'near_out_of_stock', 'uses' => 'StockReportController@near_out_of_stock', 'visible'=>false,'custom_label'=>'Near Out Of Stock Report']);
+                Route::match(['post','get'],'quantity_adjustment_report', ['as' => 'quantity_adjustment_report', 'uses' => 'StockReportController@quantity_adjustment_report', 'visible'=>false,'custom_label'=>'Quantity Adjustment Report']);
+            });
 
+
+            Route::prefix('expensesReport')->as('ExpensesReport.')->namespace('ExpensesReport')->group(function(){
+                Route::match(['get','post'],'/expenses_report_by_type', ['as' => 'expenses_report_by_type', 'uses' => 'ExpensesReportController@expenses_report_by_type', 'visible' => false, "custom_label"=>"Expenses By Type"]);
+                Route::match(['get','post'],'/expenses_report_by_store', ['as' => 'expenses_report_by_store', 'uses' => 'ExpensesReportController@expenses_report_by_store', 'visible' => false, "custom_label"=>"Expenses By Store"]);
             });
 
 

@@ -206,22 +206,6 @@ class StockController extends Controller
         return view("stock.stocklog.form",$data);
     }
 
-    public function usage_log_report(Request $request)
-    {
-        $data['title'] = "Stock Log Report";
-        if($request->get('from') && $request->get('to')){
-            $data['from']  = $request->get('from');
-            $data['to']  = $request->get('to');
-        }else{
-            $data['from']  = date('Y-m-01');
-            $data['to']  = date('Y-m-t');
-        }
-
-        $data['logs'] = StockLogItem::with(['user','stock','operation','warehousestore', 'stock_log_usages_type'])->whereBetween('log_date',[$data['from'], $data['to']])->get();
-        return view("stock.stocklog.stocklog_report",$data);
-    }
-
-
 
     public function edit_log(Request $request, $id)
     {

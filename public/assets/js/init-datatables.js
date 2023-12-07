@@ -20,28 +20,91 @@ function format(d) {
 
 // Data Table
 
-$('.convert-data-table').DataTable({
-    "PaginationType": "bootstrap",
-    dom: '<"tbl-head clearfix"T>,<"tbl-top clearfix"lfr>,t,<"tbl-footer clearfix"<"tbl-info pull-left"i><"tbl-pagin pull-right"p>>',
-    tableTools: {
-        "sSwfPath": "swf/copy_csv_xls_pdf.swf"
+$('.convert-data-table').dataTable(
+    {
+        /*
+        buttons: [
+            'copy', 'excel', 'pdf', 'print'
+        ],
+         */
+        buttons :[
+            {
+                extend: 'print',
+                autoPrint: true,
+                title: '',
+                //For repeating heading.
+                repeatingHead: {
+                    logo: 'https://www.google.co.in/logos/doodles/2018/world-cup-2018-day-22-5384495837478912-s.png',
+                    logoPosition: 'right',
+                    logoStyle: '',
+                    title: '<h3></h3>'
+                }
+            },
+            'copy', 'excel', 'pdf',
+        ],
+        dom:  "<'row be-datatable-header'<'col-sm-2'l><'col-sm-5 text-right'B><'col-sm-4 text-right'f>>" +
+            "<'row be-datatable-body'<'col-sm-12'tr>>" +
+            "<'row be-datatable-footer'<'col-sm-5'i><'col-sm-7'p>>"
     }
-});
+);
 
 
 
 
-$('.colvis-data-table').DataTable({
-    "PaginationType": "bootstrap",
-    dom: '<"tbl-head clearfix"C>,<"tbl-top clearfix"lfr>,t,<"tbl-footer clearfix"<"tbl-info pull-left"i><"tbl-pagin pull-right"p>>'
+$('.colvis-data-table').dataTable(
+    {
+        /*
+        buttons: [
+            'copy', 'excel', 'pdf', 'print'
+        ],
+         */
+        buttons :[
+            {
+                extend: 'print',
+                autoPrint: true,
+                title: '',
+                //For repeating heading.
+                repeatingHead: {
+                    logo: 'https://www.google.co.in/logos/doodles/2018/world-cup-2018-day-22-5384495837478912-s.png',
+                    logoPosition: 'right',
+                    logoStyle: '',
+                    title: '<h3></h3>'
+                }
+            },
+            'copy', 'excel', 'pdf',
+        ],
+        dom:  "<'row be-datatable-header'<'col-sm-2'l><'col-sm-5 text-right'B><'col-sm-4 text-right'f>>" +
+            "<'row be-datatable-body'<'col-sm-12'tr>>" +
+            "<'row be-datatable-footer'<'col-sm-5'i><'col-sm-7'p>>"
+    }
+);
 
 
-});
-
-
-$('.responsive-data-table').DataTable({
-    "PaginationType": "bootstrap",
-    responsive: true,
-    dom: '<"tbl-top clearfix"lfr>,t,<"tbl-footer clearfix"<"tbl-info pull-left"i><"tbl-pagin pull-right"p>>'
-});
+$('.responsive-data-table').dataTable(
+    {
+        /*
+        buttons: [
+            'copy', 'excel', 'pdf', 'print'
+        ],
+         */
+        buttons :[
+            {
+                extend: 'print',
+                autoPrint: true,
+                title: '',
+                //For repeating heading.
+                repeatingHead: {
+                    logo: 'https://www.google.co.in/logos/doodles/2018/world-cup-2018-day-22-5384495837478912-s.png',
+                    logoPosition: 'right',
+                    logoStyle: '',
+                    title: '<h3></h3>'
+                }
+            },
+            'copy', 'excel', 'pdf',
+        ],
+        dom:  "<'row be-datatable-header'<'col-sm-2'l><'col-sm-5 text-right'B><'col-sm-4 text-right'f>>" +
+            "<'row be-datatable-body'<'col-sm-12'tr>>" +
+            "<'row be-datatable-footer'<'col-sm-5'i><'col-sm-7'p>>"
+    }
+);
 
