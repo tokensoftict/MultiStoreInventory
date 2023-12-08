@@ -17,7 +17,7 @@ class StockReportController extends Controller
         $data['title'] = "Stock Log Report";
         $data['to'] = $request->get('to', date('Y-m-t'));
         $data['from'] = $request->get('from', date('Y-m-01'));
-        $data['logs'] = StockLogItem::with(['user','stock','operation','warehousestore', 'stock_log_usages_type'])->whereBetween('log_date',[$data['from'], $data['to']])->get();
+        $data['logs'] = StockLogItem::with(['user','stock','operation','warehousestore', 'stock_log_usages_type'])->whereBetween('log_date',[$data['from'], $data['to']])->where('warehousestore_id', getActiveStore()->id)->get();
         return view("stock.stocklog.stocklog_report",$data);
     }
 

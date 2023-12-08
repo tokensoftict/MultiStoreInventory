@@ -137,11 +137,12 @@
 @endsection
 
 @push('js')
+    <script type="text/javascript" src="{{ asset('table/datatables.js') }}"></script>
     <script   src="{{ asset('bower_components/select2/dist/js/select2.min.js') }}"></script>
     <script   src="{{ asset('assets/js/init-select2.js') }}"></script>
 
 
-    <script type="text/javascript" src="{{ asset('table/datatables.js') }}"></script>
+
 
     <script src="{{ asset('assets/js/init-datatables.js') }}"></script>
     <script  src="{{ asset('assets/js/init-datepicker.js') }}"></script>
