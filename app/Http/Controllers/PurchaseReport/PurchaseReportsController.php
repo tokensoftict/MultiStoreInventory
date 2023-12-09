@@ -53,7 +53,7 @@ class PurchaseReportsController extends Controller
         $data['purchase_orders'] = Po::with(['supplier','purchase_order_items','user','created_user'])
             ->whereIn('warehousestore_id', getMyAccessStore('id'))
             ->where('supplier_id', $data['supplier_id'])
-            ->where('type', 'PURCHASE')
+            ->where('type',  $data['type'])
             ->whereBetween('date_created',[$data['from'],$data['to']])->orderBy('id','DESC')->get();
         return view('purchasereport.monthly_supplier', $data);
     }
@@ -69,7 +69,7 @@ class PurchaseReportsController extends Controller
         $data['title'] = 'Monthly Purchase Orders / Returns By Store';
         $data['purchase_orders'] = Po::with(['supplier','purchase_order_items','user','created_user'])
             ->where('warehousestore_id',  $data['warehousestore_id'])
-            ->where('type', 'PURCHASE')
+            ->where('type',  $data['type'])
             ->whereBetween('date_created',[$data['from'],$data['to']])->orderBy('id','DESC')->get();
         return view('purchasereport.monthly_store', $data);
     }

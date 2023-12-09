@@ -22,7 +22,7 @@
             <tr>
                 <td>{{ $loop->iteration }}</td>
                 <td>{{ $purchase_order->supplier->name ?? "" }}</td>
-                <td>{{ $purchase_order->purchase_order_invoice_number }}</td>
+                <td>{{ $purchase_order->purchase_order_invoice_number. ($purchase_order->type == "RETURN" ? "-RETURN" : "")  }}</td>
                 <td>{{ $purchase_order->type }}</td>
                 <td>{{ $purchase_order->warehousestore->name ?? "" }}</td>
                 <td>{{ $purchase_order->purchase_order_items->count() }}</td>
