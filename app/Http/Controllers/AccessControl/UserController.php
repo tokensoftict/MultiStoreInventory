@@ -68,7 +68,7 @@ class UserController extends Controller
 
         DB::transaction(function () use ($data, $userdata, &$res, &$request){
             $new_user = new User();
-            unset($userdata['store']);
+            unset($userdata['store'],$userdata['undefined']);
 
             $new_user = $new_user->updateOrCreate($userdata);
 

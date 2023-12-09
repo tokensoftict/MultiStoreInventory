@@ -15,6 +15,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * Class Customer
  * 
  * @property int $id
+ * @property int $credit_limit
  * @property string|null $firstname
  * @property string|null $lastname
  * @property string|null $email
@@ -68,6 +69,7 @@ class Customer extends Model
         'arriving_from',
         'city',
         'state',
+        'credit_limit'
 	];
 
 	public static $fields = [
@@ -90,6 +92,7 @@ class Customer extends Model
         'arriving_from',
         'city',
         'state',
+        'credit_limit'
     ];
 
     protected $appends = ['credit_balance'];
