@@ -368,6 +368,21 @@ class Invoice extends Model
             $report[$stock->id]['batches'] =  $batches;
             $report[$stock->id]['stock'] = $stock;
             $report[$stock->id]['prods'] = $prods[$stock->id];
+
+            if($prods[$stock->id]['type'] === "yard_quantity"){
+                if((float)$stock->yard_cost_price >= (float)$prods[$stock->id]['price']){
+                    $status = true;
+                    $errors[$stock->id] = $stock->name."can not be sell under cost price ".number_format($stock->yard_cost_price,2 );
+                }
+            }
+
+            if($prods[$stock->id]['type'] === "quantity"){
+                if((float)$stock->cost_price >= (float)$prods[$stock->id]['price']){
+                    $status = true;
+                    $errors[$stock->id] = $stock->name."can not be sell under cost price ".number_format($stock->cost_price,2 );
+                }
+            }
+
         }
 
         if(count($errors) > 0){ // a validation error occurred return the batch back
@@ -474,6 +489,23 @@ class Invoice extends Model
             $report[$stock->id]['batches'] =  $batches;
             $report[$stock->id]['stock'] = $stock;
             $report[$stock->id]['prods'] = $prods[$stock->id];
+
+
+
+            if($prods[$stock->id]['type'] === "yard_quantity"){
+                if((float)$stock->yard_cost_price >= (float)$prods[$stock->id]['price']){
+                    $status = true;
+                    $errors[$stock->id] = $stock->name." can not be sell under cost price ".number_format($stock->yard_cost_price,2 );
+                }
+            }
+
+            if($prods[$stock->id]['type'] === "quantity"){
+                if((float)$stock->cost_price >= (float)$prods[$stock->id]['price']){
+                    $status = true;
+                    $errors[$stock->id] = $stock->name." can not be sell under cost price ".number_format($stock->cost_price,2 );
+                }
+            }
+
         }
 
         return ['status'=> $status, 'data'=>$report,'errors'=> $errors];
