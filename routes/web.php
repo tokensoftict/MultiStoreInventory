@@ -409,7 +409,7 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
             });
 
             Route::prefix('cashBookReport')->as('cashBookReport.')->namespace('CashBookReport')->group(function(){
-                Route::get('list', ['as' => 'list', 'uses' => 'CashBookReportController@list_all', 'custom_label'=>"Monthly Cashbook Report", 'visible' => false]);
+                Route::match(['get','post'],'list', ['as' => 'list', 'uses' => 'CashBookReportController@list_all', 'custom_label'=>"Monthly Cashbook Report", 'visible' => false]);
             });
 
         });
