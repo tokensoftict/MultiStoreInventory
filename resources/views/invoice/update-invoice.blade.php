@@ -622,10 +622,14 @@
                     }else{
                         //HoldInvoice(document.getElementById('hold_invoice_hold'));
                         hideMask();
-                        var errors = res.error;
-                        for(let key in errors){
-                            if(document.getElementById('error_'+key)){
-                                $(document.getElementById('error_'+key)).html(errors[key]).removeAttr('style');
+                        if(res.error === "Customer has reached the credit limit, transaction can not continue"){
+                            alert(res.error)
+                        }else {
+                            var errors = res.error;
+                            for (let key in errors) {
+                                if (document.getElementById('error_' + key)) {
+                                    $(document.getElementById('error_' + key)).html(errors[key]).removeAttr('style');
+                                }
                             }
                         }
                     }

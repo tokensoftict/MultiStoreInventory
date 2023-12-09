@@ -61,6 +61,15 @@ class InvoiceController extends Controller
 
         if($reports['status'] == true) return response()->json(['status'=>false,'error'=>$reports['errors']]);
 
+        if($request->get('payment') !== "false" && $request->get('status') == 'COMPLETE') {
+
+            $creditStatus = Payment::validateCreditLimit(['payment_info' => json_decode($request->get('payment'), true), "type" => "Invoice"], $reports);
+
+            if ($creditStatus === true) {
+                return response()->json(['status' => false, 'error' => "Customer has reached the credit limit, transaction can not continue"]);
+            }
+        }
+
         $invoice = Invoice::updateInvoice($request,$reports, $invoice);
 
         if($request->get('payment') !== "false" && $request->get('status') == 'COMPLETE'){
@@ -83,6 +92,15 @@ class InvoiceController extends Controller
         $reports = Invoice::validateInvoiceProduct(json_decode($request->get('data'),true),'quantity');    // validate products if the quantity is okay
 
         if($reports['status'] == true) return response()->json(['status'=>false,'error'=>$reports['errors']]);
+
+        if($request->get('payment') !== "false" && $request->get('status') == 'COMPLETE') {
+
+            $creditStatus = Payment::validateCreditLimit(['payment_info' => json_decode($request->get('payment'), true), "type" => "Invoice"], $reports);
+
+            if ($creditStatus === true) {
+                return response()->json(['status' => false, 'error' => "Customer has reached the credit limit, transaction can not continue"]);
+            }
+        }
 
         $invoice = Invoice::createInvoice($request,$reports, false);
 

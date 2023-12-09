@@ -31,6 +31,7 @@
                                 <th>Address</th>
                                 <th>Phone Number</th>
                                 <th>Credit Balance</th>
+                                <th>Credit Limit</th>
                                 <th>Created</th>
                                 <th>Action</th>
                             </tr>
@@ -50,6 +51,7 @@
                                     <td>{{ $customer->address }}</td>
                                     <td>{{ $customer->phone_number }}</td>
                                     <td>{{ number_format($customer->credit_balance,2) }}</td>
+                                    <td>{{ number_format($customer->credit_limit,2) }}</td>
                                     <td>{{ $customer->created_at  }}</td>
                                     <td>
 
@@ -63,6 +65,7 @@
                             </tbody>
                             <tfoot>
                             <tr>
+                                <td></td>
                                 <td></td>
                                 <td></td>
                                 <td></td>

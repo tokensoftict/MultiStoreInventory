@@ -19,7 +19,7 @@ class CustomerController extends Controller
         $data['title'] = "List Customer";
         $data['title2'] = "Add Customer";
         $data['customers'] = Customer::all();
-        return setPageContent('customermanager.list-customer',$data);
+        return view('customermanager.list-customer',$data);
     }
 
     public function create(){

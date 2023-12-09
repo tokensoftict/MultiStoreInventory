@@ -42,6 +42,15 @@
                             </div>
 
                             <div class="form-group">
+                                <label>Customer Credit Limit</label>
+                                <input type="text" value="{{ old('credit_limit',$customer->credit_limit) }}"   class="form-control" name="credit_limit" placeholder="Customer Credit Limit"/>
+                                @if ($errors->has('credit_limit'))
+                                    <label for="name-error" class="error"
+                                           style="display: inline-block;">{{ $errors->first('credit_limit') }}</label>
+                                @endif
+                            </div>
+
+                            <div class="form-group">
                                 <label>Phone Number</label>
                                 <input type="text" value="{{ old('phone_number',$customer->phone_number) }}" required  class="form-control" name="phone_number" placeholder="Phone Number"/>
                                 @if ($errors->has('phone_number'))

@@ -121,31 +121,31 @@ class Payment extends Model
         {
 
 
-                $invoice_amount =  $paymentInformation['invoice']->sub_total;
+            $invoice_amount =  $paymentInformation['invoice']->sub_total;
 
-                $total_amount_paid = 0;
-                foreach($paymentInformation['payment_info']['split_method'] as $pmthod=>$amount)
-                {
-                    $total_amount_paid+=$amount;
-                }
+            $total_amount_paid = 0;
+            foreach($paymentInformation['payment_info']['split_method'] as $pmthod=>$amount)
+            {
+                $total_amount_paid+=$amount;
+            }
 
-                if($total_amount_paid < $invoice_amount){
-                    $paymentInformation['payment_info']['split_method'][4] = ($invoice_amount - $total_amount_paid);
-                    $paymentInformation['payment_info']['payment_info_data'][4] = [
-                        'payment_method_id' => 4,
-                        'credit' => "credit"
-                    ];
-                }
-                else if($total_amount_paid > $invoice_amount)
-                {
+            if($total_amount_paid < $invoice_amount){
+                $paymentInformation['payment_info']['split_method'][4] = ($invoice_amount - $total_amount_paid);
+                $paymentInformation['payment_info']['payment_info_data'][4] = [
+                    'payment_method_id' => 4,
+                    'credit' => "credit"
+                ];
+            }
+            else if($total_amount_paid > $invoice_amount)
+            {
 
                 $paymentInformation['payment_info']['split_method'][4] = -($total_amount_paid- $invoice_amount );
-                    // this is an over payment for this invoice
-                    $paymentInformation['payment_info']['payment_info_data'][4] = [
-                        'payment_method_id' => 4,
-                        'credit' => "credit"
-                    ];
-                }
+                // this is an over payment for this invoice
+                $paymentInformation['payment_info']['payment_info_data'][4] = [
+                    'payment_method_id' => 4,
+                    'credit' => "credit"
+                ];
+            }
 
 
 
@@ -234,6 +234,50 @@ class Payment extends Model
         }
 
         return $payment;
-
     }
+
+
+    public static function validateCreditLimit($paymentInformation, $reports){
+        $totals = Invoice::calculateInvoiceTotal($reports);
+        $total = 0;
+        $total_amount_paid = 0;
+        if( $paymentInformation['payment_info']['payment_method_id'] == "split_method")
+        {
+            $total+=$totals['total_invoice_total_selling'];
+            $total_amount_paid = 0;
+            foreach($paymentInformation['payment_info']['split_method'] as $pmthod=>$amount)
+            {
+                $total_amount_paid+=$amount;
+            }
+
+            $total = $total - $total_amount_paid;
+
+        }else if($paymentInformation['payment_info']['payment_method_id'] == 4){
+            $total+=$totals['total_invoice_total_selling'];
+        }
+
+        if($total === 0) return false;
+
+        $customer =  Customer::find(request()->get('customer_id'));
+
+        $credit_limit = (int)$customer->credit_limit;
+
+        $total_credit = (int)$customer->credit_balance;
+
+
+        if($total_credit > 0) return false;
+
+        if($total_credit < 0){
+            $total_credit = -$total_credit;
+        }
+        $total_credit = $total_credit+$total;
+
+
+        if($total_credit > $credit_limit){
+            return true;
+        }
+
+        return false;
+    }
+
 }
