@@ -211,7 +211,7 @@
             html+="<td class='text-center'>"+$("#qty").val()+"</td>";
             html+="<td class='text-right'>"+formatMoney($("#selling_price").val())+"</td>";
             html+="<td class='text-right'>"+formatMoney($("#cost_price").val())+"</td>";
-            html+="<td class='total_attr text-right' data-value='"+(parseFloat($("#selling_price").val()) * parseInt($("#qty").val()))+"'>"+formatMoney(parseFloat($("#cost_price").val()) * parseInt($("#qty").val()))+"</td>";
+            html+="<td class='total_attr text-right' data-value='"+(parseFloat($("#selling_price").val()) * parseInt($("#qty").val()))+"'>"+formatMoney(parseFloat($("#selling_price").val()) * parseInt($("#qty").val()))+"</td>";
             html+='<td><button class="btn btn-sm btn-danger" onclick="remove_item(this)">Remove</button></td>';
             html+="</tr>";
 
