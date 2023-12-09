@@ -112,7 +112,7 @@
                                                     </div>
                                                     <div class="col-md-3">
                                                         <label>Transfer Invoice Number</label>
-                                                        <input class="form-control"  name="transfer_number" value="{{ old('transfer_number', $transfer->transfer_number) }}"/>
+                                                        <input class="form-control" id="transfer_number"  name="transfer_number" value="{{ old('transfer_number', $transfer->transfer_number) }}"/>
                                                         @if ($errors->has('date_created'))
                                                             <label for="name-error" class="error"
                                                                    style="display: inline-block;">{{ $errors->first('date_created') }}</label>
@@ -307,7 +307,11 @@
             if($('#appender tr').length === 0){
                 alert("Please add at least one item to to continue");
                 return false;
-            }else{
+            }else if($('#transfer_number').val() === ""){
+                alert("Please add transfer invoice number");
+                return false;
+            }
+            else{
                 $('#save_and_create').attr('disabled','disabled')
             }
 
