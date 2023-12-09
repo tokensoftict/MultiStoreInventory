@@ -3,8 +3,8 @@
 return [
 
     'inventory' => [
-        'BUNDLE / PACKED' => 'NORMAL',
-        'YARD /PIECES'=> 'PACKED',
+        'PACKED' => 'NORMAL',
+        'YARD'=> 'PACKED',
     ],
 
     'hotel' => [

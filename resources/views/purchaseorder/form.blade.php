@@ -23,17 +23,17 @@
 
                                 <div class="col-sm-2">
                                     <label>Recent Cost Price</label>
-                                    <input  style="background-color: #FFF;color: #000" type="number" class="form-control" id="cost_price"/>
+                                    <input  style="background-color: #FFF;color: #000" type="number" placeholder="Recent Cost Price" class="form-control" id="cost_price"/>
                                 </div>
 
                                 <div class="col-sm-2">
                                     <label>Selling Price</label>
-                                    <input  style="background-color: #FFF;color: #000" type="number" class="form-control" id="selling_price"/>
+                                    <input  style="background-color: #FFF;color: #000" type="number" placeholder="Selling Price" class="form-control" id="selling_price"/>
                                 </div>
 
                                 <div class="col-sm-2">
                                     <label style="white-space: nowrap;">Quantity</label>
-                                    <input type="number" class="form-control" id="qty"/>
+                                    <input type="number" placeholder="Quantity" class="form-control" id="qty"/>
                                 </div>
 
                                 <div class="col-sm-2">
@@ -41,6 +41,7 @@
                                 </div>
                             </div>
                             <br/>
+                            <hr/>
                         </form>
                     </div>
                     <div class="panel-body">
@@ -53,7 +54,7 @@
                                         {{ csrf_field() }}
                                         <div class="panel-body">
                                             <div class="row">
-                                                <div class="col-md-3 col-lg-offset-3">
+                                                <div class="col-md-3">
                                                     <label>Select Supplier</label>
                                                     <select required id="supplier" name="supplier_id" class="form-control select2">
                                                         <option value="">-Select One-</option>
@@ -86,7 +87,16 @@
                                                                style="display: inline-block;">{{ $errors->first('date_created') }}</label>
                                                     @endif
                                                 </div>
+                                                <div class="col-md-3">
+                                                    <label>Purchase Invoice Number</label>
+                                                    <input required id="purchase_order_invoice_number" value="{{ old('purchase_order_invoice_number', $porder->purchase_order_invoice_number) }}" placeholder="Purchase Invoice Number" class="form-control" name="purchase_order_invoice_number"/>
+                                                    @if ($errors->has('date_created'))
+                                                        <label for="name-error" class="error"
+                                                               style="display: inline-block;">{{ $errors->first('date_created') }}</label>
+                                                    @endif
+                                                </div>
                                             </div>
+                                            <input type="hidden" value="{{ $type }}" name="type">
                                             <br/>
                                             <div class="table-responsive">
                                                 <table class="table table-striped table-striped table-bordered">
@@ -230,7 +240,18 @@
 
         function checkform(){
             if($('#appender tr').length === 0){
-                alert("Please add atleast one item to to continue");
+                alert("Please add at least one item to to continue");
+                return false;
+            }
+
+            if($('#supplier').val() == ""){
+                alert("Please select a supplier to continue");
+                return false;
+            }
+
+
+            if($('#purchase_order_invoice_number').val() == ""){
+                alert("Please enter Purchase Invoice Number");
                 return false;
             }
 

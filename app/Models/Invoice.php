@@ -686,7 +686,11 @@ class Invoice extends Model
 
         $invoice_paper_number_count = Invoice::where('invoice_paper_number',$invoice_paper_number)->count();
 
-        if ($invoice_paper_number_count > 0) $invoice_paper_number = $invoice_paper_number."-RETURN-".mt_rand();
+        if ($invoice_paper_number_count > 0) {
+            $invoice_paper_number = $invoice_paper_number."-RETURN-".mt_rand();
+        }else{
+            $invoice_paper_number = $invoice_paper_number."-RETURN-".mt_rand();
+        }
 
 
         $invoice_data = [

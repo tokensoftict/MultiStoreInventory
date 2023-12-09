@@ -131,7 +131,7 @@ class InvoiceReportController extends Controller
 
         $data['title'] = "Sales Analysis";
         $data['invoices'] = $lists;
-        return setPageContent('invoicereport.sales_analysis',$data);
+        return view('invoicereport.sales_analysis',$data);
 
     }
 
@@ -144,10 +144,10 @@ class InvoiceReportController extends Controller
             $data['from'] = date('Y-m-01');
             $data['to'] = date('Y-m-t');
         }
-        $lists = ReturnLog::whereBetween('date_added',[$data['from'],$data['to']])->get();
-        $data['title'] = "Return Logs Report";
+        $lists = ReturnLog::whereBetween('date_added',[$data['from'],$data['to']])->where('warehousestore_id', getActiveStore()->id)->get();
+        $data['title'] = "Sales Returns Report";
         $data['logs'] = $lists;
-        return setPageContent('invoicereport.return_logs',$data);
+        return view('invoicereport.return_logs',$data);
     }
 
 
@@ -164,7 +164,7 @@ class InvoiceReportController extends Controller
         PDF::loadView("pdf.full_invoice_report",$data)->save(public_path('pdf/report.pdf'));
 
         $data['title'] = "Complete Invoice Report";
-        return setPageContent('invoicereport.full_invoice_report',$data);
+        return view('invoicereport.full_invoice_report',$data);
     }
 
 

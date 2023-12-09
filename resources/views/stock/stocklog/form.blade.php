@@ -32,9 +32,11 @@
                                 <th>Date</th>
                                 <th>Product Type</th>
                                 <th>Usage Type</th>
-                                <th>Department</th>
+                                <th>Store</th>
                                 <th>Selling Price</th>
+                                <th>Total Selling</th>
                                 <th>Cost Price</th>
+                                <th>Total Cost</th>
                                 <th>By</th>
                                 <th>Action</th>
                             </tr>
@@ -48,9 +50,11 @@
                                     <td>{{ convert_date2($log->log_date) }}</td>
                                     <td>{{ array_search($log->product_type,config('stock_type_name.'.config('app.store'))) }}</td>
                                     <td>{{ $log->stock_log_usages_type->name ?? "" }}</td>
-                                    <td>{{ $log->department }}</td>
+                                    <td>{{ $log->warehousestore->name }}</td>
                                     <td>{{ number_format($log->selling_price,2) }}</td>
+                                    <td>{{ number_format(($log->selling_price * $log->quantity ),2) }}</td>
                                     <td>{{ number_format($log->cost_price,2) }}</td>
+                                    <td>{{ number_format(($log->cost_price * $log->quantity ),2) }}</td>
                                     <td>{{ $log->user->name }}</td>
                                     <td>
                                         @if(userCanView('stocklog.edit',$log->id))
@@ -65,6 +69,25 @@
 
                             @endforelse
                             </tbody>
+                            <tfoot>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th>Total</th>
+                            <th>{{ number_format($logs->sum(function($log){
+                                        return $log->selling_price * $log->quantity;
+                                    }),2)  }}</th>
+                            <th></th>
+                            <th>{{ number_format($logs->sum(function($log){
+                                        return $log->cost_price * $log->quantity;
+                                    }),2)  }}</th>
+                            <th></th>
+                            <th></th>
+                            </tfoot>
                         </table>
                     </div>
                 </section>

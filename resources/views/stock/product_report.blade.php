@@ -93,12 +93,16 @@
                                     <thead>
                                     <tr>
                                         <th>#</th>
+                                        <th>Transfer Number</th>
+                                        <th>Stock</th>
                                         <th>From</th>
                                         <th>To</th>
                                         <th>Status</th>
                                         <th>Date</th>
                                         <th>Product Type</th>
-                                        <th>Total Cost Price</th>
+                                        <th>Selling Price</th>
+                                        <th>Quantity</th>
+                                        <th>Total Selling Price</th>
                                         <th>By</th>
                                     </tr>
                                     </thead>
@@ -106,17 +110,39 @@
                                     @forelse($transfers as $transfer)
                                         <tr>
                                             <td>{{ $loop->iteration }}</td>
+                                            <td>{{ $transfer->stock_transfer->transfer_number }}</td>
+                                            <td>{{ $transfer->stock->name }}</td>
                                             <td>{{ $transfer->store_from->name }}</td>
                                             <td>{{ $transfer->store_to->name }}</td>
                                             <td>{!! $transfer->stock_transfer->status == "COMPLETE" ? label( $transfer->stock_transfer->status,'success') : label( $transfer->status,'primary') !!}</td>
-                                            <td>{{ convert_date($transfer->transfer_date) }}</td>
-                                            <td>{{ $transfer->product_type }}</td>
-                                            <td>{{ number_format($transfer->total_price,2) }}</td>
+                                            <td>{{ convert_date2($transfer->transfer_date) }}</td>
+                                            <td>{{ array_flip(config('stock_type_name.'.config('app.store')))[$transfer->product_type] }}</td>
+                                            <td>{{ number_format($transfer->selling_price,2) }}</td>
+                                            <td>{{ $transfer->quantity }}</td>
+                                            <td>{{ number_format(($transfer->selling_price * $transfer->quantity),2) }}</td>
                                             <td>{{ $transfer->user->name }}</td>
                                         </tr>
                                     @empty
                                     @endforelse
                                     </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th>Total</th>
+                                            <th>{{ number_format($transfers->sum('selling_price'),2) }}</th>
+                                            <th>{{ $transfers->sum('quantity') }}</th>
+                                            <th>{{ number_format($transfers->sum(function($transfer){
+                                                        return $transfer->selling_price * $transfer->quantity;
+                                                }),2) }}</th>
+                                            <th></th>
+                                        </tr>
+                                    </tfoot>
                                 </table>
                             </div>
                         </div>
@@ -180,7 +206,7 @@
                                     <tbody>
                                     @foreach($purchases as $item)
                                         <tr>
-                                            <td>{{ $item->purchase_order->supplier->name }}</td>
+                                            <td>{{ $item->purchase_order->supplier->name ?? "" }}</td>
                                             <td>{{ convert_date2($item->purchase_order->date_created) }}</td>
                                             <td>{!! $item->purchase_order->status == "DRAFT" ? label('DRAFT','primary') :   label('COMPLETE','success') !!}</td>
                                             <td class="text-center">{{ $item->qty }}</td>

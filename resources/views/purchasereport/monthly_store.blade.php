@@ -17,23 +17,30 @@
                 <section class="panel">
                     <header class="panel-heading">
                         {{ $title }}
-                        <form action=""  class="tools pull-right" style="margin-right: 80px" method="post">
+                        <form action=""  class="tools pull-right"  method="post">
                             {{ csrf_field() }}
                             <div class="row">
-                                <div class="col-sm-3">
+                                <div class="col-sm-2">
                                     <label>From</label>
                                     <input type="text" class="form-control datepicker js-datepicker" data-min-view="2" data-date-format="yyyy-mm-dd" style="background-color: #FFF; color: #000;"  value="{{ $from }}" name="from" placeholder="From"/>
                                 </div>
-                                <div class="col-sm-3">
+                                <div class="col-sm-2">
                                     <label>To</label>
                                     <input type="text" class="form-control datepicker js-datepicker" data-min-view="2" data-date-format="yyyy-mm-dd" style="background-color: #FFF; color: #000;"  value="{{ $to }}" name="to" placeholder="TO"/>
                                 </div>
-                                <div class="col-sm-3">
+                                <div class="col-sm-2">
                                     <label>Select Store</label>
                                     <select class="form-control" name="warehousestore_id">
                                         @foreach($stores as $store)
                                             <option value="{{ $store['id'] }}" {{ $store['id'] == $warehousestore_id ? 'selected' : '' }}>{{ $store['name'] }}</option>
                                         @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-sm-3">
+                                    <label>Select Type</label>
+                                    <select class="form-control" name="type">
+                                        <option value="PURCHASE" {{ $type == "PURCHASE" ? 'selected' : "" }}>PURCHASE</option>
+                                        <option value="RETURN" {{ $type == "RETURN" ? 'selected' : "" }}>RETURNS</option>
                                     </select>
                                 </div>
                                 <div class="col-sm-2"><br/>

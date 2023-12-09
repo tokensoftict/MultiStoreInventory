@@ -49,6 +49,7 @@
                                     <thead>
                                     <tr>
                                         <th class="text-left">Name</th>
+                                        <th class="text-center">Product Type</th>
                                         <th class="text-center">Selling Price</th>
                                         <th class="text-center">Quantity</th>
                                         <th class="text-right">Total Selling Price</th>
@@ -65,14 +66,16 @@
                                         @endphp
                                         <tr>
                                             <td class="text-left">{{ $trans->stock->name }}</td>
-                                            <td class="text-center">{{ number_format($trans->cost_price,2) }}</td>
+                                            <td>{{ array_flip(config('stock_type_name.'.config('app.store')))[$trans->product_type] }}</td>
+                                            <td class="text-center">{{ number_format($trans->selling_price,2) }}</td>
                                             <td class="text-center">{{ $trans->quantity }}</td>
-                                            <td class="text-right">{{ number_format(($trans->quantity * $trans->cost_price),2) }}</td>
+                                            <td class="text-right">{{ number_format(($trans->quantity * $trans->selling_price),2) }}</td>
                                         </tr>
                                     @endforeach
                                     </tbody>
                                     <tfoot>
                                     <tr>
+                                        <td></td>
                                         <td></td>
                                         <td></td>
                                         <th class="text-right">Total</th>

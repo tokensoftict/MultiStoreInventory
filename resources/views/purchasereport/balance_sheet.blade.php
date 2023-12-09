@@ -28,7 +28,7 @@
                                 <input type="text" class="form-control datepicker js-datepicker" data-min-view="2" data-date-format="yyyy-mm-dd" style="background-color: #FFF; color: #000;"  value="{{ $to }}" name="to" placeholder="TO"/>
                             </div>
                             <div class="col-sm-3">
-                                <label>Select Customer</label>
+                                <label>Select Supplier</label>
                                 <select class="form-control" name="customer_id">
                                     @foreach($customers as $customer)
                                         <option {{ $customer_id == $customer->id ? "selected" : "" }} value="{{ $customer->id }}">{{ $customer->name }}</option>

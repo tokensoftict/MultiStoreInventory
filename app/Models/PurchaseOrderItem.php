@@ -20,6 +20,8 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property Carbon|null $expiry_date
  * @property string|null $store
  * @property int $qty
+ * @property string $purchase_order_invoice_number
+ * @property string $type
  * @property float|null $cost_price
  * @property float|null $selling_price
  * @property int|null $added_by
@@ -61,7 +63,9 @@ class PurchaseOrderItem extends Model
 		'qty',
 		'cost_price',
         'selling_price',
-		'added_by'
+		'added_by',
+        'type',
+        'purchase_order_invoice_number'
 	];
 
 	public function user()

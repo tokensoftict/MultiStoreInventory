@@ -151,8 +151,10 @@ class AjaxController extends Controller
                     'available_yard_quantity' => $stock->stock->getCustomYardStockQuantity($request->store),
                     'text' => $stock->stock->name,
                     "id" => $stock->stock->id,
-                    'cost_price' => getStockActualCostPrice($stock->stock, $request->type),
-                    'selling_price' => getStockActualSellingPrice($stock->stock, $request->type)
+                    'cost_price' => getStockActualCostPrice($stock->stock, 'NORMAL'),
+                    'selling_price' => getStockActualSellingPrice($stock->stock, 'NORMAL'),
+                    'yard_cost_price' => getStockActualCostPrice($stock->stock, 'PACKED'),
+                    'yard_selling_price' => getStockActualSellingPrice($stock->stock, 'PACKED'),
                 ];
             }else{
                 $result[] = [

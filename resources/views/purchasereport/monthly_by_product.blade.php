@@ -4,9 +4,10 @@
     <link rel="stylesheet" href="{{ asset('bower_components/select2/dist/css/select2.min.css') }}">
     <link rel="stylesheet" href="{{ asset('bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css') }}">
 
-        <link rel="stylesheet" href="{{ asset('table/datatables.css') }}">
+    <link rel="stylesheet" href="{{ asset('table/datatables.css') }}">
 
 @endpush
+
 @section('content')
     <div class="ui-container">
         <div class="row">
@@ -14,98 +15,79 @@
                 <section class="panel">
                     <header class="panel-heading">
                         {{ $title }}
-
-                        <form action=""  class="tools pull-right" style="margin-right: 80px" method="post">
+                        <form action=""  class="tools pull-right"  method="post">
                             {{ csrf_field() }}
                             <div class="row">
-                                <div class="col-sm-3">
+                                <div class="col-sm-2">
                                     <label>From</label>
                                     <input type="text" class="form-control datepicker js-datepicker" data-min-view="2" data-date-format="yyyy-mm-dd" style="background-color: #FFF; color: #000;"  value="{{ $from }}" name="from" placeholder="From"/>
                                 </div>
-                                <div class="col-sm-3">
+                                <div class="col-sm-2">
                                     <label>To</label>
                                     <input type="text" class="form-control datepicker js-datepicker" data-min-view="2" data-date-format="yyyy-mm-dd" style="background-color: #FFF; color: #000;"  value="{{ $to }}" name="to" placeholder="TO"/>
                                 </div>
                                 <div class="col-sm-3">
-                                    <label>Search Product</label>
-                                    <select id="products" class="form-control" name="product">
-                                       <option selected value="{{ $product }}">{{ $product_name }}</option>
+                                    <label>Select Type</label>
+                                    <select class="form-control" name="type">
+                                        <option value="PURCHASE" {{ $type == "PURCHASE" ? 'selected' : "" }}>PURCHASE</option>
+                                        <option value="RETURN" {{ $type == "RETURN" ? 'selected' : "" }}>RETURNS</option>
                                     </select>
                                 </div>
-                                <div class="col-sm-3"><br/>
+                                <div class="col-sm-3">
+                                    <label>Search Product</label>
+                                    <select id="products" class="form-control" name="product">
+                                        <option selected value="{{ $product }}">{{ $product_name }}</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-1"><br/>
                                     <button type="submit" style="margin-top: 5px;" class="btn btn-primary">Submit</button>
                                 </div>
                             </div>
                         </form>
-
                     </header>
                     <div class="panel-body">
-                        @if(session('success'))
-                            {!! alert_success(session('success')) !!}
-                        @elseif(session('error'))
-                            {!! alert_error(session('error')) !!}
-                        @endif
+                        <br/>  <br/><br/>
                         <table class="table table-bordered table-responsive table convert-data-table table-striped" id="invoice-list" style="font-size: 12px">
                             <thead>
                             <tr>
                                 <th>#</th>
-                                <th>Invoice/Receipt No</th>
-                                <th>Customer</th>
+                                <th>Purchase Invoice Number</th>
+                                <th>Supplier</th>
                                 <th>Stock</th>
-                                <th>Qty Sold / Returns</th>
-                                <th>Total Cost Price</th>
+                                <th>Qty Purchase / Returns</th>
                                 <th>Total Selling Price</th>
-                                <th>Profit</th>
-                                <th>Status</th>
+                                <th>Total Cost Price</th>
                                 <th>Date</th>
-                                <th>Time</th>
                                 <th>By</th>
                                 <th>Action</th>
                             </tr>
                             </thead>
                             <tbody>
-                            @php
-                                $total_cost =0;
-                                $total_selling =0;
-                                $total_profit =0;
-                                $total_qty = 0;
-                            @endphp
-                            @foreach($invoices as $invoice)
-                                @php
-                                    $total_cost+=($invoice->quantity * $invoice->cost_price);
-                                    $total_selling+=($invoice->quantity * $invoice->selling_price);
-                                    $total_profit += (($invoice->quantity * $invoice->selling_price)-($invoice->quantity * $invoice->cost_price));
-                                    $total_qty+=$invoice->quantity;
-                                @endphp
+                            @foreach($datas as $data)
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
-                                    <td>{{ $invoice->invoice->invoice_paper_number }}</td>
-                                    <td>{{ $invoice->customer->firstname }} {{ $invoice->customer->lastname }}</td>
-                                    <td>{{ $invoice->stock->name }}</td>
-                                    <td>{{ $invoice->quantity }}</td>
-                                    <td>{{ number_format(($invoice->quantity * $invoice->cost_price),2) }}</td>
-                                    <td>{{ number_format(($invoice->quantity * $invoice->selling_price),2) }}</td>
-                                    <td>{{ number_format((($invoice->quantity * $invoice->selling_price)-($invoice->quantity * $invoice->cost_price)),2) }}</td>
-                                    <td>{!! invoice_status($invoice->status) !!}</td>
-                                    <td>{{ convert_date2($invoice->invoice->invoice_date) }}</td>
-                                    <td>{{ $invoice->invoice->sales_time }}</td>
-                                    <td>{{ $invoice->invoice->created_user->name }}</td>
+                                    <td>{{ $data->purchase_order->purchase_order_invoice_number }}</td>
+                                    <td>{{ $data->purchase_order->supplier->name }}</td>
+                                    <td>{{ $data->stock->name }}</td>
+                                    <td>{{ $data->qty }}</td>
+                                    <td>{{ number_format(($data->cost_price * $data->qty),2) }}</td>
+                                    <td>{{ number_format(($data->selling_price * $data->qty),2) }}</td>
+                                    <td>{{ convert_date2($data->purchase_order->date_created) }}</td>
+                                    <td>{{ $data->user->name }}</td>
                                     <td>
                                         <div class="btn-group">
                                             <button data-toggle="dropdown" class="btn btn-success dropdown-toggle btn-xs" type="button" aria-expanded="false">Action <span class="caret"></span></button>
                                             <ul role="menu" class="dropdown-menu">
-                                                @if(userCanView('invoiceandsales.view'))
-                                                    <li><a href="{{ route('invoiceandsales.view',$invoice->invoice->id) }}">View Invoice</a></li>
+                                                @if(userCanView('purchaseorders.show'))
+                                                    <li><a href="{{ route('purchaseorders.show',$data->purchase_order->id) }}">View Purchase Order</a></li>
                                                 @endif
-                                                @if(userCanView('invoiceandsales.pos_print') && $invoice->sub_total > -1)
-                                                    <li><a href="{{ route('invoiceandsales.pos_print',$invoice->invoice->id) }}">Print Invoice Pos</a></li>
+                                                @if(userCanView('purchaseorders.edit') && $data->purchase_order->status == "DRAFT")
+                                                    <li><a href="{{ route('purchaseorders.edit',$data->purchase_order->id) }}">Edit Purchase Order</a></li>
                                                 @endif
-                                                @if(userCanView('invoiceandsales.print_afour') && $invoice->sub_total > -1)
-                                                    <li><a href="{{ route('invoiceandsales.print_afour',$invoice->invoice->id) }}">Print Invoice A4</a></li>
+                                                @if(userCanView('purchaseorders.markAsComplete') && $data->purchase_order->status == "DRAFT")
+                                                    <li><a href="{{ route('purchaseorders.markAsComplete',$data->purchase_order->id) }}">Complete Purchase Order</a></li>
                                                 @endif
-                                                @if(userCanView('invoiceandsales.print_way_bill') && $invoice->sub_total > -1)
-                                                    <li><a href="{{ route('invoiceandsales.print_way_bill',$invoice->invoice->id) }}">Print Waybill</a></li>
-                                                @endif
+
                                             </ul>
                                         </div>
                                     </td>
@@ -113,21 +95,22 @@
                             @endforeach
                             </tbody>
                             <tfoot>
-                            <tr>
-                                <th></th>
-                                <th></th>
-                                <th></th>
-                                <th></th>
-                                <th>{{ number_format($total_qty,0) }}</th>
-                                <th>{{ number_format($total_cost,2) }}</th>
-                                <th>{{ number_format($total_selling,2) }}</th>
-                                <th>{{ number_format($total_profit,2) }}</th>
-                                <th></th>
-                                <th></th>
-                                <th></th>
-                                <th></th>
-                                <th></th>
-                            </tr>
+                                    <tr>
+                                        <th></th>
+                                        <th></th>
+                                        <th></th>
+                                        <th>Total</th>
+                                        <th>{{ $datas->sum('qty') }}</th>
+                                        <th>{{ number_format($datas->sum(function($data){
+                                                return ($data->selling_price * $data->qty);
+                                            }),2) }}</th>
+                                        <th>{{ number_format($datas->sum(function($data){
+                                                return ($data->cost_price * $data->qty);
+                                            }),2) }}</th>
+                                        <th></th>
+                                        <th></th>
+                                        <th></th>
+                                    </tr>
                             </tfoot>
                         </table>
                     </div>
@@ -135,8 +118,6 @@
             </div>
         </div>
     </div>
-
-
 @endsection
 
 

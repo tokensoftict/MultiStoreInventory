@@ -67,6 +67,19 @@
                                     </tr>
                                @endforeach
                             </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th>{{ number_format($logs->sum('quantity_before')) }}</th>
+                                    <th></th>
+                                    <th></th>
+                                    <th>{{ number_format($logs->sum('selling_price'),2) }}</th>
+                                    <th></th>
+                                </tr>
+                            </tfoot>
                         </table>
                     </div>
                 </section>

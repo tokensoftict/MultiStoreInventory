@@ -515,7 +515,7 @@ function convert_date_with_time($date){
 }
 
 function convert_date2($date){
-    return date('Y/m/d', strtotime($date));
+    return date('d/m/Y', strtotime($date));
 }
 
 

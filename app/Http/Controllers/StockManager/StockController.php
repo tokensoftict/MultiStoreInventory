@@ -202,7 +202,7 @@ class StockController extends Controller
         $data['title2'] = "Today's Stock Log";
         $data['stores'] = Warehousestore::all();
         $data['usages'] = StockLogUsagesType::where('status', 1)->get();
-        $data['logs'] = StockLogItem::with(['user','stock','operation','warehousestore', 'stock_log_usages_type'])->where('log_date',dailyDate())->orderBy('log_date','DESC')->get();
+        $data['logs'] = StockLogItem::with(['user','stock','operation','warehousestore', 'stock_log_usages_type'])->where('log_date',dailyDate())->where('warehousestore_id', getActiveStore()->id)->orderBy('log_date','DESC')->get();
         return view("stock.stocklog.form",$data);
     }
 

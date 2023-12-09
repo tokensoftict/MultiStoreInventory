@@ -53,6 +53,10 @@
     </style>
 </head>
 <body>
+@php
+$total = 0;
+$totalSalesCount =0;
+@endphp
 @foreach($invoices as $invoice)
     <table width="100%">
         <tr>
@@ -99,6 +103,9 @@
             </thead>
             <tbody>
             @foreach($invoice->invoice_items as $item)
+                @php
+                    $total+=$item->total_selling_price;
+                @endphp
                 <tr>
                     <td>{{ $loop->iteration }}</td>
                     <td align="left" class="text-left">{{ $item->stock->name }}</td>
@@ -128,6 +135,27 @@
     </div>
     <hr/>
 @endforeach
+
+<table width="100%">
+    <tr>
+        <td valign="top" width="50%"></td>
+        <td valign="top" width="50%">
+            <table  width="100%">
+                <tr>
+                    <th>TOTAl SALES COUNT</th>
+                    <th>{{ number_format($invoices->count(), 0) }}</th>
+                </tr>
+                <tr>
+                    <th>GRAND TOTAL</th>
+                    <th>{{ number_format($total, 2) }}</th>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
+
+
 </body>
 </html>
 

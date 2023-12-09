@@ -14,25 +14,16 @@ class PaymentReportController extends Controller
 
     public function daily_payment_reports(Request $request)
     {
-        if($request->get('date')){
-            $data['date'] = $request->get('date');
-        }else{
-            $data['date'] = dailyDate();
-        }
+        $data['date'] = $request->get('from', dailyDate());
         $data['title'] = "Daily Payment Report";
         $data['payments'] = Payment::with(['warehousestore','customer','user','payment_method_tables','invoice'])->where('warehousestore_id',getActiveStore()->id)->where('payment_date', $data['date'])->orderBy('id','DESC')->get();
-        return setPageContent('paymentreport.daily_payment_reports',$data);
+        return view('paymentreport.daily_payment_reports',$data);
     }
 
     public function monthly_payment_reports(Request $request)
     {
-        if($request->get('from') && $request->get('to')){
-            $data['from'] = $request->get('from');
-            $data['to'] = $request->get('to');
-        }else{
-            $data['from'] = date('Y-m-01');
-            $data['to'] = date('Y-m-t');
-        }
+        $data['from'] = $request->get('from', date('Y-m-01'));
+        $data['to'] = $request->get('to', date('Y-m-t'));
 
         $data['title'] = "Monthly Payment Report";
 
@@ -42,15 +33,11 @@ class PaymentReportController extends Controller
 
     public function monthly_payment_report_by_method(Request $request)
     {
-        if($request->get('from') && $request->get('to')){
-            $data['from'] = $request->get('from');
-            $data['to'] = $request->get('to');
-            $data['payment_method'] = $request->get('payment_method');
-        }else{
-            $data['from'] = date('Y-m-01');
-            $data['to'] = date('Y-m-t');
-            $data['payment_method'] = 1;
-        }
+        $data['from'] = $request->get('from', date('Y-m-01'));
+        $data['to'] = $request->get('to', date('Y-m-t'));
+
+        $data['payment_method'] = $request->get('payment_method', 1);
+
         $data['payments'] = PaymentMethodTable::with(['warehousestore','payment','customer','user','payment_method','invoice'])->where('payment_method_id', $data['payment_method'])->where('warehousestore_id',getActiveStore()->id)->whereBetween('payment_date', [$data['from'],$data['to']])->orderBy('id','DESC')->get();
         $data['title'] = "Monthly Payment Report By Payment Method";
         $data['pmthods'] = PaymentMethod::all();
@@ -59,31 +46,25 @@ class PaymentReportController extends Controller
 
     public function payment_analysis(Request $request)
     {
-        if($request->get('date')){
-            $data['date'] = $request->get('date');
-        }else{
-            $data['date'] = dailyDate();
-        }
+
+        $data['date'] = $request->get('from', dailyDate());
+
         $data['title'] = "Payment Analysis";
 
         $data['payment_methods'] = PaymentMethod::all();
 
-        return setPageContent('paymentreport.payment_analysis',$data);
+        return view('paymentreport.payment_analysis',$data);
     }
 
 
     public function income_analysis(Request $request)
     {
-        if($request->get('from') && $request->get('to')){
-            $data['from'] = $request->get('from');
-            $data['to'] = $request->get('to');
-            $data['department'] = $request->get('department');
-        }else{
-            $data['from'] = date('Y-m-01');
-            $data['to'] = date('Y-m-t');
-        }
 
-        $data['expenses'] = Expense::with(['expenses_type','user'])->whereBetween('expense_date',[ $data['from'], $data['to']])->get();
+        $data['from'] = $request->get('from', date('Y-m-01'));
+        $data['to'] = $request->get('to', date('Y-m-t'));
+
+
+        $data['expenses'] = Expense::with(['expenses_type','user'])->where('warehousestore_id', getActiveStore()->id)->whereBetween('expense_date',[ $data['from'], $data['to']])->orderBy('id','DESC')->get();
         $data['payments'] = PaymentMethodTable::with(['warehousestore','payment','customer','user','payment_method','invoice'])->where('warehousestore_id',getActiveStore()->id)->whereBetween('payment_date', [$data['from'],$data['to']])->orderBy('id','DESC')->get();
 
         $data['title'] = "Income Analysis";

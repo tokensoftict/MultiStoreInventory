@@ -69,7 +69,7 @@
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $payment->customer->firstname }} {{ $payment->customer->lastname }}</td>
                                         <td>{{ $payment->invoice->invoice_paper_number }}</td>
-                                        <td>{{ number_format($payment->amount,2) }}</td>
+                                        <td>{{ number_format($payment->invoice->sub_total,2) }}</td>
                                         <td>{{ number_format($payment->amount,2) }}</td>
                                     </tr>
 
@@ -81,9 +81,9 @@
                                 <tr>
                                     <th></th>
                                     <th></th>
+                                    <th></th>
                                     <th>Total</th>
                                     <th>{{ number_format($total_,2) }}</th>
-                                    <th></th>
                                 </tr>
                                 </tfoot>
                             </table>

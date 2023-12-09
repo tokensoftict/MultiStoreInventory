@@ -291,9 +291,11 @@
         function bindAllTr(){
             $('#appender').find('tr').off('click');
             $('#appender').find('tr').on('click',function(){
-                $('.picture').prop('checked',false);
-                $(this).find('.picture').prop('checked', true);
-                $('#imageThumb').attr('src',$(this).find('.picture').attr('data-image'));
+                if($('#imageThumb').attr('src') !== $(this).find('.picture').attr('data-image')) {
+                    $('.picture').prop('checked', false);
+                    $(this).find('.picture').prop('checked', true);
+                    $('#imageThumb').attr('src', $(this).find('.picture').attr('data-image'));
+                }
             });
         }
 
@@ -348,7 +350,7 @@
                 if (!isNaN(currentVal)) {
                     if(type == 'minus') {
 
-                        if(currentVal > input.attr('min')) {
+                        if(currentVal > 1) {
                             input.val(currentVal - 1).change();
                         }
                         /*
@@ -361,9 +363,7 @@
                         */
 
                     } else if(type == 'plus') {
-                        if(currentVal < input.attr('max')) {
-                            input.val(currentVal + 1).change();
-                        }
+                        input.val(currentVal + 1).change();
                     /*
 
                         if(parseInt(input.val()) == input.attr('max')) {
@@ -471,12 +471,12 @@
             if(data.stock.type != "Normal"){
                 type_select += '<select class="form-control product_type">';
 
-                if(parseInt(data.stock.available_quantity) > 0) {
+                //if(parseInt(data.stock.available_quantity) > 0) {
                     type_select += '<option selected value="{{ getActiveStore()->packed_column }}" data-price="'+data.stock.selling_price+'" data-av-qty="'+data.stock.available_quantity+'">Packed</option>';
-                }
-                if(parseInt(data.stock.available_yard_quantity) > 0) {
+                //}
+                //if(parseInt(data.stock.available_yard_quantity) > 0) {
                     type_select += '<option value="{{ getActiveStore()->yard_column }}" data-price="'+data.stock.yard_selling_price+'" data-av-qty="'+data.stock.available_yard_quantity+'">Pieces / Yards</option>';
-                }
+                //}
 
                     type_select +='</select>';
             }else{
@@ -485,12 +485,12 @@
                 type_select +='</select>';
             }
 
-            if(data.stock.available_quantity == 0 && data.stock.available_yard_quantity >0){
+            //if(data.stock.available_quantity == 0 && data.stock.available_yard_quantity >0){
                 data.stock.available_quantity = data.stock.available_yard_quantity;
                 data.stock.selling_price = data.stock.yard_selling_price
-            }
+           // }
 
-            return '<tr style="cursor: pointer" id="product_'+data.stock.id+'"><th  class="text-center"><input data-image="'+data.stock.image+'" name="picture" class="picture" value="1" type="radio"></th><th>'+data.stock.name+'<div id="error_'+data.stock.id+'" class="errors alert alert-danger" '+(data['error'] ? '' : 'style="display:none;"')+'>'+(data['error'] ? data['error'] : '')+'</div>'+'</th><td><div class="col-md-4"><div class="input-group"> <span class="input-group-btn input-group-sm"> <button  data-field="quant[1]" type="button" class="btn btn-danger btn-number minus" data-type="minus"> <i class="fa fa-minus"></i></button></span><input class="form-control text-center input-number"  data-id="'+data.stock.id+'" data-price="'+data.stock.selling_price+'" style="width:100px;display: block;" required="" max="'+data.stock.available_quantity+'" min="1" type="number" value="1"> <span class="input-group-btn"> <button type="button" class="btn btn-primary btn-number plus" data-type="plus"><i class="fa fa-plus"></i> </button> </span></div></div><td>'+type_select+'</td><th class="text-right item_price"><input type="text" step="0.00000001" class="item_text_price form-control" value="'+data.stock.selling_price+'"/></th><th class="text-right item_total">'+formatMoney(data.stock.selling_price)+'</th><td class="text-right"> <a href="#" onclick="return removeItem(this);" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i></a></td></tr>';
+            return '<tr style="cursor: pointer" id="product_'+data.stock.id+'"><th  class="text-center"><input data-image="'+data.stock.image+'" name="picture" class="picture" value="1" type="radio"></th><th>'+data.stock.name+'<div id="error_'+data.stock.id+'" class="errors alert alert-danger" '+(data['error'] ? '' : 'style="display:none;"')+'>'+(data['error'] ? data['error'] : '')+'</div>'+'</th><td><div class="col-md-4"><div class="input-group"> <span class="input-group-btn input-group-sm"> <button  data-field="quant[1]" type="button" class="btn btn-danger btn-number minus" data-type="minus"> <i class="fa fa-minus"></i></button></span><input class="form-control text-center input-number"  data-id="'+data.stock.id+'" data-price="'+data.stock.selling_price+'" style="width:100px;display: block;" required=""  type="number" value="1"> <span class="input-group-btn"> <button type="button" class="btn btn-primary btn-number plus" data-type="plus"><i class="fa fa-plus"></i> </button> </span></div></div><td>'+type_select+'</td><th class="text-right item_price"><input type="text" step="0.00000001" class="item_text_price form-control" value="'+data.stock.selling_price+'"/></th><th class="text-right item_total">'+formatMoney(data.stock.selling_price)+'</th><td class="text-right"> <a href="#" onclick="return removeItem(this);" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i></a></td></tr>';
         }
 
         function ProcessInvoice(btn){

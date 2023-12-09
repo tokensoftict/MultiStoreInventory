@@ -29,7 +29,13 @@ class PurchaseOrder extends Controller
 
     public function index(){
         $data['title'] = "List Today's Purchase Orders";
-        $data['purchase_orders'] = Po::with(['supplier','purchase_order_items','user','created_user'])->where('date_created',date('Y-m-d'))->orderBy('id','DESC')->get();
+        $data['purchase_orders'] = Po::with(['supplier','purchase_order_items','user','created_user'])->where('type', 'PURCHASE')->where('date_created',date('Y-m-d'))->orderBy('id','DESC')->get();
+        return view('purchaseorder.list', $data);
+    }
+
+    public function returns(){
+        $data['title'] = "List Today's Purchase Returns";
+        $data['purchase_orders'] = Po::with(['supplier','purchase_order_items','user','created_user'])->where('type', 'RETURN')->where('date_created',date('Y-m-d'))->orderBy('id','DESC')->get();
         return view('purchaseorder.list', $data);
     }
 
@@ -38,8 +44,19 @@ class PurchaseOrder extends Controller
         $data['title'] = 'New Purchase Order';
         $data['suppliers'] = Supplier::where('status',1)->get();
         $data['porder'] = new Po();
+        $data['type'] = 'PURCHASE';
         $data['stores'] = Warehousestore::all();
-        return setPageContent('purchaseorder.form', $data);
+        return view('purchaseorder.form', $data);
+    }
+
+
+    public function create_returns(){
+        $data['title'] = 'New Purchase Return';
+        $data['suppliers'] = Supplier::where('status',1)->get();
+        $data['porder'] = new Po();
+        $data['type'] = 'RETURN';
+        $data['stores'] = Warehousestore::all();
+        return view('purchaseorder.form', $data);
     }
 
 
@@ -69,16 +86,14 @@ class PurchaseOrder extends Controller
 
 
 
-
-
-
     public function edit($id){
-        $data['title'] = 'Edit Purchase Order';
         $data['porder'] = Po::with(['supplier','purchase_order_items','user','created_user'])->findorfail($id);
         $data['settings'] = $this->settings->store();
         $data['suppliers'] = Supplier::where('status',1)->get();
         $data['stores'] = Warehousestore::all();
-        return setPageContent('purchaseorder.form', $data);
+        $data['type'] = $data['porder']->type;
+        $data['title'] =  $data['porder'] == "PURCHASE" ? 'Edit Purchase Order' : 'Edit Purchase Return';
+        return view('purchaseorder.form', $data);
     }
 
 

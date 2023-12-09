@@ -19,6 +19,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property int $from
  * @property int $to
  * @property string $type
+ * @property string $transfer_number
  * @property string $status
  * @property Carbon $transfer_date
  * @property Carbon|null $created_at
@@ -54,7 +55,8 @@ class StockTransfer extends Model
         'type',
         'status',
         'total_price',
-        'transfer_date'
+        'transfer_date',
+        'transfer_number'
     ];
 
     public function store_to()
@@ -83,13 +85,13 @@ class StockTransfer extends Model
 
         if($this->status == "COMPLETE") return redirect()->route('stocktransfer.index')->with('success','stock transfer was completed successfully');
 
-        $from_store = getActualStore($this->type, $this->from);
-
-        $to_store = getActualStore($this->type, $this->to);
-
         $items = $this->stock_transfer_items()->get();
         foreach ($items as $item)
         {
+            $from_store = getActualStore($item->product_type, $this->from);
+
+            $to_store = getActualStore($item->product_type, $this->to);
+
             $batches =  $item->stock->getSaleableBatches($from_store,$item->quantity);
 
             if($batches == false)
@@ -98,6 +100,10 @@ class StockTransfer extends Model
 
         foreach ($items as $item)
         {
+            $from_store = getActualStore($item->product_type, $this->from);
+
+            $to_store = getActualStore($item->product_type, $this->to);
+
             $batches =  $item->stock->getSaleableBatches($from_store,$item->quantity);
 
             $item->stock->removeSaleableBatches($batches);
@@ -144,27 +150,28 @@ class StockTransfer extends Model
     }
 
     public static function createStockTransfer($request){
+
         $qty = $request->get("qty");
         $stocks = $request->get("stock_id");
+        $type = $request->get('type');
 
         $transfer_item = [];
 
         $total = 0;
 
-        $selected_stocks = Stock::whereIn('id', $stocks)->get();
-
-        foreach ($selected_stocks as $key =>$selected_stock)
+        foreach ($stocks as $key =>$id)
         {
-            $total+=getStockActualCostPrice($selected_stock, $request->type) * $qty[$key];
+            $selected_stock = Stock::findorfail($id);
+            $total+=getStockActualSellingPrice($selected_stock, $type[$key]) * $qty[$key];
             $transfer_item[] = new StockTransferItem(
                 [
                     'stock_id' => $selected_stock->id,
                     'user_id' => auth()->id(),
-                    'product_type' => $request->type,
+                    'product_type' => $type[$key],
                     'from' => $request->from,
                     'to' => $request->to,
-                    'selling_price' => getStockActualSellingPrice($selected_stock, $request->type),
-                    'cost_price' => getStockActualCostPrice($selected_stock, $request->type),
+                    'selling_price' => getStockActualSellingPrice($selected_stock, $type[$key]),
+                    'cost_price' => getStockActualCostPrice($selected_stock, $type[$key]),
                     'quantity' => $qty[$key],
                     'transfer_date' => $request->transfer_date,
                 ]
@@ -176,8 +183,8 @@ class StockTransfer extends Model
             'user_id' => auth()->id(),
             'total_price' => $total,
             'from' =>  $request->from,
-            'type' => $request->type,
             'to' => $request->to,
+            'transfer_number' => $request->transfer_number,
             'transfer_date' => $request->transfer_date,
         ]);
         $transfer->stock_transfer_items() ->saveMany($transfer_item);
@@ -193,28 +200,26 @@ class StockTransfer extends Model
     public static function updateStockTransfer($request, $id){
 
         $transfer = StockTransfer::findorfail($id);
-
         $qty = $request->get("qty");
         $stocks = $request->get("stock_id");
-
+        $type = $request->get('type');
         $transfer_item = [];
 
         $total = 0;
 
-        $selected_stocks = Stock::whereIn('id', $stocks)->get();
-
-        foreach ($selected_stocks as $key =>$selected_stock)
+        foreach ($stocks as $key =>$id)
         {
-            $total+=getStockActualCostPrice($selected_stock, $request->type) * $qty[$key];
+            $selected_stock = Stock::findorfail($id);
+            $total+=getStockActualSellingPrice($selected_stock, $type[$key]) * $qty[$key];
             $transfer_item[] = new StockTransferItem(
                 [
                     'stock_id' => $selected_stock->id,
                     'user_id' => auth()->id(),
-                    'product_type' => $request->type,
+                    'product_type' => $type[$key],
                     'from' => $request->from,
                     'to' => $request->to,
-                    'selling_price' => getStockActualSellingPrice($selected_stock, $request->type),
-                    'cost_price' => getStockActualSellingPrice($selected_stock, $request->type),
+                    'selling_price' => getStockActualSellingPrice($selected_stock, $type[$key]),
+                    'cost_price' => getStockActualCostPrice($selected_stock, $type[$key]),
                     'quantity' => $qty[$key],
                     'transfer_date' => $request->transfer_date,
                 ]
@@ -225,6 +230,7 @@ class StockTransfer extends Model
             'status' => "DRAFT",
             'user_id' => auth()->id(),
             'total_price' => $total,
+            'transfer_number' => $request->transfer_number,
             'transfer_date' => $request->transfer_date,
         ]);
 
@@ -236,75 +242,75 @@ class StockTransfer extends Model
         return redirect()->route('stocktransfer.index')->with('success','stock transfer has ben updated successfully');
     }
 
-/*
-    public static function __createStockTransfer($request)
-    {
-        $from_store = getActualStore($request->product_type, $request->from);
+    /*
+        public static function __createStockTransfer($request)
+        {
+            $from_store = getActualStore($request->product_type, $request->from);
 
-        $to_store = getActualStore($request->product_type, $request->to);
+            $to_store = getActualStore($request->product_type, $request->to);
 
-        $stock = Stock::findorfail($request->stock_id);
+            $stock = Stock::findorfail($request->stock_id);
 
-        $batches =  $stock->getSaleableBatches($from_store,$request->qty);
+            $batches =  $stock->getSaleableBatches($from_store,$request->qty);
 
-        if($request->from == $request->to)
-            return redirect()->route('stocktransfer.add_transfer')->with('error','Sorry, You can transfer stock to the store');
+            if($request->from == $request->to)
+                return redirect()->route('stocktransfer.add_transfer')->with('error','Sorry, You can transfer stock to the store');
 
-        if($batches == false)
-            return redirect()->route('stocktransfer.add_transfer')->with('error','Not enough quantity to transfer, please check available quantity');
+            if($batches == false)
+                return redirect()->route('stocktransfer.add_transfer')->with('error','Not enough quantity to transfer, please check available quantity');
 
-        $transfer = StockTransferBackup::create(
-            [
-                'stock_id' => $stock->id,
-                'user_id' => auth()->id(),
-                'product_type' => $request->product_type,
-                'from' => $request->from,
-                'to' => $request->to,
-                'selling_price' => getStockActualSellingPrice($stock,$request->product_type),
-                'cost_price' => getStockActualCostPrice($stock, $request->product_type),
-                'quantity' => $request->qty,
-                'transfer_date' => $request->date_created,
-            ]
-        );
+            $transfer = StockTransferBackup::create(
+                [
+                    'stock_id' => $stock->id,
+                    'user_id' => auth()->id(),
+                    'product_type' => $request->product_type,
+                    'from' => $request->from,
+                    'to' => $request->to,
+                    'selling_price' => getStockActualSellingPrice($stock,$request->product_type),
+                    'cost_price' => getStockActualCostPrice($stock, $request->product_type),
+                    'quantity' => $request->qty,
+                    'transfer_date' => $request->date_created,
+                ]
+            );
 
-        $stock->removeSaleableBatches($batches);
+            $stock->removeSaleableBatches($batches);
 
-        foreach ($batches as $key => $batch){
-            StockLogOperation::createOperationLog([
-                'stock_id' => $stock->id,
-                'user_id' =>  auth()->id(),
-                'selling_price' => $transfer->selling_price,
-                'cost_price' => $transfer->cost_price,
-                'operation_type' => "App\\Models\\StockTransfer",
-                'operation_id' => $transfer->id,
-                'quantity' => $batch['qty'],
-                'store' => $from_store,
-                'stockbatch_id' => $key,
-                'log_date' =>  $request->date_created
-            ]);
+            foreach ($batches as $key => $batch){
+                StockLogOperation::createOperationLog([
+                    'stock_id' => $stock->id,
+                    'user_id' =>  auth()->id(),
+                    'selling_price' => $transfer->selling_price,
+                    'cost_price' => $transfer->cost_price,
+                    'operation_type' => "App\\Models\\StockTransfer",
+                    'operation_id' => $transfer->id,
+                    'quantity' => $batch['qty'],
+                    'store' => $from_store,
+                    'stockbatch_id' => $key,
+                    'log_date' =>  $request->date_created
+                ]);
+            }
+
+            $stock->addSaleableBatches($batches, $to_store);
+
+            foreach ($batches as $key => $batch){
+                StockLogOperation::createOperationLog([
+                    'stock_id' => $stock->id,
+                    'user_id' =>  auth()->id(),
+                    'selling_price' => $transfer->selling_price,
+                    'cost_price' => $transfer->cost_price,
+                    'operation_type' => "App\\Models\\StockTransfer",
+                    'operation_id' => $transfer->id,
+                    'quantity' => $batch['qty'],
+                    'store' => $to_store,
+                    'stockbatch_id' => $key,
+                    'log_date' =>  $request->date_created
+                ]);
+            }
+
+            return redirect()->route('stocktransfer.add_transfer')->with('success','Stock has been transferred successfully!');
+
         }
 
-        $stock->addSaleableBatches($batches, $to_store);
-
-        foreach ($batches as $key => $batch){
-            StockLogOperation::createOperationLog([
-                'stock_id' => $stock->id,
-                'user_id' =>  auth()->id(),
-                'selling_price' => $transfer->selling_price,
-                'cost_price' => $transfer->cost_price,
-                'operation_type' => "App\\Models\\StockTransfer",
-                'operation_id' => $transfer->id,
-                'quantity' => $batch['qty'],
-                'store' => $to_store,
-                'stockbatch_id' => $key,
-                'log_date' =>  $request->date_created
-            ]);
-        }
-
-        return redirect()->route('stocktransfer.add_transfer')->with('success','Stock has been transferred successfully!');
-
-    }
-
-*/
+    */
 
 }

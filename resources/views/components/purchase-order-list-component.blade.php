@@ -1,9 +1,12 @@
 <div>
+    <br/> <br/>
     <table class="table table-bordered table-responsive table convert-data-table table-striped" style="font-size: 12px">
         <thead>
         <tr>
             <th>#</th>
             <th>Supplier</th>
+            <th>Purchase Invoice Number</th>
+            <th>Type</th>
             <th>Store</th>
             <th>Total Items</th>
             <th>Total Amount</th>
@@ -19,6 +22,8 @@
             <tr>
                 <td>{{ $loop->iteration }}</td>
                 <td>{{ $purchase_order->supplier->name ?? "" }}</td>
+                <td>{{ $purchase_order->purchase_order_invoice_number }}</td>
+                <td>{{ $purchase_order->type }}</td>
                 <td>{{ $purchase_order->warehousestore->name ?? "" }}</td>
                 <td>{{ $purchase_order->purchase_order_items->count() }}</td>
                 <td>{{ number_format($purchase_order->purchase_order_items()->sum(DB::raw('cost_price * qty')),2) }}</td>
@@ -48,6 +53,24 @@
             </tr>
         @endforeach
         </tbody>
+        <tfoot>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th>Total</th>
+            <th>{{
+                 number_format($purchaseorders->sum(function($order){
+                     return $order->purchase_order_items()->sum(DB::raw('cost_price * qty'));
+                 }),2)
+            }}</th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+        </tfoot>
     </table>
 
 </div>
