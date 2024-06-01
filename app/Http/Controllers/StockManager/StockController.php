@@ -85,6 +85,12 @@ class StockController extends Controller
             $stock_data['yard_cost_price'] = 0;
         }
 
+        if($request->get('stock_batch') && (!empty($batch['quantity']) && $batch['quantity']!=0)) {
+            $request->validate([
+                'quantity' => 'required'
+            ]);
+        }
+
         $stock = Stock::create( $stock_data);
 
         $batch = $request->get('stock_batch');
