@@ -89,7 +89,7 @@ class StockController extends Controller
 
         $batch = $request->get('stock_batch');
 
-        if($request->get('stock_batch') && !empty($batch['quantity'])) {
+        if($request->get('stock_batch') && (!empty($batch['quantity']) && $batch['quantity']!=0)) {
             $batch['received_date'] = date('Y-m-d');
             $stock->stockbatches()->create($batch);
         }
