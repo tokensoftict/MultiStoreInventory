@@ -11,6 +11,7 @@
             <div class="col-md-10 col-md-offset-1">
                 <section class="panel">
                     <div class="panel-heading">
+                        <h3>{{ $title }}</h3>
                         <form action="" onsubmit="return add_item();">
                             <br/>
                             <div class="row">
@@ -211,7 +212,7 @@
             html+="<td class='text-center'>"+$("#qty").val()+"</td>";
             html+="<td class='text-right'>"+formatMoney($("#selling_price").val())+"</td>";
             html+="<td class='text-right'>"+formatMoney($("#cost_price").val())+"</td>";
-            html+="<td class='total_attr text-right' data-value='"+(parseFloat($("#selling_price").val()) * parseInt($("#qty").val()))+"'>"+formatMoney(parseFloat($("#selling_price").val()) * parseInt($("#qty").val()))+"</td>";
+            html+="<td class='total_attr text-right' data-value='"+(parseFloat($("#selling_price").val()) * parseInt($("#qty").val()))+"'>"+formatMoney(parseFloat($("#cost_price").val()) * parseInt($("#qty").val()))+"</td>";
             html+='<td><button class="btn btn-sm btn-danger" onclick="remove_item(this)">Remove</button></td>';
             html+="</tr>";
 

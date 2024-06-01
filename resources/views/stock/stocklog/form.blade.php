@@ -57,11 +57,15 @@
                                     <td>{{ number_format(($log->cost_price * $log->quantity ),2) }}</td>
                                     <td>{{ $log->user->name }}</td>
                                     <td>
-                                        @if(userCanView('stocklog.edit',$log->id))
+                                        @if(userCanView('stocklog.edit'))
                                             <a href="{{ route('stocklog.edit',$log->id) }}" class="btn btn-primary btn-sm">Edit</a>
                                         @endif
-                                        @if(userCanView('stocklog.delete_log',$log->id))
+                                        @if(userCanView('stocklog.delete_log'))
                                             <a href="{{ route('stocklog.delete_log',$log->id) }}" class="btn btn-danger btn-sm">Delete</a>
+                                        @endif
+
+                                        @if(userCanView('stocklog.print_log'))
+                                            <a href="{{ route('stocklog.print_log',$log->id) }}" onclick="return open_print_window(this);" class="btn btn-success btn-sm">Print</a>
                                         @endif
                                     </td>
                                 </tr>
@@ -126,6 +130,7 @@
                             </div>
 
                             <div class="form-group">
+
                                 <label>Select Product Type</label>
                                 <select required id="product_type" name="product_type" class="form-control select2">
                                     @foreach(config('stock_type_name.'.config('app.store')) as $key=>$type)

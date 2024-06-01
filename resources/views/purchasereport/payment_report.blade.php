@@ -65,7 +65,7 @@
                                             <td>{{ $loop->iteration }}</td>
                                             <td>{{ $history->supplier->name }}</td>
                                             <td>{{ $history->supplier->phonenumber }}</td>
-                                            <td>{{ $history->payment_method->name ?? "" }}</td>
+                                            <td>{{ $history->payment_method->name ?? "RETURN" }}</td>
                                             <td>{{ number_format($history->amount,2) }}</td>
                                             <td>{{ convert_date($history->payment_date) }}</td>
                                             <td>{{ $history->user->name }}</td>

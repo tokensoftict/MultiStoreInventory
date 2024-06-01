@@ -49,7 +49,7 @@ class PaymentReportController extends Controller
 
         $data['date'] = $request->get('from', dailyDate());
 
-        $data['title'] = "Payment Analysis";
+        $data['title'] = "Supplier Payment Analysis";
 
         $data['payment_methods'] = PaymentMethod::all();
 

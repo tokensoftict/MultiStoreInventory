@@ -15,9 +15,9 @@
                 <section class="panel">
                     <header class="panel-heading">
                         {{ $title }}
-                        @if(userCanView('purchaseorders.create'))
+                        @if(userCanView('purchaseorders.create_returns'))
                             <span class="tools pull-right">
-                                  <a  href="{{ route('purchaseorders.create') }}" class="btn btn-primary"><i class="fa fa-plus"></i> New Purchase Order</a>
+                                  <a  href="{{ route('purchaseorders.create_returns') }}" class="btn btn-primary"><i class="fa fa-plus"></i> New Purchase Returns</a>
                             </span>
                         @endif
                     </header>

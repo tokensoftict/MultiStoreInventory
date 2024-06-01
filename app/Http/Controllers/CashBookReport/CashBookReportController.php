@@ -25,7 +25,7 @@ class CashBookReportController extends Controller
         $data['opening'] = $credit_bal - $debit_bal;
         $data['title'] = 'List Cashbook';
         $data['banks'] = BankAccount::all();
-        $data['transactions'] = Cashbook::whereBetween('transaction_date',[ $data['from'],$data['to']])->get();
-        return setPageContent('cashbook.list-cashbook',$data);
+        $data['transactions'] = Cashbook::whereBetween('transaction_date',[ $data['from'],$data['to']])->where('bank_account_id', $data['bank_account_id'])->get();
+        return view('cashbook.list-cashbook',$data);
     }
 }

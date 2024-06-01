@@ -237,6 +237,7 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
                 Route::get('{id}/edit', ['as' => 'edit', 'uses' => 'StockController@edit_log']);
                 Route::put('{id}', ['as' => 'update', 'uses' => 'StockController@update_log']);
                 Route::get('{id}/delete_log', ['as' => 'delete_log', 'uses' => 'StockController@delete_log']);
+                Route::get('{id}/print_log', ['as' => 'print_log', 'uses' => 'StockController@print_log', 'custom_label'=>'Print Stock Log']);
             });
 
 

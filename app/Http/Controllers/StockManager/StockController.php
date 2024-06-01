@@ -233,9 +233,17 @@ class StockController extends Controller
 
         $log->delete();
 
-        return redirect()->route('stocklog.usage_log_report')->with('success','Stock Log has been deleted successfully!');
+        return redirect()->back()->with('success','Stock Log has been deleted successfully!');
     }
 
+
+
+    public function print_log($id)
+    {
+        $log = StockLogItem::with(['user','stock','operation','warehousestore'])->find($id);
+
+        return view('print.print_stock_log', ['log' => $log]);
+    }
 
 
     public function stock_report(Request $request, $id){

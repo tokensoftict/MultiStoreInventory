@@ -30,6 +30,7 @@ class PermitTask
         $validTask = $myAccess->permissions()->whereHas('task', function ($q) {
             $q->whereRoute(Route::currentRouteName());
         })->first();
+
         $page_name = $validTask->task->name." page";
 
         $causedID = $request->user()->id;
