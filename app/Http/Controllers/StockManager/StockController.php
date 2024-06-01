@@ -78,6 +78,13 @@ class StockController extends Controller
         */
         //validate image
 
+        if(empty($stock_data['yard_selling_price'])){
+            $stock_data['yard_selling_price'] = 0;
+        }
+        if(empty($stock_data['yard_cost_price'])){
+            $stock_data['yard_cost_price'] = 0;
+        }
+
         $stock = Stock::create( $stock_data);
 
         $batch = $request->get('stock_batch');
