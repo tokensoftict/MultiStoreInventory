@@ -80,6 +80,9 @@
                                         @if(userCanView('stocklog.delete_log',$log->id))
                                             <a href="{{ route('stocklog.delete_log',$log->id) }}" class="btn btn-danger btn-sm">Delete</a>
                                         @endif
+                                        @if(userCanView('stocklog.print_log'))
+                                            <a href="{{ route('stocklog.print_log',$log->id) }}" onclick="return open_print_window(this);" class="btn btn-success btn-sm">Print</a>
+                                        @endif
                                     </td>
                                 </tr>
                             @empty
@@ -87,23 +90,23 @@
                             @endforelse
                             </tbody>
                             <tfoot>
-                                <th></th>
-                                <th></th>
-                                <th></th>
-                                <th></th>
-                                <th></th>
-                                <th></th>
-                                <th></th>
-                                <th>Total</th>
-                                <th>{{ number_format($logs->sum(function($log){
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th>Total</th>
+                            <th>{{ number_format($logs->sum(function($log){
                                         return $log->selling_price * $log->quantity;
                                     }),2)  }}</th>
-                                <th></th>
-                                <th>{{ number_format($logs->sum(function($log){
+                            <th></th>
+                            <th>{{ number_format($logs->sum(function($log){
                                         return $log->cost_price * $log->quantity;
                                     }),2)  }}</th>
-                                <th></th>
-                                <th></th>
+                            <th></th>
+                            <th></th>
                             </tfoot>
                         </table>
                     </div>

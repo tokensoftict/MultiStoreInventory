@@ -109,11 +109,19 @@
                                 <select name="stock_id"  class="form-control select2" id="products">
                                     <option value="">-Select One-</option>
                                 </select>
+                                @if ($errors->has('stock_id'))
+                                    <label for="name-error" class="error"
+                                           style="display: inline-block; color: red">{{ $errors->first('stock_id') }}</label>
+                                @endif
                             </div>
 
                             <div class="form-group">
                                 <label style="white-space: nowrap;">Quantity</label>
                                 <input required type="number" name="qty" placeholder="Quantity" class="form-control" id="qty"/>
+                                @if ($errors->has('qty'))
+                                    <label for="name-error" class="error"
+                                           style="display: inline-block;">{{ $errors->first('qty') }}</label>
+                                @endif
                             </div>
 
                             <div class="form-group" >
@@ -125,7 +133,7 @@
                                 </select>
                                 @if ($errors->has('usage_type'))
                                     <label for="name-error" class="error"
-                                           style="display: inline-block;">{{ $errors->first('supplier') }}</label>
+                                           style="display: inline-block;">{{ $errors->first('usage_type') }}</label>
                                 @endif
                             </div>
 
@@ -142,6 +150,16 @@
                                            style="display: inline-block;">{{ $errors->first('product_type') }}</label>
                                 @endif
                             </div>
+                            <div class="form-group">
+                                <label>Invoice Number</label>
+                                <input type="text" class="form-control" placeholder="Invoice Number" id="invoice_number" required name="invoice_number"/>
+                                @if ($errors->has('invoice_number'))
+                                    <label for="name-error" class="error"
+                                           style="display: inline-block;">{{ $errors->first('invoice_number') }}</label>
+                                @endif
+                            </div>
+
+
                             <input type="hidden" id="department" name="department" value="STORE" />
 
 

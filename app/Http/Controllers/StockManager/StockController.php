@@ -196,6 +196,16 @@ class StockController extends Controller
     public function add_log(Request $request){
 
         if($request->getMethod() == "POST"){
+            $request->validate(
+                [
+                    'stock_id' => 'required',
+                    'qty' => 'required',
+                    'usage_type' => 'required',
+                    'product_type' => 'required',
+                    'invoice_number' => 'required',
+                    'date_created' => 'required'
+                ]
+            );
             return StockLogItem::createStockLog($request);
         }
         $data['title'] = "New Stock Log";
@@ -218,6 +228,16 @@ class StockController extends Controller
 
     public function update_log(Request $request, $id)
     {
+        $request->validate(
+            [
+                'stock_id' => 'required',
+                'qty' => 'required',
+                'usage_type' => 'required',
+                'product_type' => 'required',
+                'invoice_number' => 'required',
+                'date_created' => 'required'
+            ]
+        );
         return StockLogItem::updateStockLog($id, $request);
     }
 

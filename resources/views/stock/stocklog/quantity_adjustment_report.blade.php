@@ -65,7 +65,7 @@
                                     <td>{{ $adjustment->from}}</td>
                                     <td>{{ $adjustment->to }}</td>
                                     <td>{{ convert_date2($adjustment->date_adjusted) }}</td>
-                                    <td>{{ $adjustment->type }}</td>
+                                    <td>{{ array_search($adjustment->type,config('stock_type_name.'.config('app.store'))) }}</td>
                                     <td>{{ number_format($adjustment->stock->selling_price,2) }}</td>
                                 </tr>
                             @endforeach

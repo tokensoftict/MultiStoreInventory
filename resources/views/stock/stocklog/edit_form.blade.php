@@ -56,6 +56,12 @@
                                            style="display: inline-block;">{{ $errors->first('product_type') }}</label>
                                 @endif
                             </div>
+
+                            <div class="form-group">
+                                <label>Invoice Number</label>
+                                <input type="text" class="form-control"  placeholder="Invoice Number" {{ $log->invoice_number }} id="invoice_number" required name="Invoice_number"/>
+                            </div>
+
                             <input type="hidden" id="department" name="department" value="STORE" />
 
 

@@ -354,7 +354,7 @@ class Stock extends Model
             'date_adjusted' => date('Y-m-d'),
             'from' => $stock->available_yard_quantity,
             'to' => $request->yard_qty,
-            'type' => 'YARD',
+            'type' => 'NORMAL',
             'warehousestore_id' => getActiveStore()->id,
             'changed_column' => getActiveStore()->yard_column,
         ];

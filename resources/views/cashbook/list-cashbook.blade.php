@@ -35,7 +35,7 @@
                                     <label>Select Bank</label>
                                     <select class="form-control" name="bank_account_id">
                                         @foreach($banks as $bank)
-                                        <option {{ $bank_account_id === $bank->id ? "selected" : "" }} value="{{ $bank->id }}">{{ $bank->bank->name }} - {{ $bank->account_no }}</option>
+                                        <option {{ $bank_account_id === $bank->id ? "selected" : "" }} value="{{ $bank->id }}">{{ $bank->bank->name }} - {{ $bank->account_number }}</option>
                                         @endforeach
                                     </select>
                                 </div>
