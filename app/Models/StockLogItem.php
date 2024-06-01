@@ -45,6 +45,7 @@ class StockLogItem extends Model
 		'selling_price' => 'float',
 		'cost_price' => 'float',
 		'quantity' => 'int',
+        'invoice_number' => 'string',
 		'stock_log_usages_type_id' => 'int'
 	];
 
@@ -63,6 +64,7 @@ class StockLogItem extends Model
 		'usage_type',
 		'department',
 		'log_date',
+        'invoice_number',
 		'stock_log_usages_type_id'
 	];
 
@@ -120,6 +122,7 @@ class StockLogItem extends Model
                 'product_type' => $request->product_type,
                 'selling_price' => getStockActualSellingPrice($stock, $request->product_type),
                 'user_id' => auth()->id(),
+                'invoice_number' => $request->invoice_number
             ]
         );
 
@@ -135,7 +138,8 @@ class StockLogItem extends Model
                 'quantity' => $batch['qty'],
                 'store' => $store_column,
                 'stockbatch_id' => $key,
-                'log_date' => $request->date_created
+                'log_date' => $request->date_created,
+                'invoice_number' => $request->invoice_number
             ]);
         }
 
@@ -179,6 +183,7 @@ class StockLogItem extends Model
                 'product_type' => $request->product_type,
                 'selling_price' => getStockActualSellingPrice($log->stock, $request->product_type),
                 'user_id' => auth()->id(),
+                'invoice_number' => $request->invoice_number
             ]
         );
 
@@ -196,7 +201,8 @@ class StockLogItem extends Model
                 'quantity' => $batch['qty'],
                 'store' => $store_column,
                 'stockbatch_id' => $key,
-                'log_date' => $request->date_created
+                'log_date' => $request->date_created,
+                'invoice_number' => $request->invoice_number
             ]);
         }
 

@@ -14,6 +14,16 @@ use Illuminate\Support\Facades\DB;
 
 class PurchaseReportsController extends Controller
 {
+    public function general_purchase_order(Request $request){
+        $data['from'] = $request->get('from',  date('Y-m-01'));
+        $data['to'] = $request->get('to', date('Y-m-t'));
+        $data['title'] = 'General Purchase Orders / Returns Report';
+        $data['purchase_orders'] = Po::with(['supplier','purchase_order_items','user','created_user'])
+            ->whereBetween('date_created',[$data['from'],$data['to']])
+            ->orderBy('id','DESC')->get();
+        return view('purchasereport.general', $data);
+    }
+
     public function daily(Request $request){
         $data['date'] = $request->get('date', date('Y-m-d'));
         $data['type'] = $request->get('type', 'PURCHASE');

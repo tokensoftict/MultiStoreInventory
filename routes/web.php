@@ -342,6 +342,7 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
 
             Route::prefix('purchasesReport')->as('purchase.')->namespace('PurchaseReport')->group(function(){
 
+                Route::match(['post','get'],'/general_purchase_order', ['as' => 'general_purchase_order', 'uses' => 'PurchaseReportsController@general_purchase_order', 'custom_label'=>"General Purchase Order / Returns",'visible' => false]);
                 Route::match(['post','get'],'/monthly_by_supplier', ['as' => 'monthly_by_supplier', 'uses' => 'PurchaseReportsController@monthly_by_supplier', 'custom_label'=>"Purchase Order / Returns By Supplier",'visible' => false]);
                 Route::match(['post','get'],'/monthly_by_store', ['as' => 'monthly_by_store', 'uses' => 'PurchaseReportsController@monthly_by_store', 'custom_label'=>"Purchase Order / Returns By Store",'visible' => false]);
                 Route::match(['post','get'],'/monthly_by_user', ['as' => 'monthly_by_user', 'uses' => 'PurchaseReportsController@monthly_by_user', 'custom_label'=>"Purchase Order / Returns By User", 'visible' => false]);
