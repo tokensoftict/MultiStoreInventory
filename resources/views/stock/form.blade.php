@@ -141,6 +141,10 @@
                                             <div class="form-group">
                                                 <label>Initial Quantity <span  style="color:red;">*</span></label>
                                                 <input type="number"  value=""  class="form-control" name="stock_batch[quantity]" placeholder="Initial Quantity"/>
+                                                @if ($errors->has('name'))
+                                                    <label for="name-error" class="error"
+                                                           style="display: inline-block;">{{ $errors->first('name') }}</label>
+                                                @endif
                                             </div>
                                             <div class="form-group">
                                                 <label>Supplier</label>
