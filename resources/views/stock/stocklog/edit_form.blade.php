@@ -59,7 +59,7 @@
 
                             <div class="form-group">
                                 <label>Invoice Number</label>
-                                <input type="text" class="form-control"  placeholder="Invoice Number" {{ $log->invoice_number }} id="invoice_number" required name="invoice_number"/>
+                                <input type="text" class="form-control"  placeholder="Invoice Number" value="{{ $log->invoice_number }}" id="invoice_number" required name="invoice_number"/>
                             </div>
 
                             <input type="hidden" id="department" name="department" value="STORE" />
