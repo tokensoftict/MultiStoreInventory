@@ -235,7 +235,7 @@ class StockController extends Controller
                 'usage_type' => 'required',
                 'product_type' => 'required',
                 'invoice_number' => 'required',
-                'date_created' => 'required'
+
             ]
         );
         return StockLogItem::updateStockLog($id, $request);
