@@ -27,7 +27,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Excel;
-
+use PDF;
 class StockController extends Controller
 {
 
@@ -265,9 +265,10 @@ class StockController extends Controller
     public function print_log($id)
     {
         $log = StockLogItem::with(['user','stock','operation','warehousestore'])->find($id);
-        $logo = $this->settings->store();
+        $store= $this->settings->store();
 
-        return view('print.print_stock_log', ['log' => $log, 'store'=>$logo]);
+        $pdf = PDF::loadView("print.print_stock_log",['log' => $log, 'store'=>$store]);
+        return $pdf->stream('document.pdf');
     }
 
 

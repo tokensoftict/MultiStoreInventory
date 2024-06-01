@@ -53,12 +53,6 @@
             <div class="row">
                 <div class="clear">
                     <div class="pull-left">
-                        <h4>{{  "Stock Log ID #".$log->id }}</h4>
-                    </div>
-                    <div class="title">
-
-                    </div>
-                    <div class="pull-right">
                         {!! softwareStampWithDate() !!}
                     </div>
                 </div>
