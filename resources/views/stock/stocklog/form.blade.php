@@ -83,6 +83,7 @@
                             <th></th>
                             <th></th>
                             <th></th>
+                            <th></th>
                             <th>Total</th>
                             <th>{{ number_format($logs->sum(function($log){
                                         return $log->selling_price * $log->quantity;

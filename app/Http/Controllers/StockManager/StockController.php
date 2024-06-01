@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\StockManager;
 
+use App\Classes\Settings;
 use App\Exports\CurrentStockExport;
 use App\Http\Controllers\Controller;
 use App\Imports\ImportExistingStock;
@@ -30,6 +31,9 @@ use Excel;
 class StockController extends Controller
 {
 
+    public function __construct(Settings $_settings){
+        $this->settings = $_settings;
+    }
 
     public function index(){
 
@@ -261,8 +265,9 @@ class StockController extends Controller
     public function print_log($id)
     {
         $log = StockLogItem::with(['user','stock','operation','warehousestore'])->find($id);
+        $logo = $this->settings->store();
 
-        return view('print.print_stock_log', ['log' => $log]);
+        return view('print.print_stock_log', ['log' => $log, 'store'=>$logo]);
     }
 
 

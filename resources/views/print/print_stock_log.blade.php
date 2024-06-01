@@ -5,7 +5,10 @@
         <br/><br/>
         <div class="clear">
             <div class="pull-left" style="width: 30%;">
-                <img src="" class="pull-left" style="width: 30%"/><br/>  <br/>
+                <img src="{{ public_path("img/". $store->logo) }}" class="pull-left" style="width: 30%"/><br/>  <br/>
+                <h5>Invoice Number</h5>
+                <h4>{{ $log->invoice_number }}</h4>
+                <br/>
                 <h5>Store</h5>
                 <h4>{{ $log->warehousestore->name }}</h4>
                 <br/>

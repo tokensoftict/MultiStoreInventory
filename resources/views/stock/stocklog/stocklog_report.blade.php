@@ -47,6 +47,7 @@
                                 <th>Stock</th>
                                 <th>Quantity</th>
                                 <th>Date</th>
+                                <th>Invoice Number</th>
                                 <th>Product Type</th>
                                 <th>Usage Type</th>
                                 <th>Store</th>
@@ -65,6 +66,7 @@
                                     <td>{{ $log->stock->name }}</td>
                                     <td>{{ $log->quantity }}</td>
                                     <td>{{ convert_date2($log->log_date) }}</td>
+                                    <td>{{ $log->invoice_number }}</td>
                                     <td>{{ array_search($log->product_type,config('stock_type_name.'.config('app.store'))) }}</td>
                                     <td>{{ $log->stock_log_usages_type->name ?? "" }}</td>
                                     <td>{{ $log->warehousestore->name }}</td>
