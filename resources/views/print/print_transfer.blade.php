@@ -5,7 +5,7 @@
         <br/><br/>
         <div class="clear">
             <div class="pull-left" style="width: 30%;">
-                <img src="" class="pull-left" style="width: 30%"/><br/>  <br/>
+                <img style="max-height:60px;float: right;margin-top: -10px" src="{{ public_path("img/". $store->logo) }}" alt='Logo'><br/>  <br/>
                 <h5>Transfer From</h5>
                 <h4>{{ $transfer->store_from->name }}</h4>
                 <br/>
