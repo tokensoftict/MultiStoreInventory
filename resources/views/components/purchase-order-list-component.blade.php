@@ -36,16 +36,20 @@
                         <button data-toggle="dropdown" class="btn btn-success dropdown-toggle btn-xs" type="button" aria-expanded="false">Action <span class="caret"></span></button>
                         <ul role="menu" class="dropdown-menu">
                             @if(userCanView('purchaseorders.show'))
-                                <li><a href="{{ route('purchaseorders.show',$purchase_order->id) }}">View Purchase Order</a></li>
+                                <li><a href="{{ route('purchaseorders.show',$purchase_order->id) }}">View Purchase {{ ucwords(strtolower($purchase_order->type)) }}</a></li>
                             @endif
                             @if(userCanView('purchaseorders.edit') && $purchase_order->status == "DRAFT")
-                                <li><a href="{{ route('purchaseorders.edit',$purchase_order->id) }}">Edit Purchase Order</a></li>
+                                <li><a href="{{ route('purchaseorders.edit',$purchase_order->id) }}">Edit Purchase {{ ucwords(strtolower($purchase_order->type)) }}</a></li>
                             @endif
                             @if(userCanView('purchaseorders.markAsComplete') && $purchase_order->status == "DRAFT")
-                                <li><a href="{{ route('purchaseorders.markAsComplete',$purchase_order->id) }}">Complete Purchase Order</a></li>
+                                <li><a href="{{ route('purchaseorders.markAsComplete',$purchase_order->id) }}">Complete Purchase {{ ucwords(strtolower($purchase_order->type)) }}</a></li>
                             @endif
                             @if(userCanView('purchaseorders.destroy') && $purchase_order->status == "DRAFT")
-                                <li><a href="{{ route('purchaseorders.destroy',$purchase_order->id) }}">Delete Purchase Order</a></li>
+                                <li><a href="{{ route('purchaseorders.destroy',$purchase_order->id) }}">Delete Purchase {{ ucwords(strtolower($purchase_order->type)) }}</a></li>
+                            @endif
+
+                            @if(userCanView('purchaseorders.print'))
+                                <li><a href="{{ route('purchaseorders.print',$purchase_order->id) }}" onclick="return open_print_window(this);">Print Purchase {{ ucwords(strtolower($purchase_order->type)) }}</a></li>
                             @endif
                         </ul>
                     </div>
@@ -54,22 +58,22 @@
         @endforeach
         </tbody>
         <tfoot>
-            <th></th>
-            <th></th>
-            <th></th>
-            <th></th>
-            <th></th>
-            <th>Total</th>
-            <th>{{
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th>Total</th>
+        <th>{{
                  number_format($purchaseorders->sum(function($order){
                      return $order->purchase_order_items()->sum(DB::raw('cost_price * qty'));
                  }),2)
             }}</th>
-            <th></th>
-            <th></th>
-            <th></th>
-            <th></th>
-            <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
         </tfoot>
     </table>
 

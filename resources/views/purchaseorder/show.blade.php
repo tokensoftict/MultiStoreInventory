@@ -7,6 +7,11 @@
                 <section class="panel">
                     <div class="panel-heading">
                         {{ $title }}
+                        <span class="pull-right">
+                            @if(userCanView('purchaseorders.print'))
+                                <a href="{{ route('purchaseorders.print',$porder->id) }}"  onclick="return open_print_window(this);" class="btn btn-info btn-sm" ><i class="fa fa-print"></i> Print A4</a>
+                            @endif
+                        </span>
                     </div>
                     <div class="panel-body">
                         <div class="col-lg-12">
@@ -18,7 +23,7 @@
                         </div>
                         <div class="col-xs-12">
                             <div class="invoice-title">
-                                <h2>Purchase Order</h2><h3 class="pull-right"> # {{ $porder->id }}</h3>
+                                <h2>Purchase {{ ucwords(strtolower($porder->type)) }}</h2><h3 class="pull-right"> # {{ $porder->id }}</h3>
                             </div>
                             <hr>
                             <div class="row">

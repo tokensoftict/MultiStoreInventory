@@ -16,6 +16,7 @@ use App\Models\Warehousestore;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Models\PurchaseOrder as Po;
+use PDF;
 
 class PurchaseOrder extends Controller
 {
@@ -65,11 +66,21 @@ class PurchaseOrder extends Controller
         return Po::createPurchaseOrder($request);
     }
 
+
+    public function print($id){
+        $data['title'] = 'Print Purchase Order';
+        $data['porder'] = Po::with(['supplier','purchase_order_items','user','created_user'])->find($id);
+        $data['settings'] = $this->settings->store();
+
+        $pdf = PDF::loadView("print.print_purchase", $data);
+        return $pdf->stream('document.pdf');
+    }
+
     public function show($id){
         $data['title'] = 'View Purchase Order';
         $data['porder'] = Po::with(['supplier','purchase_order_items','user','created_user'])->find($id);
         $data['settings'] = $this->settings->store();
-        return setPageContent('purchaseorder.show', $data);
+        return view('purchaseorder.show', $data);
     }
 
     public function destroy($id){

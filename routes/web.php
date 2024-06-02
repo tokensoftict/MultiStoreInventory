@@ -312,6 +312,7 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
                 Route::get('', ['as' => 'index', 'uses' => 'PurchaseOrder@index', 'visible' => true, 'custom_label'=>'List Purchases']);
                 Route::get('/returns', ['as' => 'returns', 'uses' => 'PurchaseOrder@returns', 'visible' => true, 'custom_label'=>'List Returns']);
                 Route::get('{id}/show', ['as' => 'show', 'uses' => 'PurchaseOrder@show']);
+                Route::get('{id}/print', ['as' => 'print', 'uses' => 'PurchaseOrder@print', 'custom_label' => "Print Purchase Order"]);
                 Route::get('create', ['as' => 'create', 'uses' => 'PurchaseOrder@create','visible' => true]);
                 Route::get('create_returns', ['as' => 'create_returns', 'uses' => 'PurchaseOrder@create_returns','visible' => true, 'custom_label' => 'Create Purchase Return']);
                 Route::post('store', ['as' => 'store', 'uses' => 'PurchaseOrder@store']);

@@ -133,9 +133,16 @@
     window.addEventListener('load', function (){
         $(document).ready(function(){
             $('input[type=submit], button[type=submit]').click(function() {
+                @php
+                    $id = 'magic'.mt_rand();
+                @endphp
                 $('input[type=submit], button[type=submit]').attr('disabled', 'disabled');
-                $(this).parents('form').append('<input type="hidden" name="'+$(this).attr('name')+'" value="'+$(this).val()+'" />');
+                $(this).parents('form').append('<input type="hidden" id="{{ $id }}" name="'+$(this).attr('name')+'" value="'+$(this).val()+'" />');
                 $(this).parents('form').submit();
+                setTimeout(function(){
+                    $('#{{ $id }}').remove();
+                    $('input[type=submit], button[type=submit]').removeAttr('disabled');
+                }, 10000)
             });
         })
     });
