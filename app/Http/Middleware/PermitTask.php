@@ -23,15 +23,22 @@ class PermitTask
 
         $myAccess =  $request->user()->group;
 
+        if (!$myAccess->status) abort('403', "Unable to locate your Permission Group");
 
-        if (!$myAccess->status) abort('403');
-
+        if(!userCanView(Route::currentRouteName())){
+            abort("403", "You do not have permission to perform this operation");
+        }
 
         $validTask = $myAccess->permissions()->whereHas('task', function ($q) {
             $q->whereRoute(Route::currentRouteName());
         })->first();
 
+        if($validTask){
+            abort("403", "System error, Please contact Administrator");
+        }
+
         $page_name = $validTask->task->name." page";
+
 
         $causedID = $request->user()->id;
         if(session()->get('past_page') != Route::currentRouteName() && $request->user()->group_id !=1)
@@ -46,7 +53,7 @@ class PermitTask
                 ->log($request->user()->name . ' accessed ' . $page_name);
 
         }
-        if (!$validTask) abort('403');//throw new UplException('access_denied');
+        if (!$validTask) abort('403','Access Denied');//throw new UplException('access_denied');
 
         $request->user()->update(['last_activity' => Carbon::now()->toDateTimeString()]);
 
