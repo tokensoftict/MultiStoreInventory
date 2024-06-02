@@ -99,7 +99,7 @@
        </tr>
         <tr>
             <td>Sales Representative</td>
-            <td>{{ $invoice->customer->name }}</td>
+            <td>{{ $invoice->created_user->name }}</td>
         </tr>
     </table>
 

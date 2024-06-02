@@ -264,6 +264,9 @@ class Payment extends Model
 
         $total_credit = (int)$customer->credit_balance;
 
+        if($credit_limit === 0){ // credit limit has not been set
+            return false;
+        }
 
         if($total_credit > 0) return false;
 

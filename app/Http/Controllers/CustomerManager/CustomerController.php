@@ -33,7 +33,13 @@ class CustomerController extends Controller
 
         $request->validate(Customer::$validate);
 
-        $customer = Customer::create($request->only(Customer::$fields));
+        $data = $request->only(Customer::$fields);
+
+        if(empty($data['credit_limit'])){
+            $data['credit_limit'] = 0;
+        }
+
+        $customer = Customer::create($data);
 
         if(!isset($request->ajax))
         {

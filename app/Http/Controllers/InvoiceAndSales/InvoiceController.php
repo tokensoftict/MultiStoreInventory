@@ -124,7 +124,7 @@ class InvoiceController extends Controller
 
     public function print_pos($id){
         $data = [];
-        $invoice = Invoice::with(['created_by','customer','invoice_items'])->find($id);
+        $invoice = Invoice::with(['created_user','customer','invoice_items'])->find($id);
         $data['invoice'] =$invoice;
         $data['store'] =  $this->settings->store();
         $page_size = $invoice->invoice_items()->get()->count() * 15;
@@ -148,7 +148,7 @@ class InvoiceController extends Controller
 
     public function print_afour($id){
         $data = [];
-        $invoice = Invoice::with(['created_by','customer','invoice_items'])->find($id);
+        $invoice = Invoice::with(['created_user','customer','invoice_items'])->find($id);
         $data['invoice'] = $invoice;
         $data['store'] =  $this->settings->store();
         $pdf = PDF::loadView("print.pos_afour",$data);
@@ -157,7 +157,7 @@ class InvoiceController extends Controller
 
     public function print_way_bill($id){
         $data = [];
-        $invoice = Invoice::with(['created_by','customer','invoice_items'])->find($id);
+        $invoice = Invoice::with(['created_user','customer','invoice_items'])->find($id);
         $data['invoice'] = $invoice;
         $data['store'] =  $this->settings->store();
         $pdf = PDF::loadView("print.pos_afour_waybill",$data);

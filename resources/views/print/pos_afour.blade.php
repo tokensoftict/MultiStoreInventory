@@ -103,6 +103,10 @@
             <td>Status</td>
             <td>{{ $invoice->status }}</td>
         </tr>
+        <tr>
+            <td>Sales Representative</td>
+            <td>{{ $invoice->created_user->name }}</td>
+        </tr>
     </table>
 
 
