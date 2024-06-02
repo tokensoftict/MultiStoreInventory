@@ -391,7 +391,7 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
                 Route::match(['post','get'],'/store_monthly', ['as' => 'store_monthly', 'uses' => 'InvoiceReportController@store_monthly', 'custom_label'=>'Invoice Report By Store','visible' => false]);
                 Route::match(['post','get'],'/sales_analysis', ['as' => 'sales_analysis', 'uses' => 'InvoiceReportController@sales_analysis','custom_label'=>'Sales Analysis', 'visible' => false]);
                 Route::match(['post','get'],'/return_logs', ['as' => 'return_logs', 'uses' => 'InvoiceReportController@return_logs','custom_label'=>'Sales Return', 'visible' => false]);
-                Route::match(['post','get'],'/full_invoice_report', ['as' => 'full_invoice_report', 'uses' => 'InvoiceReportController@full_invoice_report','custom_label'=>'Complete Invoice Report', 'visible' => false]);
+                //Route::match(['post','get'],'/full_invoice_report', ['as' => 'full_invoice_report', 'uses' => 'InvoiceReportController@full_invoice_report','custom_label'=>'Complete Invoice Report', 'visible' => false]);
             });
 
 
