@@ -33,7 +33,7 @@ class PermitTask
             $q->whereRoute(Route::currentRouteName());
         })->first();
 
-        if($validTask){
+        if(!$validTask){
             abort("403", "System error, Please contact Administrator");
         }
 
