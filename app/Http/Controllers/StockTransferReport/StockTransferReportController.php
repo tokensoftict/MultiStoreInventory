@@ -67,6 +67,7 @@ class StockTransferReportController extends Controller
                     ->where(function($query){
                         $query->orwhere('from', getActiveStore()->id)->orwhere('to', getActiveStore()->id);
                     })
+                    ->where('stock_id', $data['product'])
                     ->whereBetween('transfer_date',[$data['from'],$data['to']]);
             })
             ->orderBy('id','DESC')->get();

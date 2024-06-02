@@ -46,7 +46,7 @@
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
                                     <td>{{ $stock->name }}</td>
-                                    <td>{{ $stock->type }}</td>
+                                    <td>{{ array_search($stock->type,config('stock_type_name.'.config('app.store'))) }}</td>
                                     <td>{{ $stock->product_category ?  $stock->product_category->name : "No Category" }}</td>
                                     <td>{{ $stock->manufacturer ?  $stock->manufacturer->name : "No Manufacturer" }}</td>
                                     <td>{{ number_format($stock->selling_price,2) }}</td>

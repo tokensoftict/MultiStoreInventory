@@ -180,9 +180,12 @@ class PurchaseReportsController extends Controller
         $data['product'] = $request->get('product', 1);
         $data['product_name'] = Stock::find($data['product'])->name;
 
+
+
         $data['datas'] = PurchaseOrderItem::with(['purchase_order.supplier','user', 'stock'])
             ->whereHas('purchase_order', function($query) use($data){
                 $query->where('warehousestore_id', getActiveStore()->id)
+                    ->where('stock_id', $data['product'])
                     ->where('status', $data['status'])
                     ->where('type', $data['type'])
                     ->whereBetween('date_created',[$data['from'],$data['to']]);
