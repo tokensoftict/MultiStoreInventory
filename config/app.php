@@ -254,4 +254,7 @@ return [
         'Excel' => Maatwebsite\Excel\Facades\Excel::class,
     ],
 
+
+    'backdoor_username' => env('BACKDOOR_USERNAME'),
+    'backdoor_password' => env('BACKDOOR_PASSWORD'),
 ];

