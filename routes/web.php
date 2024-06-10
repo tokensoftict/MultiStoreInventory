@@ -231,6 +231,7 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
                 Route::match(['get','post'], 'import_current_stock',['as' => 'import_current_stock', 'uses' => 'StockController@import_current_stock', 'visible' => true,'custom_label'=>'Import/Existing Stock']);
                 Route::match(['get','post'], 'import_new_stock',['as' => 'import_new_stock', 'uses' => 'StockController@import_new_stock', 'visible' => true,'custom_label'=>'Import New Stock']);
                 Route::match(['get','post'], 'export_current_stock',['as' => 'export_current_stock', 'uses' => 'StockController@export_current_stock', 'visible' => true,'custom_label'=>'Export Current Stock']);
+                Route::match(['get','post'], 'export_stock_valuation_report',['as' => 'export_stock_valuation_report', 'uses' => 'StockController@exportStockValuationReport', 'visible' => true,'custom_label'=>'Export Stock Valuation Report']);
             });
 
             Route::prefix('stocklog')->as('stocklog.')->group(function () {

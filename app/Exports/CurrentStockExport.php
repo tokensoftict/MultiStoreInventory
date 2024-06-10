@@ -5,8 +5,9 @@ namespace App\Exports;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithTitle;
 
-class CurrentStockExport implements FromCollection, WithHeadings
+class CurrentStockExport implements FromCollection, WithHeadings, WithTitle
 {
     /**
      * @return \Illuminate\Support\Collection
@@ -75,9 +76,18 @@ class CurrentStockExport implements FromCollection, WithHeadings
             'YARD QUANTITY',
         ];
 
-        if(\request()->has('template'))  unset($heading[9], $heading[10], $heading[0]);
+        if(\request()->has('template')) {
+            unset($heading[0]);
+            $heading[] = 'SUPPLIER NAME';
+            $heading[] = 'SUPPLIER PHONE';
+        }
 
 
         return $heading;
+    }
+
+    public function title(): string
+    {
+        return "Stocks";
     }
 }

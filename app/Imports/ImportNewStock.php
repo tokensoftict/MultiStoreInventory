@@ -5,7 +5,10 @@ namespace App\Imports;
 use App\Models\Manufacturer;
 use App\Models\ProductCategory;
 use App\Models\Stock;
+use App\Models\Stockbatch;
+use App\Models\Supplier;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
@@ -26,6 +29,10 @@ class ImportNewStock  implements ToModel,WithHeadingRow
         {
             $category =  ProductCategory::where('name', $row['category'])->get()->first();
 
+            if(!$category){
+                $category = ProductCategory::find( $row['category']);
+            }
+
             if ($category)
             {
                 $stock['product_category_id'] = $category->id;
@@ -42,6 +49,11 @@ class ImportNewStock  implements ToModel,WithHeadingRow
         if(isset($row['manufacturer']) && !empty($row['manufacturer']) &&  $row['manufacturer'] != "N/A")
         {
             $manufacturer = Manufacturer::where('name', $row['manufacturer'])->get()->first();
+
+            if(!$manufacturer){
+                $manufacturer = Manufacturer::find($row['manufacturer']);
+            }
+
             if ($manufacturer) {
                 $stock['manufacturer_id'] = $manufacturer->id;
             } else {
@@ -62,7 +74,34 @@ class ImportNewStock  implements ToModel,WithHeadingRow
 
         $stock['type'] = strtoupper($row['product_type']) == "SINGLE" ? "NORMAL" : strtoupper($row['product_type']);
 
-        return new Stock($stock);
+        $newStock = new Stock($stock);
+
+        if(Arr::has($row, ["bundle_quantity", "yard_quantity", "supplier_name", "supplier_phone"])){
+
+            $supplier = Supplier::where("name", $row['supplier_name'])->first();
+
+            if(!$supplier){
+                $supplier = Supplier::find($row['supplier_name']);
+            }
+
+            if(!$supplier){
+                $supplier = Supplier::create([
+                    'name' => $row['supplier_name'],
+                    'phonenumber' =>  $row['supplier_name']
+                ]);
+            }
+
+            $stockBatch = new Stockbatch([
+                'quantity' => $row['bundle_quantity'],
+                'received_date' => now()->format("Y-m-d"),
+                'yard_quantity' => $row['yard_quantity'],
+                'supplier_id' => $supplier->id
+            ]);
+
+            $newStock->stockbatches()->save($stockBatch);
+        }
+
+        return $newStock;
     }
 
 

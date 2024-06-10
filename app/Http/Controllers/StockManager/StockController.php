@@ -4,6 +4,8 @@ namespace App\Http\Controllers\StockManager;
 
 use App\Classes\Settings;
 use App\Exports\CurrentStockExport;
+use App\Exports\ExportStockMultiSheet;
+use App\Exports\StockValuationReport;
 use App\Http\Controllers\Controller;
 use App\Imports\ImportExistingStock;
 use App\Imports\ImportNewStock;
@@ -359,6 +361,163 @@ class StockController extends Controller
 
     public function export_current_stock()
     {
-        return Excel::download(new CurrentStockExport(), \request()->has('template') ? 'Stock-Template.xlsx' : "Available-stock-".date('Y-m-d').'.xlsx');
+        return Excel::download(new ExportStockMultiSheet(), \request()->has('template') ? 'Stock-Template.xlsx' : "Available-stock-".date('Y-m-d').'.xlsx');
+    }
+
+
+    public function exportStockValuationReport()
+    {
+        $excelRows = [];
+        $greatGrandTotal =0;
+        $excelRows[] = [
+            "cell1" => "",
+            "cell2" => "",
+            "cell3" => "STOCK VALUATION REPORT ",now()->format("D, d M Y"),
+            "cell4" => "",
+            "cell5" => "",
+            "cell6" => "",
+            "cell7" => "",
+        ];
+        $excelRows[] = [
+            "cell1" => "",
+            "cell2" => "",
+            "cell3" => "",
+            "cell4" => "",
+            "cell5" => "",
+            "cell6" => "",
+            "cell7" => "",
+        ];
+        $excelRows[] = [
+            "cell1" => "",
+            "cell2" => "",
+            "cell3" => "",
+            "cell4" => "",
+            "cell5" => "",
+            "cell6" => "",
+            "cell7" => "",
+        ];
+        $excelRows[] = [
+            "cell1" => "",
+            "cell2" => "Product",
+            "cell3" => "",
+            "cell4" => "",
+            "cell5" => "Cost Price",
+            "cell6" => "Qty In Stock",
+            "cell7" => "Cost Amount",
+        ];
+        $excelRows[] = [
+            "cell1" => "",
+            "cell2" => "",
+            "cell3" => "",
+            "cell4" => "",
+            "cell5" => "",
+            "cell6" => "",
+            "cell7" => "",
+        ];
+
+
+
+        $sql = "";
+        $store = getActiveStore();
+
+        $sql .= "SUM(" . $store->packed_column . ") as " . $store->packed_column . ",";
+        $sql .= "SUM(" . $store->yard_column . ") as " . $store->yard_column . ",";
+
+        $sql = rtrim($sql,", ");
+
+        $stockbatches = Stock::query()->with(['stockbatches' => function($query) use($sql){
+            $query->select(DB::raw($sql))->groupBy('stock_id');
+        }])->whereNull("product_category_id")->get();
+
+
+        $grandTotal = 0;
+        if($stockbatches->count() > 0) {
+            $excelRows[] = [
+                "cell1" => "...",
+                "cell2" => "",
+                "cell3" => "",
+                "cell4" => "",
+                "cell5" => "",
+                "cell6" => "",
+                "cell7" => "",
+            ];
+            foreach ($stockbatches as $stockbatch) {
+                $grandTotal =$stockbatch->cost_price*(isset($stockbatch->stockbatches->{$store->packed_column}) ? $stockbatch->stockbatches->{$store->packed_column} : 0);
+                $excelRows[] = [
+                    "cell1" => "",
+                    "cell2" => $stockbatch->name,
+                    "cell3" => "",
+                    "cell4" => "",
+                    "cell5" => number_format($stockbatch->cost_price),
+                    "cell6" => number_format((isset($stockbatch->stockbatches->{$store->packed_column}) ? $stockbatch->stockbatches->{$store->packed_column} : 0)),
+                    "cell7" => number_format($stockbatch->cost_price*(isset($stockbatch->stockbatches->{$store->packed_column}) ? $stockbatch->stockbatches->{$store->packed_column} : 0)),
+                ];
+            }
+            $excelRows[] = [
+                "cell1" => "Grand Total",
+                "cell2" => "",
+                "cell3" => "",
+                "cell4" => "",
+                "cell5" => "",
+                "cell6" => "",
+                "cell7" => number_format($grandTotal),
+            ];
+        }
+        $greatGrandTotal+=$grandTotal;
+
+        $categories = ProductCategory::select("id", "name")->get();
+        foreach ($categories as $category) {
+            $excelRows[] = [
+                "cell1" => $category->name,
+                "cell2" => "",
+                "cell3" => "",
+                "cell4" => "",
+                "cell5" => "",
+                "cell6" => "",
+                "cell7" => "",
+            ];
+
+            $stockbatches =  Stock::query()->with(['stockbatches' => function($query) use($sql){
+                $query->select(DB::raw($sql))->groupBy('stock_id');
+            }])->where("product_category_id", $category->id)->get();
+
+            $grandTotal = 0;
+
+            foreach ($stockbatches as $stockbatch){
+                $grandTotal =$stockbatch->cost_price*(isset($stockbatch->stockbatches->{$store->packed_column}) ? $stockbatch->stockbatches->{$store->packed_column} : 0);
+                $excelRows[] = [
+                    "cell1" => "",
+                    "cell2" => $stockbatch->name,
+                    "cell3" => "",
+                    "cell4" => "",
+                    "cell5" => number_format($stockbatch->cost_price),
+                    "cell6" => number_format((isset($stockbatch->stockbatches->{$store->packed_column}) ? $stockbatch->stockbatches->{$store->packed_column} : 0)),
+                    "cell7" => number_format($stockbatch->cost_price*(isset($stockbatch->stockbatches->{$store->packed_column}) ? $stockbatch->stockbatches->{$store->packed_column} : 0)),
+                ];
+            }
+            $excelRows[] = [
+                "cell1" => "Grand Total",
+                "cell2" => "",
+                "cell3" => "",
+                "cell4" => "",
+                "cell5" => "",
+                "cell6" => "",
+                "cell7" => number_format($grandTotal),
+            ];
+            $greatGrandTotal+=$grandTotal;
+        }
+
+
+        $excelRows[] = [
+            "cell1" => "Grand Total",
+            "cell2" => "",
+            "cell3" => "",
+            "cell4" => "",
+            "cell5" => "",
+            "cell6" => "",
+            "cell7" => number_format($greatGrandTotal),
+        ];
+
+        return Excel::download(new StockValuationReport($excelRows),  "Stock-Valuation-Report".date('Y-m-d').'.xlsx');
     }
 }
