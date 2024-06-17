@@ -107,7 +107,7 @@ class InvoiceReportController extends Controller
         if($request->get('from') && $request->get('to')){
             $data['from'] = $request->get('from');
             $data['to'] = $request->get('to');
-            $data['status'] = $request->get('status');
+            $data['status'] =  "COMPLETE";
         }else{
             $data['from'] = date('Y-m-01');
             $data['to'] = date('Y-m-t');

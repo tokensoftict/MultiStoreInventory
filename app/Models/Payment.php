@@ -112,8 +112,8 @@ class Payment extends Model
             'invoice_type'=>$invoiceType,
             'department' => auth()->user()->department,
             'warehousestore_id' => getActiveStore()->id,
-            'subtotal' => $paymentInformation['invoice']->sub_total,
-            'total_paid' => $paymentInformation['invoice']->sub_total,
+            'subtotal' => $paymentInformation['invoice']->sub_total - $paymentInformation['invoice']->discount_amount,
+            'total_paid' => $paymentInformation['invoice']->sub_total - $paymentInformation['invoice']->discount_amount,
             'payment_time' => Carbon::now()->toTimeString(),
             'payment_date' => date('Y-m-d'),
         ]);
@@ -121,12 +121,14 @@ class Payment extends Model
         {
 
 
-            $invoice_amount =  $paymentInformation['invoice']->sub_total;
+            $invoice_amount =  $paymentInformation['invoice']->sub_total - $paymentInformation['invoice']->discount_amount;
 
             $total_amount_paid = 0;
             foreach($paymentInformation['payment_info']['split_method'] as $pmthod=>$amount)
             {
-                $total_amount_paid+=$amount;
+                if(is_numeric($amount)) {
+                    $total_amount_paid += $amount;
+                }
             }
 
             if($total_amount_paid < $invoice_amount){
@@ -238,16 +240,23 @@ class Payment extends Model
 
 
     public static function validateCreditLimit($paymentInformation, $reports){
-        $totals = Invoice::calculateInvoiceTotal($reports);
+        if($reports instanceof Invoice){
+            $totals['total_invoice_total_selling'] = ($reports->sub_total - $reports->discount_amount);
+        }else{
+            $totals = Invoice::calculateInvoiceTotal($reports);
+        }
         $total = 0;
         $total_amount_paid = 0;
         if( $paymentInformation['payment_info']['payment_method_id'] == "split_method")
         {
             $total+=$totals['total_invoice_total_selling'];
             $total_amount_paid = 0;
+
             foreach($paymentInformation['payment_info']['split_method'] as $pmthod=>$amount)
             {
-                $total_amount_paid+=$amount;
+                if(is_numeric($amount)) {
+                    $total_amount_paid += $amount;
+                }
             }
 
             $total = $total - $total_amount_paid;
@@ -258,8 +267,11 @@ class Payment extends Model
 
         if($total === 0) return false;
 
-        $customer =  Customer::find(request()->get('customer_id'));
-
+        if($reports instanceof Invoice){
+            $customer =  Customer::find($reports->customer_id);
+        }else {
+            $customer = Customer::find(request()->get('customer_id'));
+        }
         $credit_limit = (int)$customer->credit_limit;
 
         $total_credit = (int)$customer->credit_balance;

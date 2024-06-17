@@ -195,12 +195,21 @@
                             @if(userCanView('invoiceandsales.create'))
                                 <section class="panel">
                                     <section class="panel-body panel-border text-center">
-                                        @if(userCanView('invoiceandsales.draft_invoice'))
-                                            <button type="button"  data-status="DRAFT" class="btn btn-success btn-lg" onclick="return ProcessInvoice(this);">Save Draft</button>
+                                        @if(userCanView('invoiceandsales.request_for_discount'))
+                                            <button type="button"  data-status="DISCOUNT" class="btn  btn-dark btn-lg" onclick="return ProcessInvoice(this);">Request For Discount</button>
                                         @endif
-                                        @if(userCanView('invoiceandsales.complete_invoice'))
-                                            <button type="button"  data-status="COMPLETE" class="btn btn-primary btn-lg" onclick="return ProcessInvoice(this);">Complete Invoice</button>
-                                        @endif
+                                        <div class="row mtop-10">
+                                            <div class="col-sm-6">
+                                                @if(userCanView('invoiceandsales.draft_invoice'))
+                                                    <button type="button"  data-status="DRAFT" class="btn btn-block btn-success btn-lg" onclick="return ProcessInvoice(this);">Save Draft</button>
+                                                @endif
+                                            </div>
+                                            <div class="col-sm-6">
+                                                @if(userCanView('invoiceandsales.complete_invoice'))
+                                                    <button type="button"  data-status="COMPLETE" class="btn btn-block btn-primary btn-lg" onclick="return ProcessInvoice(this);">Complete</button>
+                                                @endif
+                                            </div>
+                                        </div>
                                     </section>
                                 </section>
                             @endif
@@ -282,46 +291,46 @@
     </div>
     @if(userCanView('customer.store'))
         <div class="modal fade" id="newCustomer" tabindex="-1" role="dialog" aria-labelledby="loadMeLabel">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title">New Customer</h4>
-                </div>
-                <div class="modal-body">
-                    <div class="alert alert-danger" id="error_reg" style="display: none;"></div>
-                    <form id="new_customer_form" action="{{ route('customer.store') }}?ajax=true"  enctype="multipart/form-data" method="post">
-                        {{ csrf_field() }}
-                        <div class="form-group">
-                            <label>First Name</label>
-                            <input type="text"  required  class="form-control" name="firstname" placeholder="First Name"/>
-                        </div>
-                        <div class="form-group">
-                            <label>Last Name</label>
-                            <input type="text"  required  class="form-control" name="lastname" placeholder="Last Name"/>
-                        </div>
-                        <div class="form-group">
-                            <label>Email</label>
-                            <input type="text"    class="form-control" name="email" placeholder="Email Address"/>
-                        </div>
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">New Customer</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-danger" id="error_reg" style="display: none;"></div>
+                        <form id="new_customer_form" action="{{ route('customer.store') }}?ajax=true"  enctype="multipart/form-data" method="post">
+                            {{ csrf_field() }}
+                            <div class="form-group">
+                                <label>First Name</label>
+                                <input type="text"  required  class="form-control" name="firstname" placeholder="First Name"/>
+                            </div>
+                            <div class="form-group">
+                                <label>Last Name</label>
+                                <input type="text"  required  class="form-control" name="lastname" placeholder="Last Name"/>
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="text"    class="form-control" name="email" placeholder="Email Address"/>
+                            </div>
 
-                        <div class="form-group">
-                            <label>Phone Number</label>
-                            <input type="text" required  class="form-control" name="phone_number" placeholder="Phone Number"/>
-                        </div>
-                        <div class="form-group">
-                            <label>Address</label>
-                            <textarea class="form-control" placeholder="Address" name="address"></textarea>
-                        </div>
-                        <div>
-                            <button type="submit" id="add_customer" class="btn btn-success btn-sm">Add Customer</button>
-                        </div>
+                            <div class="form-group">
+                                <label>Phone Number</label>
+                                <input type="text" required  class="form-control" name="phone_number" placeholder="Phone Number"/>
+                            </div>
+                            <div class="form-group">
+                                <label>Address</label>
+                                <textarea class="form-control" placeholder="Address" name="address"></textarea>
+                            </div>
+                            <div>
+                                <button type="submit" id="add_customer" class="btn btn-success btn-sm">Add Customer</button>
+                            </div>
 
-                    </form>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
     @endif
 @endsection
 
@@ -696,12 +705,12 @@
 
 
 
-                        if(getTotalSplitPayemnt() !== calculateTotal() && $('#customer_id').val() === "1")
-                        {
-                            alert("You can not sell credit to a Generic Customer, Please select real customer");
-                            error = true;
-                            return false;
-                        }
+                    if(getTotalSplitPayemnt() !== calculateTotal() && $('#customer_id').val() === "1")
+                    {
+                        alert("You can not sell credit to a Generic Customer, Please select real customer");
+                        error = true;
+                        return false;
+                    }
 
 
 
@@ -749,7 +758,7 @@
                     return false;
                 }
 
-                    return {
+                return {
                     'split_method':data,
                     'payment_method_id':$('#payment_method').val(),
                     'payment_info_data' : payment_info_data
@@ -854,8 +863,8 @@
                     form__.find(".form-control").removeAttr('disabled');
                     form__.removeAttr('style');
                     if(response.status === true){
-                       var newCustomer = new Option(response.value,response.id,true,true);
-                       $('#customer_id').append(newCustomer).trigger('change');
+                        var newCustomer = new Option(response.value,response.id,true,true);
+                        $('#customer_id').append(newCustomer).trigger('change');
                         $('#newCustomer').modal('hide');
                         form__.find(".form-control").val('');
                         form__.find(".form-control").html('');

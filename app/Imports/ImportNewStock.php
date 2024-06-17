@@ -18,7 +18,6 @@ class ImportNewStock  implements ToModel,WithHeadingRow
 
     public function model(array $row)
     {
-
         $stock = [];
 
         if(!isset($row['name'])) return NULL;
@@ -75,14 +74,15 @@ class ImportNewStock  implements ToModel,WithHeadingRow
         $stock['type'] = strtoupper($row['product_type']) == "SINGLE" ? "NORMAL" : strtoupper($row['product_type']);
 
         $newStock = new Stock($stock);
-
-        if(Arr::has($row, ["bundle_quantity", "yard_quantity", "supplier_name", "supplier_phone"])){
+        $newStock->save();
+        if(Arr::has($row, ["bundle_quantity", "yard_quantity", "supplier_name"])){
 
             $supplier = Supplier::where("name", $row['supplier_name'])->first();
 
             if(!$supplier){
                 $supplier = Supplier::find($row['supplier_name']);
             }
+
 
             if(!$supplier){
                 $supplier = Supplier::create([
@@ -91,17 +91,21 @@ class ImportNewStock  implements ToModel,WithHeadingRow
                 ]);
             }
 
+            $store = getActiveStore();
+
             $stockBatch = new Stockbatch([
                 'quantity' => $row['bundle_quantity'],
                 'received_date' => now()->format("Y-m-d"),
-                'yard_quantity' => $row['yard_quantity'],
-                'supplier_id' => $supplier->id
+                $store->packed_column => $row['bundle_quantity'],
+                $store->yard_column => $row['yard_quantity'],
+                'supplier_id' => $supplier->id,
+                'stock_id' => $newStock->id
             ]);
 
             $newStock->stockbatches()->save($stockBatch);
         }
 
-        return $newStock;
+
     }
 
 

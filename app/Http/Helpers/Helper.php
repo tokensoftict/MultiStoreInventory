@@ -534,6 +534,8 @@ function invoice_status($status){
         return label(ucwords($status),"success");
     }else if($status == "DELETED"){
         return label(ucwords($status),"danger");
+    }else if($status == "DISCOUNT-APPLIED"){
+        return label(ucwords($status),"success");
     }
 }
 

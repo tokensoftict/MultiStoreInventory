@@ -215,12 +215,21 @@
                             @if(userCanView('invoiceandsales.create'))
                                 <section class="panel">
                                     <section class="panel-body panel-border text-center">
-                                        @if($invoice->status == "DRAFT" && userCanView('invoiceandsales.draft_invoice'))
-                                            <button type="button"  data-status="DRAFT" class="btn btn-success btn-lg" onclick="return ProcessInvoice(this);">Save Draft</button>
+                                        @if(userCanView('invoiceandsales.request_for_discount'))
+                                            <button type="button"  data-status="DISCOUNT" class="btn  btn-dark btn-lg" onclick="return ProcessInvoice(this);">Request For Discount</button>
                                         @endif
-                                        @if(userCanView('invoiceandsales.complete_invoice'))
-                                            <button type="button"  data-status="COMPLETE" class="btn btn-primary btn-lg" onclick="return ProcessInvoice(this);">Complete Invoice</button>
-                                        @endif
+                                        <div class="row mtop-10">
+                                            <div class="col-sm-6">
+                                                @if(userCanView('invoiceandsales.draft_invoice'))
+                                                    <button type="button"  data-status="DRAFT" class="btn btn-block btn-success btn-lg" onclick="return ProcessInvoice(this);">Save Draft</button>
+                                                @endif
+                                            </div>
+                                            <div class="col-sm-6">
+                                                @if(userCanView('invoiceandsales.complete_invoice'))
+                                                    <button type="button"  data-status="COMPLETE" class="btn btn-block btn-primary btn-lg" onclick="return ProcessInvoice(this);">Complete</button>
+                                                @endif
+                                            </div>
+                                        </div>
                                     </section>
                                 </section>
                             @endif

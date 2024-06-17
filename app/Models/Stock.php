@@ -286,18 +286,22 @@ class Stock extends Model
     }
 
     public function removeSaleableBatches($batches){
-        foreach ($batches as $key=>$batch){
-            $stockbatch = Stockbatch::find($key);
-            $stockbatch->{$batch['from']} =   $stockbatch->{$batch['from']} - $batch['qty'];
-            $stockbatch->update();
+        if(count($batches) > 0) {
+            foreach ($batches as $key => $batch) {
+                $stockbatch = Stockbatch::find($key);
+                $stockbatch->{$batch['from']} = $stockbatch->{$batch['from']} - $batch['qty'];
+                $stockbatch->update();
+            }
         }
     }
 
     public function addSaleableBatches($batches, $to_where){
-        foreach ($batches as $key=>$batch){
-            $stockbatch = Stockbatch::find($key);
-            $stockbatch->{$to_where} =   $stockbatch->{$to_where} + $batch['qty'];
-            $stockbatch->update();
+        if(count($batches) > 0) {
+            foreach ($batches as $key => $batch) {
+                $stockbatch = Stockbatch::find($key);
+                $stockbatch->{$to_where} = $stockbatch->{$to_where} + $batch['qty'];
+                $stockbatch->update();
+            }
         }
     }
 

@@ -27,6 +27,8 @@
                                     <select class="form-control" name="status">
                                         <option {{ $status == "COMPLETE" ? "selected" : "" }} value="COMPLETE">COMPLETE</option>
                                         <option {{ $status == "DRAFT" ? "selected" : "" }} value="DRAFT">DRAFT</option>
+                                        <option {{ $status == "DISCOUNT" ? "selected" : "" }} value="DISCOUNT">PENDING DISCOUNT</option>
+                                        <option {{ $status == "DISCOUNT-APPLIED" ? "selected" : "" }} value="DISCOUNT-APPLIED">DISCOUNT APPLIED</option>
                                     </select>
                                 </div>
                                 <div class="col-sm-2"><br/>

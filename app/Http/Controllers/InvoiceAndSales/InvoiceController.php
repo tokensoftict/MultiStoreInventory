@@ -32,6 +32,10 @@ class InvoiceController extends Controller
 
     }
 
+    public function request_for_discount(){
+
+    }
+
     public function new(){
         $data = [];
         $data['customers'] = Customer::all();
@@ -51,6 +55,15 @@ class InvoiceController extends Controller
         $data = [];
         $data['title'] = 'Completed Invoice List';
         $data['invoices'] = Invoice::with(['created_user','customer'])->where('warehousestore_id', getActiveStore()->id)->where('status','COMPLETE')->where('invoice_date',date('Y-m-d'))->get();
+        return view('invoice.paid-invoice',$data);
+    }
+
+    public function discount(){
+        $data = [];
+        $data['title'] = 'Pending Discount Invoice List';
+        $data['invoices'] = Invoice::with(['created_user','customer'])->where('warehousestore_id', getActiveStore()->id)->where(function($query){
+            $query->orWhere('status', "DISCOUNT-APPLIED")->orWhere('status', "DISCOUNT");
+        })->where('invoice_date',date('Y-m-d'))->get();
         return view('invoice.paid-invoice',$data);
     }
 
@@ -89,36 +102,61 @@ class InvoiceController extends Controller
 
     public function create(Request $request){
 
-        $reports = Invoice::validateInvoiceProduct(json_decode($request->get('data'),true),'quantity');    // validate products if the quantity is okay
+        if($request->has("no_stock")){
 
-        if($reports['status'] == true) return response()->json(['status'=>false,'error'=>$reports['errors']]);
+            $invoice = Invoice::findorfail($request->get('invoice_id'));
 
-        if($request->get('payment') !== "false" && $request->get('status') == 'COMPLETE') {
-
-            $creditStatus = Payment::validateCreditLimit(['payment_info' => json_decode($request->get('payment'), true), "type" => "Invoice"], $reports);
+            $creditStatus = Payment::validateCreditLimit([ 'payment_info' =>json_decode($request->get('payment_info'), true), "type" => "Invoice"], $invoice);
 
             if ($creditStatus === true) {
-                return response()->json(['status' => false, 'error' => "Customer has reached the credit limit, transaction can not continue"]);
+                return redirect()->route("invoiceandsales.view", $invoice->id)->with("error", "Customer has reached the credit limit, transaction can not continue");
             }
-        }
 
-        $invoice = Invoice::createInvoice($request,$reports, false);
+            if($invoice->status == "COMPLETE") return redirect()->route('invoiceandsales.view',$request->get('invoice_id'))->with('success','Invoice has been completed successfully!');
 
-        if($request->get('payment') !== "false" && $request->get('status') == 'COMPLETE'){
-
-            $payment = Payment::createPayment(['invoice'=>$invoice,'payment_info'=>json_decode($request->get('payment'),true),"type"=>"Invoice"]);
+            $payment = Payment::createPayment(['invoice'=>$invoice, 'payment_info' =>json_decode($request->get('payment_info'), true), "type"=>"Invoice"]);
 
             $invoice->payment_id = $payment->id;
+
+            $invoice->status = "COMPLETE";
 
             $invoice->total_amount_paid = $payment->total_paid;
 
             $invoice->update();
 
+            return redirect()->route('invoiceandsales.view',$request->get('invoice_id'))->with('success','Invoice has been completed successfully!');
+        } else{
+            $reports = Invoice::validateInvoiceProduct(json_decode($request->get('data'), true), 'quantity');    // validate products if the quantity is okay
+
+            if ($reports['status'] == true) return response()->json(['status' => false, 'error' => $reports['errors']]);
+
+            if ($request->get('payment') !== "false" && $request->get('status') == 'COMPLETE') {
+
+                $creditStatus = Payment::validateCreditLimit(['payment_info' => json_decode($request->get('payment'), true), "type" => "Invoice"], $reports);
+
+                if ($creditStatus === true) {
+                    return response()->json(['status' => false, 'error' => "Customer has reached the credit limit, transaction can not continue"]);
+                }
+            }
+
+            $invoice = Invoice::createInvoice($request, $reports, false);
+
+            if ($request->get('payment') !== "false" && $request->get('status') == 'COMPLETE') {
+
+                $payment = Payment::createPayment(['invoice' => $invoice, 'payment_info' => json_decode($request->get('payment'), true), "type" => "Invoice"]);
+
+                $invoice->payment_id = $payment->id;
+
+                $invoice->total_amount_paid = $payment->total_paid;
+
+                $invoice->update();
+
+            }
+
+            $success_view = view('invoice.success', ['invoice_id' => $invoice->id])->render();
+
+            return json(['status' => true, 'html' => $success_view]);
         }
-
-        $success_view = view('invoice.success',['invoice_id'=> $invoice->id])->render();
-
-        return json(['status'=>true,'html'=>$success_view]);
     }
 
 
@@ -168,6 +206,8 @@ class InvoiceController extends Controller
     public function view($id){
         $data = [];
         $data['title'] = 'View Invoice';
+        $data['banks'] = BankAccount::all();
+        $data['payments'] = PaymentMethod::all();
         $data['invoice'] = Invoice::with(['created_by','customer','invoice_items'])->find($id);
         return setPageContent('invoice.view',$data);
     }
@@ -227,6 +267,34 @@ class InvoiceController extends Controller
 
         return json(['status'=>true,'html'=>$success_view]);
 
+    }
+
+
+    public function apply_invoice_discount($id, Request $request)
+    {
+        if($request->method() == "POST"){
+            $invoice = Invoice::find($id);
+            $invoice->discount_amount = $request->get('discount');
+            $invoice->discount_type = "Fixed";
+            $invoice->status = "DISCOUNT-APPLIED";
+            $invoice->save();
+            return redirect()->route("invoiceandsales.view", $invoice)->with('success', "Discount has been applied successfully!");
+        }else{
+            $data = [];
+            $data['title'] = 'Apply Invoice Discount';
+            $data['invoice'] = Invoice::with(['created_by','customer','invoice_items'])->find($id);
+            return view('invoice.apply_discount',$data);
+        }
+    }
+
+    public function cancel_discount($id)
+    {
+        $invoice = Invoice::find($id);
+        $invoice->discount_amount = 0;
+        $invoice->discount_type = "none";
+        $invoice->status = "DRAFT";
+        $invoice->save();
+        return redirect()->route("invoiceandsales.view", $invoice)->with('success', "Discount has been cancel successfully!");
     }
 
 }

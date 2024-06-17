@@ -266,6 +266,7 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
                 Route::post('create', ['as' => 'create', 'uses' => 'InvoiceController@create']);
                 Route::get('draft', ['as' => 'draft', 'uses' => 'InvoiceController@draft', 'custom_label'=>"Today's Draft Invoice", 'visible' => true]);
                 Route::get('paid', ['as' => 'paid', 'uses' => 'InvoiceController@paid', 'custom_label'=>"Today's Complete Invoice" ,'visible' => true]);
+                Route::get('discount', ['as' => 'discount', 'uses' => 'InvoiceController@discount', 'custom_label'=>"Pending Discount's Invoice" ,'visible' => true]);
                 Route::get('{id}/pos_print', ['as' => 'pos_print', 'uses' => 'InvoiceController@print_pos' ]);
                 Route::get('{id}/print_afour', ['as' => 'print_afour', 'uses' => 'InvoiceController@print_afour']);
                 Route::get('{id}/print_way_bill', ['as' => 'print_way_bill', 'uses' => 'InvoiceController@print_way_bill']);
@@ -278,6 +279,9 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
 
                 Route::get('draft_invoice', ['as' => 'draft_invoice', 'uses' => 'InvoiceController@draft_invoice','custom_label'=>'Save Invoice to Draft']);
                 Route::get('complete_invoice', ['as' => 'complete_invoice', 'uses' => 'InvoiceController@complete_invoice','custom_label'=>'Save Invoice to Complete']);
+                Route::get('request_for_discount', ['as' => 'request_for_discount', 'uses' => 'InvoiceController@request_for_discount','custom_label'=>'Request For Discount']);
+                Route::match(['get', 'post'],'{id}/apply_invoice_discount', ['as' => 'apply_invoice_discount', 'uses' => 'InvoiceController@apply_invoice_discount','custom_label'=>'Apply Invoice Discount']);
+                Route::get('{id}/cancel_discount', ['as' => 'cancel_discount', 'uses' => 'InvoiceController@cancel_discount','custom_label'=>'Cancel Discount Request']);
             });
 
         });

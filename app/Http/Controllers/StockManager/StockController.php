@@ -9,6 +9,7 @@ use App\Exports\StockValuationReport;
 use App\Http\Controllers\Controller;
 use App\Imports\ImportExistingStock;
 use App\Imports\ImportNewStock;
+use App\Imports\importStockWithMultipleSheet;
 use App\Imports\StockTakingItemImport;
 use App\Models\InvoiceItem;
 use App\Models\Manufacturer;
@@ -322,6 +323,7 @@ class StockController extends Controller
             return Stock::adjustStockQuantity($request);
         }else if(($request->method() == "POST") &&  !isset($request->yard_qty)){
             $data['convert_stock'] = Stock::find($request->select_stock);
+            if(!$data['convert_stock']) redirect()->route('stock.quick')->with('error','Stock selected not found, Please check if you have selected a stock');
             $countBatch = $data['convert_stock']->stockBatches()->orderBy("expiry_date", "DESC")->count();
             if($countBatch == 0) redirect()->route('stock.quick')->with('error','Stock Initial Purchase Order not found, Please create Purchase order for product to adjust');
             $data['stock'] =  $data['convert_stock'];
@@ -350,7 +352,7 @@ class StockController extends Controller
         {
             set_time_limit(0);
             ini_set('memory_limit', '1024M');
-            Excel::import(new ImportNewStock(), request()->file('excel_file'));
+            Excel::import(new importStockWithMultipleSheet(), request()->file('excel_file'));
             return redirect()->route('stock.import_new_stock')->with('success','New Stock has been Imported Successfully!');
         }
 
@@ -416,19 +418,7 @@ class StockController extends Controller
         ];
 
 
-
-        $sql = "";
-        $store = getActiveStore();
-
-        $sql .= "SUM(" . $store->packed_column . ") as " . $store->packed_column . ",";
-        $sql .= "SUM(" . $store->yard_column . ") as " . $store->yard_column . ",";
-
-        $sql = rtrim($sql,", ");
-
-        $stockbatches = Stock::query()->with(['stockbatches' => function($query) use($sql){
-            $query->select(DB::raw($sql))->groupBy('stock_id');
-        }])->whereNull("product_category_id")->get();
-
+        $stockbatches = Stock::query()->whereNull("product_category_id")->get();
 
         $grandTotal = 0;
         if($stockbatches->count() > 0) {
@@ -442,15 +432,15 @@ class StockController extends Controller
                 "cell7" => "",
             ];
             foreach ($stockbatches as $stockbatch) {
-                $grandTotal =$stockbatch->cost_price*(isset($stockbatch->stockbatches->{$store->packed_column}) ? $stockbatch->stockbatches->{$store->packed_column} : 0);
+                $grandTotal = ($stockbatch->cost_price * $stockbatch->available_quantity);
                 $excelRows[] = [
                     "cell1" => "",
                     "cell2" => $stockbatch->name,
                     "cell3" => "",
                     "cell4" => "",
                     "cell5" => number_format($stockbatch->cost_price),
-                    "cell6" => number_format((isset($stockbatch->stockbatches->{$store->packed_column}) ? $stockbatch->stockbatches->{$store->packed_column} : 0)),
-                    "cell7" => number_format($stockbatch->cost_price*(isset($stockbatch->stockbatches->{$store->packed_column}) ? $stockbatch->stockbatches->{$store->packed_column} : 0)),
+                    "cell6" => number_format($stockbatch->available_quantity),
+                    "cell7" => number_format($stockbatch->cost_price*$stockbatch->available_quantity),
                 ];
             }
             $excelRows[] = [
@@ -477,22 +467,20 @@ class StockController extends Controller
                 "cell7" => "",
             ];
 
-            $stockbatches =  Stock::query()->with(['stockbatches' => function($query) use($sql){
-                $query->select(DB::raw($sql))->groupBy('stock_id');
-            }])->where("product_category_id", $category->id)->get();
+            $stockbatches =  Stock::query()->where("product_category_id", $category->id)->get();
 
             $grandTotal = 0;
 
             foreach ($stockbatches as $stockbatch){
-                $grandTotal =$stockbatch->cost_price*(isset($stockbatch->stockbatches->{$store->packed_column}) ? $stockbatch->stockbatches->{$store->packed_column} : 0);
+                $grandTotal = ($stockbatch->cost_price * $stockbatch->available_quantity);
                 $excelRows[] = [
                     "cell1" => "",
                     "cell2" => $stockbatch->name,
                     "cell3" => "",
                     "cell4" => "",
                     "cell5" => number_format($stockbatch->cost_price),
-                    "cell6" => number_format((isset($stockbatch->stockbatches->{$store->packed_column}) ? $stockbatch->stockbatches->{$store->packed_column} : 0)),
-                    "cell7" => number_format($stockbatch->cost_price*(isset($stockbatch->stockbatches->{$store->packed_column}) ? $stockbatch->stockbatches->{$store->packed_column} : 0)),
+                    "cell6" => number_format($stockbatch->available_quantity),
+                    "cell7" => number_format($stockbatch->cost_price*$stockbatch->available_quantity),
                 ];
             }
             $excelRows[] = [
