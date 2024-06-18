@@ -30,6 +30,15 @@ class StockExport implements FromCollection, WithHeadings
         $packed_column = $store->packed_column;
         $yard_column = $store->yard_column;
 
+
+        $stocks =   DB::table('stocks')->select(
+            'stocks.id',
+            'stocks.name',
+            'product_category.name as cat_name',
+        ) ->join('product_category', 'stocks.product_category_id','=','product_category.id')
+            ->where('stocks.status', 1);
+
+        /*
         $stocks =  DB::table('stockbatches')->select(
             'stocks.id',
             'stocks.name',
@@ -42,7 +51,7 @@ class StockExport implements FromCollection, WithHeadings
             ->where('stocks.status', 1)
             ->groupBy('stocks.id')
             ->groupBy('stocks.name');
-
+        */
         if(request()->has('categories')){
             if(in_array("all",  request()->get('categories'))) {
             }else{

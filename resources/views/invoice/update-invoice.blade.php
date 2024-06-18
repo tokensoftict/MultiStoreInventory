@@ -169,7 +169,7 @@
                                             <tr style="cursor: pointer" id="product_{{  $items->stock->id }}">
                                                 <th  class="text-center"><input data-image="{{ $items->stock->image }}" name="picture" class="picture" value="1" type="radio"></th>
                                                 <th>{{ $items->stock->name }}<div id="error_{{ $items->stock->id }}" class="errors alert alert-danger" style="display:none;"></div></th>
-                                                <td><div class="col-md-4"><div class="input-group"> <span class="input-group-btn input-group-sm"> <button  data-field="quant[1]" type="button" class="btn btn-danger btn-number minus" data-type="minus"> <i class="fa fa-minus"></i></button></span><input class="form-control text-center input-number" data-invoice-item-id="{{ $items->id }}"  data-id="{{ $items->stock->id }}" data-price="{{ $items->selling_price }}" style="width:100px;display: block;" required="" max="{{ $items->store == "quantity" ? $items->stock->available_quantity+ $items->quantity  :  $items->stock->yard_available_quantity+ $items->quantity }}" min="1" type="number" value="{{ $items->quantity }}"> <span class="input-group-btn"> <button type="button" class="btn btn-primary btn-number plus" data-type="plus"><i class="fa fa-plus"></i> </button> </span></div></div>
+                                                <td><div class="col-md-4"><div class="input-group"> <span class="input-group-btn input-group-sm"> <button  data-field="quant[1]" type="button" class="btn btn-danger btn-number minus" data-type="minus"> <i class="fa fa-minus"></i></button></span><input class="form-control text-center input-number" data-invoice-item-id="{{ $items->id }}"  data-id="{{ $items->stock->id }}" data-cost-price="{{  $items->cost_price }}" data-price="{{ $items->selling_price }}" style="width:100px;display: block;" required="" max="{{ $items->store == "quantity" ? $items->stock->available_quantity+ $items->quantity  :  $items->stock->yard_available_quantity+ $items->quantity }}" min="1" type="number" value="{{ $items->quantity }}"> <span class="input-group-btn"> <button type="button" class="btn btn-primary btn-number plus" data-type="plus"><i class="fa fa-plus"></i> </button> </span></div></div>
                                                 <td>
                                                     <select class="form-control product_type">
                                                         @if($items->store == getActiveStore()->packed_column)
@@ -181,7 +181,7 @@
                                                         @endif
                                                     </select>
                                                 </td>
-                                                <th class="text-right item_price">{{ number_format($items->selling_price,2) }}</th>
+                                                <th class="text-right item_price"><input type="text" step="0.00000001" class="item_text_price form-control"  value="{{ $items->selling_price }}"></th>
                                                 <th class="text-right item_total">{{ number_format($items->total_selling_price,2) }}</th>
                                                 <td class="text-right"> <a href="#" onclick="return removeItem(this);" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i></a></td>
                                             </tr>
@@ -411,6 +411,13 @@
 
         function bindIncrement(){
             let qty_before = 1;
+
+            $('.item_text_price').off('keyup');
+            $('.item_text_price').on('keyup',function(){
+                const textb = $(this).parent().parent().find('.input-number');
+                textb.attr('data-price',$(this).val());
+                calculateTotal();
+            });
             $('.btn-number').off("click");
             $('.btn-number').click(function(e){
                 e.preventDefault();
@@ -535,7 +542,7 @@
 
         function cartTemplate(data){
             let type_select = "";
-            if(data.stock.type != "Normal"){
+            if(data.stock.type != "NORMAL"){
                 type_select += '<select class="form-control product_type">';
 
                 if(parseInt(data.stock.available_quantity) > 0) {
@@ -558,7 +565,7 @@
                 data.stock.selling_price = data.stock.yard_selling_price
             }
 
-            return '<tr style="cursor: pointer" id="product_'+data.stock.id+'"><th  class="text-center"><input data-image="'+data.stock.image+'" name="picture" class="picture" value="1" type="radio"></th><th>'+data.stock.name+'<div id="error_'+data.stock.id+'" class="errors alert alert-danger" '+(data['error'] ? '' : 'style="display:none;"')+'>'+(data['error'] ? data['error'] : '')+'</div>'+'</th><td><div class="col-md-4"><div class="input-group"> <span class="input-group-btn input-group-sm"> <button  data-field="quant[1]" type="button" class="btn btn-danger btn-number minus" data-type="minus"> <i class="fa fa-minus"></i></button></span><input class="form-control text-center input-number" data-invoice-item-id="new"  data-id="'+data.stock.id+'" data-cost-price="'+data.stock.cost_price+'" data-price="'+data.stock.selling_price+'" style="width:100px;display: block;" required="" max="'+data.stock.available_quantity+'" min="1" type="number" value="1"> <span class="input-group-btn"> <button type="button" class="btn btn-primary btn-number plus" data-type="plus"><i class="fa fa-plus"></i> </button> </span></div></div><td>'+type_select+'</td><input type="text" step="0.00000001" class="item_text_price form-control" value="'+data.stock.selling_price+'"/><th class="text-right item_total">'+formatMoney(data.stock.selling_price)+'</th><td class="text-right"> <a href="#" onclick="return removeItem(this);" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i></a></td></tr>';
+            return '<tr style="cursor: pointer" id="product_'+data.stock.id+'"><th  class="text-center"><input data-image="'+data.stock.image+'" name="picture" class="picture" value="1" type="radio"></th><th>'+data.stock.name+'<div id="error_'+data.stock.id+'" class="errors alert alert-danger" '+(data['error'] ? '' : 'style="display:none;"')+'>'+(data['error'] ? data['error'] : '')+'</div>'+'</th><td><div class="col-md-4"><div class="input-group"> <span class="input-group-btn input-group-sm"> <button  data-field="quant[1]" type="button" class="btn btn-danger btn-number minus" data-type="minus"> <i class="fa fa-minus"></i></button></span><input class="form-control text-center input-number"  data-id="'+data.stock.id+'" data-price="'+data.stock.selling_price+'" data-cost-price="'+data.stock.cost_price+'" style="width:100px;display: block;" required="" max="'+data.stock.available_quantity+'" min="1" type="number" value="1"> <span class="input-group-btn"> <button type="button" class="btn btn-primary btn-number plus" data-type="plus"><i class="fa fa-plus"></i> </button> </span></div></div><td>'+type_select+'</td><th class="text-right item_price"><input type="text" step="0.00000001" class="item_text_price form-control" value="'+data.stock.selling_price+'"/></th><th class="text-right item_total">'+formatMoney(data.stock.selling_price)+'</th><td class="text-right"> <a href="#" onclick="return removeItem(this);" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i></a></td></tr>';
         }
 
         function ProcessInvoice(btn){
