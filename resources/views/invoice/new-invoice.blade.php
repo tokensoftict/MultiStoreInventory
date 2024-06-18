@@ -358,18 +358,18 @@
         }
 
         function appendToTable(data){
-            if(!document.getElementById('product_'+data.stock.id)) {
-                $('#appender').prepend(cartTemplate(data));
-                $('.picture').prop('checked',false);
-                $('#'+'product_'+data.stock.id).find('.picture').prop('checked', true);
-                $('#imageThumb').attr('src', $('#'+'product_'+data.stock.id).find('.picture').attr('data-image'));
-                bindIncrement();
-                bindAllTr();
-                bindproductType();
-                calculateTotal();
-            }else{
-                alert(data.stock.name+' already exist in cart')
-            }
+            //if(!document.getElementById('product_'+data.stock.id)) {
+            $('#appender').prepend(cartTemplate(data));
+            $('.picture').prop('checked',false);
+            $('#'+'product_'+data.stock.id).find('.picture').prop('checked', true);
+            $('#imageThumb').attr('src', $('#'+'product_'+data.stock.id).find('.picture').attr('data-image'));
+            bindIncrement();
+            bindAllTr();
+            bindproductType();
+            calculateTotal();
+            // }else{
+            //     alert(data.stock.name+' already exist in cart')
+            // }
 
         }
 

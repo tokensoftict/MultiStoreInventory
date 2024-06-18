@@ -300,18 +300,18 @@
         }
 
         function appendToTable(data){
-            if(!document.getElementById('product_'+data.stock.id)) {
-                $('#appender').prepend(cartTemplate(data));
-                $('.picture').prop('checked',false);
-                $('#'+'product_'+data.stock.id).find('.picture').prop('checked', true);
-                $('#imageThumb').attr('src', $('#'+'product_'+data.stock.id).find('.picture').attr('data-image'));
-                bindIncrement();
-                bindAllTr();
-                bindproductType();
-                calculateTotal();
-            }else{
-                alert(data.stock.name+' already exist in cart')
-            }
+            // if(!document.getElementById('product_'+data.stock.id)) {
+            $('#appender').prepend(cartTemplate(data));
+            $('.picture').prop('checked',false);
+            $('#'+'product_'+data.stock.id).find('.picture').prop('checked', true);
+            $('#imageThumb').attr('src', $('#'+'product_'+data.stock.id).find('.picture').attr('data-image'));
+            bindIncrement();
+            bindAllTr();
+            bindproductType();
+            calculateTotal();
+            // }else{
+            //   alert(data.stock.name+' already exist in cart')
+            //}
 
         }
 
@@ -365,16 +365,16 @@
 
                     } else if(type == 'plus') {
                         input.val(currentVal + 1).change();
-                    /*
+                        /*
 
-                        if(parseInt(input.val()) == input.attr('max')) {
-                            $(this).attr('disabled', true);
-                        }
+                            if(parseInt(input.val()) == input.attr('max')) {
+                                $(this).attr('disabled', true);
+                            }
 
-                        if(parseInt(input.val()) > input.attr('min')){
-                            $(this).parent().parent().find('.minus').removeAttr('disabled')
-                        }
-                        */
+                            if(parseInt(input.val()) > input.attr('min')){
+                                $(this).parent().parent().find('.minus').removeAttr('disabled')
+                            }
+                            */
 
                     }
                 } else {
@@ -474,13 +474,13 @@
                 type_select += '<select class="form-control product_type">';
 
                 //if(parseInt(data.stock.available_quantity) > 0) {
-                    type_select += '<option selected value="{{ getActiveStore()->packed_column }}" data-cost-price="'+data.stock.cost_price+'" data-price="'+data.stock.selling_price+'" data-av-qty="'+data.stock.available_quantity+'">Packed</option>';
+                type_select += '<option selected value="{{ getActiveStore()->packed_column }}" data-cost-price="'+data.stock.cost_price+'" data-price="'+data.stock.selling_price+'" data-av-qty="'+data.stock.available_quantity+'">Packed</option>';
                 //}
                 //if(parseInt(data.stock.available_yard_quantity) > 0) {
-                    type_select += '<option value="{{ getActiveStore()->yard_column }}" data-cost-price="'+data.stock.yard_cost_price+'" data-price="'+data.stock.yard_selling_price+'" data-av-qty="'+data.stock.available_yard_quantity+'">Pieces / Yards</option>';
+                type_select += '<option value="{{ getActiveStore()->yard_column }}" data-cost-price="'+data.stock.yard_cost_price+'" data-price="'+data.stock.yard_selling_price+'" data-av-qty="'+data.stock.available_yard_quantity+'">Pieces / Yards</option>';
                 //}
 
-                    type_select +='</select>';
+                type_select +='</select>';
             }else{
                 type_select += '<select class="form-control product_type">';
                 type_select +='<option selected value="{{ getActiveStore()->packed_column }}" data-cost-price="'+data.stock.cost_price+'" data-price="'+data.stock.selling_price+'" data-av-qty="'+data.stock.available_quantity+'">Packed</option>';
@@ -488,9 +488,9 @@
             }
 
             //if(data.stock.available_quantity == 0 && data.stock.available_yard_quantity >0){
-                data.stock.available_quantity = data.stock.available_yard_quantity;
-                data.stock.selling_price = data.stock.yard_selling_price
-           // }
+            data.stock.available_quantity = data.stock.available_yard_quantity;
+            data.stock.selling_price = data.stock.yard_selling_price
+            // }
 
             return '<tr style="cursor: pointer" id="product_'+data.stock.id+'"><th  class="text-center"><input data-image="'+data.stock.image+'" name="picture" class="picture" value="1" type="radio"></th><th>'+data.stock.name+'<div id="error_'+data.stock.id+'" class="errors alert alert-danger" '+(data['error'] ? '' : 'style="display:none;"')+'>'+(data['error'] ? data['error'] : '')+'</div>'+'</th><td><div class="col-md-4"><div class="input-group"> <span class="input-group-btn input-group-sm"> <button  data-field="quant[1]" type="button" class="btn btn-danger btn-number minus" data-type="minus"> <i class="fa fa-minus"></i></button></span><input class="form-control text-center input-number"  data-id="'+data.stock.id+'" data-cost-price="'+data.stock.cost_price+'" data-price="'+data.stock.selling_price+'" style="width:100px;display: block;" required=""  type="number" value="1"> <span class="input-group-btn"> <button type="button" class="btn btn-primary btn-number plus" data-type="plus"><i class="fa fa-plus"></i> </button> </span></div></div><td>'+type_select+'</td><th class="text-right item_price"><input type="text" step="0.00000001" class="item_text_price form-control" value="'+data.stock.selling_price+'"/></th><th class="text-right item_total">'+formatMoney(data.stock.selling_price)+'</th><td class="text-right"> <a href="#" onclick="return removeItem(this);" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i></a></td></tr>';
         }
@@ -666,7 +666,7 @@
 
 
 
-                        data[$(this).attr('data-key')] = $(this).val();
+                    data[$(this).attr('data-key')] = $(this).val();
 
                     payment_info_data[$(this).attr('data-key')] = {};
 
@@ -710,7 +710,7 @@
                     return false;
                 }
 
-                    return {
+                return {
                     'split_method':data,
                     'payment_method_id':$('#payment_method').val(),
                     'payment_info_data' : payment_info_data

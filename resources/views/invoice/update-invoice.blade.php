@@ -173,8 +173,8 @@
                                                 <td>
                                                     <select class="form-control product_type">
                                                         @if($items->store == getActiveStore()->packed_column)
-                                                                <option value="{{ getActiveStore()->packed_column }}" {{ $items->store == getActiveStore()->packed_column ? "selected" : "" }} data-cost-price="{{  $items->stock->cost_price }}" data-price="{{ $items->stock->selling_price }}" data-av-qty="{{ $items->stock->available_quantity+ $items->quantity }}">Packed</option>
-                                                                <option value="{{ getActiveStore()->yard_column }}" {{ $items->store == getActiveStore()->yard_column ? "selected" : "" }} data-cost-price="{{  $items->stock->yard_cost_price }}" data-price="{{ $items->stock->yard_selling_price }}" data-av-qty="{{ $items->stock->available_yard_quantity }}">Pieces / Yards</option>
+                                                            <option value="{{ getActiveStore()->packed_column }}" {{ $items->store == getActiveStore()->packed_column ? "selected" : "" }} data-cost-price="{{  $items->stock->cost_price }}" data-price="{{ $items->stock->selling_price }}" data-av-qty="{{ $items->stock->available_quantity+ $items->quantity }}">Packed</option>
+                                                            <option value="{{ getActiveStore()->yard_column }}" {{ $items->store == getActiveStore()->yard_column ? "selected" : "" }} data-cost-price="{{  $items->stock->yard_cost_price }}" data-price="{{ $items->stock->yard_selling_price }}" data-av-qty="{{ $items->stock->available_yard_quantity }}">Pieces / Yards</option>
                                                         @else
                                                             <option value="{{ getActiveStore()->packed_column }}" data-cost-price="{{  $items->stock->cost_price }}" data-price="{{ $items->stock->selling_price }}" data-av-qty="{{ $items->stock->available_quantity }}">Packed</option>
                                                             <option value="{{ getActiveStore()->yard_column }}" data-cost-price="{{  $items->stock->yard_cost_price }}" selected data-price="{{ $items->stock->yard_selling_price }}" data-av-qty="{{ $items->stock->available_yard_quantity+ $items->quantity }}">Pieces / Yards</option>
@@ -248,15 +248,15 @@
                                         </div>
                                         <div class="col-sm-6">
 
-                                                <div class="form-group">
-                                                    <label for="exampleInputEmail1">Customer Name</label>
-                                                    <select class="form-control  select-customer"  name="customer" id="customer_id">
-                                                        @foreach($customers as $customer)
-                                                            <option {{ $invoice->customer_id == $customer->id ? "selected" : "" }} value="{{ $customer->id }}">{{ $customer->firstname }} {{ $customer->lastname }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                    <a href="#" data-toggle="modal" data-target="#newCustomer" class="text-success" style="display: block;text-align: center">Add New Customer</a>
-                                                </div>
+                                            <div class="form-group">
+                                                <label for="exampleInputEmail1">Customer Name</label>
+                                                <select class="form-control  select-customer"  name="customer" id="customer_id">
+                                                    @foreach($customers as $customer)
+                                                        <option {{ $invoice->customer_id == $customer->id ? "selected" : "" }} value="{{ $customer->id }}">{{ $customer->firstname }} {{ $customer->lastname }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <a href="#" data-toggle="modal" data-target="#newCustomer" class="text-success" style="display: block;text-align: center">Add New Customer</a>
+                                            </div>
 
                                         </div>
                                     </div>
@@ -380,18 +380,18 @@
         }
 
         function appendToTable(data){
-            if(!document.getElementById('product_'+data.stock.id)) {
-                $('#appender').prepend(cartTemplate(data));
-                $('.picture').prop('checked',false);
-                $('#'+'product_'+data.stock.id).find('.picture').prop('checked', true);
-                $('#imageThumb').attr('src', $('#'+'product_'+data.stock.id).find('.picture').attr('data-image'));
-                bindIncrement();
-                bindAllTr();
-                bindproductType();
-                calculateTotal();
-            }else{
-                alert(data.stock.name+' already exist in cart')
-            }
+            // if(!document.getElementById('product_'+data.stock.id)) {
+            $('#appender').prepend(cartTemplate(data));
+            $('.picture').prop('checked',false);
+            $('#'+'product_'+data.stock.id).find('.picture').prop('checked', true);
+            $('#imageThumb').attr('src', $('#'+'product_'+data.stock.id).find('.picture').attr('data-image'));
+            bindIncrement();
+            bindAllTr();
+            bindproductType();
+            calculateTotal();
+            // }else{
+            //     alert(data.stock.name+' already exist in cart')
+            // }
 
         }
 
@@ -546,7 +546,7 @@
                 }
 
 
-                    type_select +='</select>';
+                type_select +='</select>';
             }else{
                 type_select += '<select class="form-control product_type">';
                 type_select +='<option selected value="{{ getActiveStore()->packed_column }}" data-cost-price="'+data.stock.cost_price+'" data-price="'+data.stock.selling_price+'" data-av-qty="'+data.stock.available_quantity+'">Packed</option>';
