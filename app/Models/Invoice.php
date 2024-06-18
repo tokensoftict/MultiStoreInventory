@@ -525,12 +525,9 @@ class Invoice extends Model
 
         foreach ($stocks as $key=>$stock){
             //lets check if the customer is buying yards or bundle
-            if($stock['prods']['type'] == "yard_qty"){
-                $stock['stock']->selling_price = $stock['prods']['price'];
-                $stock['stock']->cost_price = $stock['stock']->yard_cost_price;
-            }
+
             $invoiceTotal[$key]['total_selling_price']  =  $stock['prods']['price'] * $stock['prods']['qty'];
-            $invoiceTotal[$key]['total_cost_price']  =  $stock['stock']->cost_price * $stock['prods']['qty'];
+            $invoiceTotal[$key]['total_cost_price']  =  $stock['prods']['cost_price'] * $stock['prods']['qty'];
             $invoiceTotal[$key]['total_profit'] =  $invoiceTotal[$key]['total_selling_price'] -  $invoiceTotal[$key]['total_cost_price'];
             $total_invoice_total_selling += $invoiceTotal[$key]['total_selling_price'];
             $total_invoice_total_cost += $invoiceTotal[$key]['total_cost_price'] ;
@@ -557,13 +554,8 @@ class Invoice extends Model
 
         foreach ($stocks as $key=>$stock){
 
-            if($stock['prods']['type'] == "yard_qty"){
-                $stock['stock']->selling_price = $stock['prods']['price'];
-                $stock['stock']->cost_price = $stock['stock']->yard_cost_price;
-            }
-
             $total_selling_price  =  $stock['prods']['price'] * $stock['prods']['qty'];
-            $total_cost_price  =  $stock['stock']->cost_price * $stock['prods']['qty'];
+            $total_cost_price  =  $stock['prods']['cost_price'] * $stock['prods']['qty'];
             $total_profit =   $total_selling_price -  $total_cost_price;
 
             //remove stock quantity from database
@@ -580,9 +572,9 @@ class Invoice extends Model
                 'invoice_date' =>$invoice_date,
                 'store' => $stock['prods']['type'],
                 'sales_time' =>$sales_time,
-                'cost_price'=>($invoice->sub_total < 0 ? -($stock['stock']->cost_price) : ($stock['stock']->cost_price)),
+                'cost_price'=>($invoice->sub_total < 0 ? -($stock['prods']['cost_price']) : ($stock['prods']['cost_price'])),
                 'selling_price' =>($invoice->sub_total < 0 ? -($stock['prods']['price']) : ($stock['prods']['price'])),
-                'profit'=>($invoice->sub_total < 0 ? ($stock['prods']['price'] - $stock['stock']->cost_price) : ($stock['prods']['price'] - $stock['stock']->cost_price)),
+                'profit'=>($invoice->sub_total < 0 ? ($stock['prods']['price'] - $stock['prods']['cost_price']) : ($stock['prods']['price'] - $stock['prods']['cost_price'])),
                 'total_selling_price' =>($invoice->sub_total < 0 ? -$total_selling_price : $total_selling_price),
                 'total_cost_price' => ($invoice->sub_total < 0 ? -$total_cost_price : $total_cost_price),
                 'total_profit'=>($invoice->sub_total < 0 ? -$total_profit : $total_profit),
@@ -628,10 +620,7 @@ class Invoice extends Model
         $stocks = $validationReports['data'];
 
         foreach ($stocks as $key=>$stock){
-            if($stock['prods']['type'] == "yard_qty"){
-                $stock['stock']->selling_price = $stock['prod']['price'];
-                $stock['stock']->cost_price = $stock['stock']->yard_cost_price;
-            }
+
 
             if($invoice->sub_total < 0)
             {
@@ -650,9 +639,9 @@ class Invoice extends Model
                     'invoice_id'=> $invoice->id,
                     'stock_id' => $key,
                     'stockbatch_id'=>$batch['id'],
-                    'cost_price'=> $invoice->sub_total < 0 ? -($stock['stock']->cost_price) : $stock['stock']->cost_price,
-                    'selling_price'=> $invoice->sub_total < 0 ? -($stock['prods']['price']) : $stock['stock']->cost_price,
-                    'profit'=>$invoice->sub_total < 0 ? -($stock['stock']->selling_price - $stock['stock']->cost_price) : ($stock['stock']->selling_price - $stock['stock']->cost_price),
+                    'cost_price'=> $invoice->sub_total < 0 ? -($stock['prods']['cost_price']) : $stock['prods']['cost_price'],
+                    'selling_price'=> $invoice->sub_total < 0 ? -($stock['prods']['price']) : $stock['prods']['price'],
+                    'profit'=>$invoice->sub_total < 0 ? -($stock['prods']['price'] - $stock['prods']['cost_price']) : ($stock['prods']['price'] - $stock['prods']['cost_price']),
                     'quantity' => $batch['qty'],
                     'department'=> auth()->user()->department,
                     'warehousestore_id' => getActiveStore()->id,

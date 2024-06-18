@@ -173,11 +173,11 @@
                                                 <td>
                                                     <select class="form-control product_type">
                                                         @if($items->store == getActiveStore()->packed_column)
-                                                                <option value="{{ getActiveStore()->packed_column }}" {{ $items->store == getActiveStore()->packed_column ? "selected" : "" }} data-price="{{ $items->selling_price }}" data-av-qty="{{ $items->stock->available_quantity+ $items->quantity }}">Packed</option>
-                                                                <option value="{{ getActiveStore()->yard_column }}" {{ $items->store == getActiveStore()->yard_column ? "selected" : "" }} data-price="{{ $items->stock->yard_selling_price }}" data-av-qty="{{ $items->stock->available_yard_quantity }}">Pieces / Yards</option>
+                                                                <option value="{{ getActiveStore()->packed_column }}" {{ $items->store == getActiveStore()->packed_column ? "selected" : "" }} data-cost-price="{{  $items->stock->cost_price }}" data-price="{{ $items->stock->selling_price }}" data-av-qty="{{ $items->stock->available_quantity+ $items->quantity }}">Packed</option>
+                                                                <option value="{{ getActiveStore()->yard_column }}" {{ $items->store == getActiveStore()->yard_column ? "selected" : "" }} data-cost-price="{{  $items->stock->yard_cost_price }}" data-price="{{ $items->stock->yard_selling_price }}" data-av-qty="{{ $items->stock->available_yard_quantity }}">Pieces / Yards</option>
                                                         @else
-                                                            <option value="{{ getActiveStore()->packed_column }}" data-price="{{ $items->selling_price }}" data-av-qty="{{ $items->stock->available_quantity }}">Packed</option>
-                                                            <option value="{{ getActiveStore()->yard_column }}" selected data-price="{{ $items->stock->yard_selling_price }}" data-av-qty="{{ $items->stock->available_yard_quantity+ $items->quantity }}">Pieces / Yards</option>
+                                                            <option value="{{ getActiveStore()->packed_column }}" data-cost-price="{{  $items->stock->cost_price }}" data-price="{{ $items->stock->selling_price }}" data-av-qty="{{ $items->stock->available_quantity }}">Packed</option>
+                                                            <option value="{{ getActiveStore()->yard_column }}" data-cost-price="{{  $items->stock->yard_cost_price }}" selected data-price="{{ $items->stock->yard_selling_price }}" data-av-qty="{{ $items->stock->available_yard_quantity+ $items->quantity }}">Pieces / Yards</option>
                                                         @endif
                                                     </select>
                                                 </td>
@@ -403,6 +403,7 @@
                 const td_price = $(this).parent().parent().find('.item_price');
                 price.attr('max',$('option:selected', this).attr('data-av-qty'));
                 price.attr('data-price',$('option:selected', this).attr('data-price'));
+                price.attr('data-cost-price',$('option:selected', this).attr('data-cost-price'));
                 td_price.html('<input type="text" step="0.00000001" class="item_text_price form-control" value="'+parseFloat($('option:selected', this).attr('data-price')).toFixed(1)+'"/>')
                 bindproductType();
             });
@@ -499,7 +500,8 @@
                         qty: $(this).val(),
                         type: type.val(),
                         price : $(this).attr('data-price'),
-                        invoice_item_id : $(this).attr('data-invoice-item-id')
+                        invoice_item_id : $(this).attr('data-invoice-item-id'),
+                        cost_price : $(this).attr('data-cost-price')
                     }
                 );
                 if(parseInt($(elem).val()) > parseInt($(elem).attr('max'))){
@@ -537,19 +539,17 @@
                 type_select += '<select class="form-control product_type">';
 
                 if(parseInt(data.stock.available_quantity) > 0) {
-                    type_select += '<option selected value="{{ getActiveStore()->packed_column }}" data-price="'+data.stock.selling_price+'" data-av-qty="'+data.stock.available_quantity+'">Packed</option>';
+                    type_select += '<option selected value="{{ getActiveStore()->packed_column }}" data-cost-price="'+data.stock.cost_price+'" data-price="'+data.stock.selling_price+'" data-av-qty="'+data.stock.available_quantity+'">Packed</option>';
                 }
                 if(parseInt(data.stock.available_yard_quantity) > 0) {
-                    type_select += '<option value="{{ getActiveStore()->yard_column }}" data-price="'+data.stock.yard_selling_price+'" data-av-qty="'+data.stock.available_yard_quantity+'">Pieces / Yards</option>';
+                    type_select += '<option value="{{ getActiveStore()->yard_column }}" data-cost-price="'+data.stock.yard_cost_price+'" data-price="'+data.stock.yard_selling_price+'" data-av-qty="'+data.stock.available_yard_quantity+'">Pieces / Yards</option>';
                 }
-
-
 
 
                     type_select +='</select>';
             }else{
                 type_select += '<select class="form-control product_type">';
-                type_select +='<option selected value="{{ getActiveStore()->packed_column }}" data-price="'+data.stock.selling_price+'" data-av-qty="'+data.stock.available_quantity+'">Packed</option>';
+                type_select +='<option selected value="{{ getActiveStore()->packed_column }}" data-cost-price="'+data.stock.cost_price+'" data-price="'+data.stock.selling_price+'" data-av-qty="'+data.stock.available_quantity+'">Packed</option>';
                 type_select +='</select>';
             }
 

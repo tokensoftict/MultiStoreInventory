@@ -381,6 +381,7 @@
                 const td_price = $(this).parent().parent().find('.item_price');
                 price.attr('max',$('option:selected', this).attr('data-av-qty'));
                 price.attr('data-price',$('option:selected', this).attr('data-price'));
+                price.attr('data-cost-price',$('option:selected', this).attr('data-cost-price'));
                 td_price.html('<input type="text" step="0.00000001" class="item_text_price form-control" value="'+$('option:selected', this).attr('data-price')+'"/>')
                 bindproductType();
                 bindIncrement();
@@ -485,7 +486,8 @@
                         id: $(this).attr('data-id'),
                         qty: $(this).val(),
                         type: type.val(),
-                        price : $(this).attr('data-price')
+                        price : $(this).attr('data-price'),
+                        cost_price : $(this).attr('data-cost-price')
                     }
                 );
                 if(parseInt($(elem).val()) > parseInt($(elem).attr('max'))){
@@ -522,15 +524,15 @@
             if(data.stock.type != "Normal"){
                 type_select += '<select class="form-control product_type">';
                 if(parseInt(data.stock.available_quantity) > 0) {
-                    type_select += '<option selected value="{{ getActiveStore()->packed_column }}" data-price="'+data.stock.selling_price+'" data-av-qty="'+data.stock.available_quantity+'">Packed</option>';
+                    type_select += '<option selected value="{{ getActiveStore()->packed_column }}" data-cost-price="'+data.stock.cost_price+'" data-price="'+data.stock.selling_price+'" data-av-qty="'+data.stock.available_quantity+'">Packed</option>';
                 }
                 if(parseInt(data.stock.available_yard_quantity) > 0) {
-                    type_select += '<option value="{{ getActiveStore()->yard_column }}" data-price="'+data.stock.yard_selling_price+'" data-av-qty="'+data.stock.available_yard_quantity+'">Pieces / Yards</option>';
+                    type_select += '<option value="{{ getActiveStore()->yard_column }}" data-cost-price="'+data.stock.yard_cost_price+'" data-price="'+data.stock.yard_selling_price+'" data-av-qty="'+data.stock.available_yard_quantity+'">Pieces / Yards</option>';
                 }
                 type_select +='</select>';
             }else{
                 type_select += '<select class="form-control product_type">';
-                type_select +='<option selected value="{{ getActiveStore()->packed_column }}" data-price="'+data.stock.selling_price+'" data-av-qty="'+data.stock.available_quantity+'">Packed</option>';
+                type_select +='<option selected value="{{ getActiveStore()->packed_column }}" data-cost-price="'+data.stock.cost_price+'" data-price="'+data.stock.selling_price+'" data-av-qty="'+data.stock.available_quantity+'">Packed</option>';
                 type_select +='</select>';
             }
 
