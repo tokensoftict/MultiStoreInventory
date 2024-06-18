@@ -115,7 +115,7 @@ class Payment extends Model
             'subtotal' => $paymentInformation['invoice']->sub_total - $paymentInformation['invoice']->discount_amount,
             'total_paid' => $paymentInformation['invoice']->sub_total - $paymentInformation['invoice']->discount_amount,
             'payment_time' => Carbon::now()->toTimeString(),
-            'payment_date' => date('Y-m-d'),
+            'payment_date' => $paymentInformation['invoice']->invoice_date,
         ]);
         if( $paymentInformation['payment_info']['payment_method_id'] == "split_method")
         {
@@ -165,7 +165,7 @@ class Payment extends Model
                             'invoice_type' => $invoiceType,
                             'department' => auth()->user()->department,
                             'warehousestore_id' => getActiveStore()->id,
-                            'payment_date' => date('Y-m-d'),
+                            'payment_date' => $payment->payment_date,
                             'amount' => $amount,
                             'payment_info' => json_encode($paymentInformation['payment_info']['payment_info_data'][$pmthod])
                         ]);
@@ -177,7 +177,7 @@ class Payment extends Model
                             'invoice_id' => $paymentInformation['invoice']->id,
                             'invoice_type' =>$invoiceType,
                             'warehousestore_id' => getActiveStore()->id,
-                            'payment_date' => date('Y-m-d'),
+                            'payment_date' => $payment->payment_date,
                             'amount' => $amount,
                             'payment_info' => json_encode($paymentInformation['payment_info']['payment_info_data'][$pmthod])
                         ];
@@ -197,7 +197,7 @@ class Payment extends Model
                     'invoice_number' => $paymentInformation['invoice']->invoice_number,
                     'invoice_id' => $paymentInformation['invoice']->id,
                     'amount' => -($payment_method_id->amount),
-                    'payment_date' => dailyDate(),
+                    'payment_date' => $payment->payment_date,
                 ];
 
                 CreditPaymentLog::create($credit_log);
@@ -213,7 +213,7 @@ class Payment extends Model
                 'invoice_type' => $invoiceType,
                 'department' => auth()->user()->department,
                 'warehousestore_id' => getActiveStore()->id,
-                'payment_date' => date('Y-m-d'),
+                'payment_date' => $payment->payment_date,
                 'amount' => $paymentInformation['invoice']->sub_total,
                 'payment_info' => json_encode(Arr::get($paymentInformation, 'payment_info'))
             ]));
@@ -228,7 +228,7 @@ class Payment extends Model
                     'invoice_number' => $paymentInformation['invoice']->invoice_number,
                     'invoice_id' => $paymentInformation['invoice']->id,
                     'amount' => -($payment_method_id->amount),
-                    'payment_date' => dailyDate(),
+                    'payment_date' => $payment->payment_date,
                 ];
                 CreditPaymentLog::create($credit_log);
             }
