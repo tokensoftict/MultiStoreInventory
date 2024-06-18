@@ -76,7 +76,7 @@ class InvoiceController extends Controller
 
         if($request->get('payment') !== "false" && $request->get('status') == 'COMPLETE') {
 
-            $creditStatus = Payment::validateCreditLimit(['payment_info' => json_decode($request->get('payment'), true), "type" => "Invoice"], $reports);
+            $creditStatus = Payment::validateCreditLimit(['payment_info' => $request->get('payment'), "type" => "Invoice"], $reports);
 
             if ($creditStatus === true) {
                 return response()->json(['status' => false, 'error' => "Customer has reached the credit limit, transaction can not continue"]);
