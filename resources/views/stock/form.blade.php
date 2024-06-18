@@ -265,6 +265,13 @@
     <script   src="{{ asset('assets/js/init-datepicker.js') }}"></script>
     <script src="{{ asset('bower_components/select2/dist/js/select2.min.js') }}"></script>
     <script src="{{ asset('assets/js/init-select2.js') }}"></script>
+    <script>
+        $(document).ready(function(){
+            $(".select2").select2({
+                placeholder: "Select Item"
+            });
+        });
+    </script>
     <script type='text/javascript' src="{{asset('assets/js/barcode.js')}}"></script>
     <script src="{{ asset('/vendor/laravel-filemanager/js/stand-alone-button.js') }}"></script>
     <script>
