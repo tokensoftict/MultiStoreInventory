@@ -41,6 +41,10 @@
         $(".select-table").select2({
             placeholder: "Select a Table"
         });
+
+        $(".select2").select2({
+            placeholder: "Select Item"
+        });
         // Templating
         function formatState (state) {
             if (!state.id) { return state.text; }

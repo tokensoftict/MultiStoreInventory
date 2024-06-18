@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
 @push('css')
+    <link rel="stylesheet" href="{{ asset('bower_components/select2/dist/css/select2.min.css') }}">
     <link rel="stylesheet" href="{{ asset('bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css') }}">
-
 @endpush
 
 
@@ -77,7 +77,7 @@
 
                                         <div class="form-group">
                                             <label>Manufacturer</label>
-                                            <select class="form-control" name="manufacturer_id">
+                                            <select class="form-control select2" name="manufacturer_id">
                                                 <option value="">-Select Manufacturer-</option>
                                                 @foreach($manufactures as $manufacturer)
                                                     <option {{ old('manufacturer_id', $stock->manufacturer_id) == $manufacturer->id ? "selected" : ""  }} value="{{ $manufacturer->id }}">{{ $manufacturer->name }}</option>
@@ -87,7 +87,7 @@
 
                                         <div class="form-group">
                                             <label>Category</label>
-                                            <select class="form-control" name="product_category_id">
+                                            <select class="form-control select2" name="product_category_id">
                                                 <option value="">-Select Category-</option>
                                                 @foreach($categories as $category)
                                                     <option {{ old('product_category_id', $stock->product_category_id) == $category->id ? "selected" : ""  }} value="{{ $category->id }}">{{ $category->name }}</option>
@@ -148,7 +148,7 @@
                                             </div>
                                             <div class="form-group">
                                                 <label>Supplier</label>
-                                                <select class="form-control" name="stock_batch[supplier_id]">
+                                                <select class="form-control select2" name="stock_batch[supplier_id]">
                                                     <option value="">-Select Supplier-</option>
                                                     @foreach($suppliers as $supplier)
                                                         <option  value="{{ $supplier->id }}">{{ $supplier->name }}</option>
@@ -263,6 +263,8 @@
 @push('js')
     <script   src="{{ asset('bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js') }}"></script>
     <script   src="{{ asset('assets/js/init-datepicker.js') }}"></script>
+    <script src="{{ asset('bower_components/select2/dist/js/select2.min.js') }}"></script>
+    <script src="{{ asset('assets/js/init-select2.js') }}"></script>
     <script type='text/javascript' src="{{asset('assets/js/barcode.js')}}"></script>
     <script src="{{ asset('/vendor/laravel-filemanager/js/stand-alone-button.js') }}"></script>
     <script>
