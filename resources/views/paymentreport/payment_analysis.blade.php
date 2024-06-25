@@ -71,7 +71,7 @@
                                             <td>{{ $payment->customer->firstname }} {{ $payment->customer->lastname }}</td>
                                             <td>{{ $payment->warehousestore->name }}</td>
                                             <td>{{ $payment->payment_method->name }}</td>
-                                            <td>{{ $payment->invoice->invoice_paper_number }}</td>
+                                            <td>{{ optional($payment->invoice)->invoice_paper_number }}</td>
                                             <td>{{ number_format($payment->amount,2) }}</td>
                                             <td>{{ number_format($payment->amount,2) }}</td>
                                             <td>{{ date("h:i a",strtotime($payment->payment_time)) }}</td>
