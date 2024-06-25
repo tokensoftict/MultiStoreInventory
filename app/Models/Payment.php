@@ -91,7 +91,7 @@ class Payment extends Model
 
     public function getTotalPaidAttribute()
     {
-        return $this->paymentMethodTable->sum(function($payment){
+        return $this->payment_method_tables->sum(function($payment){
             if($payment['payment_method_id'] !== 4){
                 return $payment['amount'];
             }else{
