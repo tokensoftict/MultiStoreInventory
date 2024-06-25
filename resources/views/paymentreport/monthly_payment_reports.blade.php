@@ -58,10 +58,6 @@
                             @forelse($payments as $payment)
                                 @php
                                     $total+=$payment->total_paid;
-                                      if(is_null(optional($payment->invoice)->invoice_paper_number)){
-                                             $payment->delete();
-                                             continue;
-                                         }
                                 @endphp
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>

@@ -72,10 +72,6 @@
                                     @php
                                         $total_+=$payment->amount;
                                         $tt_payment+=$payment->amount;
-                                        if(is_null(optional($payment->invoice)->invoice_paper_number)){
-                                             $payment->delete();
-                                             continue;
-                                         }
                                     @endphp
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
