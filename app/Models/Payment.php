@@ -214,7 +214,7 @@ class Payment extends Model
                 'department' => auth()->user()->department,
                 'warehousestore_id' => getActiveStore()->id,
                 'payment_date' => $payment->payment_date,
-                'amount' => $paymentInformation['invoice']->sub_total,
+                'amount' => $paymentInformation['invoice']->sub_total - $paymentInformation['invoice']->discount_amount,
                 'payment_info' => json_encode(Arr::get($paymentInformation, 'payment_info'))
             ]));
 
