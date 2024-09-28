@@ -201,8 +201,6 @@
                                                     <button type="button"  data-status="DISCOUNT" class="btn  btn-dark btn-lg" onclick="return ProcessInvoice(this);">Request For Discount</button>
                                                 @endif
                                             </div>
-                                        </div>
-                                        <div class="row mtop-10">
                                             <div class="col-sm-6">
                                                 @if(userCanView('invoiceandsales.draft_invoice'))
                                                     <button type="button"  data-status="DRAFT" class="btn btn-block btn-success btn-lg" onclick="return ProcessInvoice(this);">Save Draft</button>
