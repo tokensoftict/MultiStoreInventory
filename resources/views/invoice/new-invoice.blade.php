@@ -195,9 +195,13 @@
                             @if(userCanView('invoiceandsales.create'))
                                 <section class="panel">
                                     <section class="panel-body panel-border text-center">
-                                        @if(userCanView('invoiceandsales.request_for_discount'))
-                                            <button type="button"  data-status="DISCOUNT" class="btn  btn-dark btn-lg" onclick="return ProcessInvoice(this);">Request For Discount</button>
-                                        @endif
+                                        <div class="row mtop-10">
+                                            <div class="col-sm-12">
+                                                @if(userCanView('invoiceandsales.request_for_discount'))
+                                                    <button type="button"  data-status="DISCOUNT" class="btn  btn-dark btn-lg" onclick="return ProcessInvoice(this);">Request For Discount</button>
+                                                @endif
+                                            </div>
+                                        </div>
                                         <div class="row mtop-10">
                                             <div class="col-sm-6">
                                                 @if(userCanView('invoiceandsales.draft_invoice'))
