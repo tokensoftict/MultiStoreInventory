@@ -205,13 +205,11 @@
                                                 </div>
                                                 <div class="col-sm-6">
                                                     @if(userCanView('invoiceandsales.draft_invoice'))
-                                                        <br/>
                                                         <button type="button"  data-status="DRAFT" class="btn btn-block btn-success btn-lg" onclick="return ProcessInvoice(this);">Save Draft</button>
                                                     @endif
                                                 </div>
                                                 <div class="col-sm-6">
                                                     @if(userCanView('invoiceandsales.complete_invoice'))
-                                                        <br/>
                                                         <button type="button"  data-status="COMPLETE" class="btn btn-block btn-primary btn-lg" onclick="return ProcessInvoice(this);">Complete</button>
                                                     @endif
                                                 </div>
