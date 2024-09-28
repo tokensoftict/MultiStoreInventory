@@ -195,21 +195,24 @@
                             @if(userCanView('invoiceandsales.create'))
                                 <section class="panel">
                                     <section class="panel-body panel-border text-center">
-                                        <div class="row mtop-10">
-                                            <div class="col-sm-12">
-                                                @if(userCanView('invoiceandsales.request_for_discount'))
-                                                    <button type="button"  data-status="DISCOUNT" class="btn  btn-dark btn-lg" onclick="return ProcessInvoice(this);">Request For Discount</button>
-                                                @endif
-                                            </div>
-                                            <div class="col-sm-6">
-                                                @if(userCanView('invoiceandsales.draft_invoice'))
-                                                    <button type="button"  data-status="DRAFT" class="btn btn-block btn-success btn-lg" onclick="return ProcessInvoice(this);">Save Draft</button>
-                                                @endif
-                                            </div>
-                                            <div class="col-sm-6">
-                                                @if(userCanView('invoiceandsales.complete_invoice'))
-                                                    <button type="button"  data-status="COMPLETE" class="btn btn-block btn-primary btn-lg" onclick="return ProcessInvoice(this);">Complete</button>
-                                                @endif
+                                        <div class="col-sm-10 col-lg-offset-1">
+                                            <div class="row mtop-10">
+                                                <div class="col-sm-12">
+                                                    @if(userCanView('invoiceandsales.request_for_discount'))
+                                                        <button type="button"  data-status="DISCOUNT" class="btn  btn-dark btn-lg" onclick="return ProcessInvoice(this);">Request For Discount</button>
+                                                        <br/>
+                                                    @endif
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    @if(userCanView('invoiceandsales.draft_invoice'))
+                                                        <button type="button"  data-status="DRAFT" class="btn btn-block btn-success btn-lg" onclick="return ProcessInvoice(this);">Save Draft</button>
+                                                    @endif
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    @if(userCanView('invoiceandsales.complete_invoice'))
+                                                        <button type="button"  data-status="COMPLETE" class="btn btn-block btn-primary btn-lg" onclick="return ProcessInvoice(this);">Complete</button>
+                                                    @endif
+                                                </div>
                                             </div>
                                         </div>
                                     </section>
