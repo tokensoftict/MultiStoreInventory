@@ -596,6 +596,10 @@ function getActualStore($product_type,$store_selected){
 
 function getActiveStore($force = false){
 
+    if(request()->has('store') && is_numeric(request()->get('store'))){
+        return Warehousestore::select('id','name','packed_column','yard_column')->where('default',1)->where('id',request()->get('store'))->first();
+    }
+
     if(session()->has('activeStore')) {
         return (object)session()->get('activeStore');
     }
