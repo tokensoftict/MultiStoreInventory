@@ -107,6 +107,11 @@
             <td>Sales Representative</td>
             <td>{{ $invoice->created_user->name }}</td>
         </tr>
+        <tr>
+            <td>Store</td>
+            <td>{{ optional($invoice)->warehousestore->name }}</td>
+        </tr>
+
     </table>
 
 
