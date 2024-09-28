@@ -19,6 +19,9 @@
 <div class="sign-in-wrapper">
     <div class="sign-container">
         <div class="text-center">
+            @if(!empty(getStoreSettings()->logo))
+                <img src="{{ asset('img/'.getStoreSettings()->logo) }}"  class="img-responsive" style="width:30%; margin: auto; display: block;"/>
+            @endif
             <h2 class="logo">{{ getStoreSettings()->name }}</h2>
             <h4>Sign In</h4>
         </div>
