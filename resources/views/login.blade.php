@@ -21,8 +21,9 @@
         <div class="text-center">
             @if(!empty(getStoreSettings()->logo))
                 <img src="{{ asset('img/'.getStoreSettings()->logo) }}"  class="img-responsive" style="width:50%; margin: auto; display: block;"/>
+            @else
+                <h2 class="logo">{{ getStoreSettings()->name }}</h2>
             @endif
-            <h2 class="logo">{{ getStoreSettings()->name }}</h2>
             <h4>Sign In</h4>
         </div>
         @if(session()->has('message'))
