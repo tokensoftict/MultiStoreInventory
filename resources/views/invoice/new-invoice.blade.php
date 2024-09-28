@@ -251,7 +251,7 @@
                                         <div class="col-sm-6">
                                             <div class="form-group">
                                                 <label for="exampleInputEmail1">Invoice / Receipt No</label>
-                                                <input class="form-control" id="invoice_paper_number"  placeholder="Invoice / Receipt No" type="text">
+                                                <input class="form-control" value="{{ $invoice_number }}" id="invoice_paper_number"  placeholder="Invoice / Receipt No" type="text">
                                             </div>
                                         </div>
                                     </div>

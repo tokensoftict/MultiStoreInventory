@@ -128,7 +128,7 @@ return [
 
 
     'store'=>env('store','inventory'), //  'inventory   hotel'
-
+    'generate_invoice_number' => env('generate_invoice_number',false),
     'departments' => [
 
         'inventory' => [

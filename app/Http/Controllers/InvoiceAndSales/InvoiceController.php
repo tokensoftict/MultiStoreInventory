@@ -41,6 +41,10 @@ class InvoiceController extends Controller
         $data['customers'] = Customer::all();
         $data['payments'] = PaymentMethod::all();
         $data['banks'] = BankAccount::where('status',1)->get();
+        $data['invoice_number'] = "";
+        if(config('app.generate_invoice_number')) {
+            $data['invoice_number'] = generateRandomString(10);
+        }
         return setPageContent('invoice.new-invoice',$data);
     }
 
