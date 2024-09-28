@@ -215,10 +215,12 @@
                             @if(userCanView('invoiceandsales.create'))
                                 <section class="panel">
                                     <section class="panel-body panel-border text-center">
-                                        @if(userCanView('invoiceandsales.request_for_discount'))
-                                            <button type="button"  data-status="DISCOUNT" class="btn  btn-dark btn-lg" onclick="return ProcessInvoice(this);">Request For Discount</button>
-                                        @endif
+                                        <div class="col-sm-10 col-lg-offset-1">
                                         <div class="row mtop-10">
+                                            @if(userCanView('invoiceandsales.request_for_discount'))
+                                                <button type="button"  data-status="DISCOUNT" class="btn  btn-dark btn-lg" onclick="return ProcessInvoice(this);">Request For Discount</button>
+                                                <br/><br/>
+                                            @endif
                                             <div class="col-sm-6">
                                                 @if(userCanView('invoiceandsales.draft_invoice'))
                                                     <button type="button"  data-status="DRAFT" class="btn btn-block btn-success btn-lg" onclick="return ProcessInvoice(this);">Save Draft</button>
@@ -229,6 +231,7 @@
                                                     <button type="button"  data-status="COMPLETE" class="btn btn-block btn-primary btn-lg" onclick="return ProcessInvoice(this);">Complete</button>
                                                 @endif
                                             </div>
+                                        </div>
                                         </div>
                                     </section>
                                 </section>
