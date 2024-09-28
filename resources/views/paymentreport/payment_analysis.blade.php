@@ -74,7 +74,7 @@
                                             <td>{{ optional($payment->invoice)->invoice_paper_number }}</td>
                                             <td>{{ number_format($payment->amount,2) }}</td>
                                             <td>{{ number_format($payment->amount,2) }}</td>
-                                            <td>{{ date("h:i a",strtotime($payment->payment_time)) }}</td>
+                                            <td>{{ $payment->payment_time }}</td>
                                             <td>{{ convert_date($payment->payment->payment_date) }}</td>
                                         </tr>
                                     @endforeach
