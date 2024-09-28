@@ -2,7 +2,7 @@
     <div class="container">
         <div class="row">
             <div class="col-md-12">
-                {{ date('Y') }} © Inventory System 08130610626 Tokensoft ICT
+                {{ date('Y') }} © Inventory System
             </div>
         </div>
     </div>
