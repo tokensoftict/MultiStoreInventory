@@ -109,9 +109,12 @@
         </tr>
         <tr>
             <td>Store</td>
-            <td>{{ optional($invoice)->warehousestore->name }}</td>
+            <td>{{  }}</td>
         </tr>
-
+        <tr>
+            <td>Credit Balance</td>
+            <td>{{ money($invoice->customer->credit_balance) }}</td>
+        </tr>
     </table>
 
 
