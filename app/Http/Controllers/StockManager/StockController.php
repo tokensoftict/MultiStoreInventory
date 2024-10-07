@@ -187,7 +187,7 @@ class StockController extends Controller
         )->join('stocks','stocks.id','=','stockbatches.stock_id')
             ->whereHas('stock',function($query){
             $query->where('status',1)->filter();
-        }) ->groupBy('stock_id')->sum('total_selling_worth');
+        }) ->groupBy('stockbatches.stock_id')->sum('total_selling_worth');
 
 
         return view("stock.list-available",$data);
