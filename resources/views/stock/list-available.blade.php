@@ -86,7 +86,7 @@
                                 <td></td>
                                 <td></td>
                                 <td></td>
-                                <th></th>
+                                <th>{{ money($total_available_cost) }}</th>
                                 <th>{{ money($total_available_selling) }}</th>
                                 <td></td>
                             </tr>

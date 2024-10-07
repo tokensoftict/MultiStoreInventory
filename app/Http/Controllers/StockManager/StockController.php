@@ -189,6 +189,12 @@ class StockController extends Controller
             $query->where('status',1)->filter();
         }) ->groupBy('stockbatches.stock_id')->get()->sum('total_selling_worth');
 
+        $data['total_available_cost'] = Stockbatch::select(
+            DB::raw($sqlTotal)
+        )->join('stocks','stocks.id','=','stockbatches.stock_id')
+            ->whereHas('stock',function($query){
+                $query->where('status',1)->filter();
+            }) ->groupBy('stockbatches.stock_id')->get()->sum('total_cost_worth');
 
         return view("stock.list-available",$data);
     }
