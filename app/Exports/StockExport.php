@@ -35,7 +35,7 @@ class StockExport implements FromCollection, WithHeadings
             'stocks.id',
             'stocks.name',
             'product_category.name as cat_name',
-        ) ->join('product_category', 'stocks.product_category_id','=','product_category.id')
+        ) ->rightJoin('product_category', 'stocks.product_category_id','=','product_category.id')
             ->where('stocks.status', 1);
 
         /*
