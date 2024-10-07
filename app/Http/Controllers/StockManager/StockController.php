@@ -178,6 +178,17 @@ class StockController extends Controller
         $data['store'] = $store;
         $data['stocks'] = $available ;
 
+        $sqlTotal = "SUM(stockbatches.$store->packed_column * stocks.selling_price) as total_selling_worth,";
+        $sqlTotal .= "SUM(stockbatches.$store->packed_column * stocks.cost_price) as total_cost_worth,";
+        $sqlTotal .= rtrim($sql,", ");
+
+        $data['total_available_selling'] = Stockbatch::select(
+            DB::raw($sqlTotal)
+        )->join('stocks','stocks.id','=','stockbatches.stock_id')
+            ->whereHas('stock',function($query){
+            $query->where('status',1)->filter();
+        }) ->groupBy('stock_id')->sum('total_selling_worth');
+
 
         return view("stock.list-available",$data);
     }

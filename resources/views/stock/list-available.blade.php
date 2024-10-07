@@ -28,11 +28,13 @@
                                 <th>Name</th>
                                 <th>Product Type</th>
                                 <th>{{ $store->name }} Quantity</th>
-                                    <th>{{ $store->name }} Yards Quantity</th>
+                                <th>{{ $store->name }} Yards Quantity</th>
                                 <th>Selling Price</th>
                                 <th>Cost Price</th>
                                 <th>Yard Selling Price</th>
                                 <th>Yard Cost Price</th>
+                                <th>Total Cost</th>
+                                <th>Total Selling</th>
                                 <th>Action</th>
                             </tr>
                             </thead>
@@ -43,7 +45,7 @@
                                     <td>{{ $batch->stock->name }}</td>
                                     <td>{{ $batch->stock->type }}</td>
                                     <td>{{ $batch->stock->available_quantity }}</td>
-                                        <td>{{ $batch->stock->available_yard_quantity }}</td>
+                                    <td>{{ $batch->stock->available_yard_quantity }}</td>
 
                                     <td>{{ number_format($batch->stock->selling_price,2) }}</td>
                                     <td>{{ number_format($batch->stock->cost_price,2) }}</td>
@@ -51,6 +53,8 @@
                                     <td>{{ number_format($batch->stock->yard_selling_price,2) }}</td>
                                     <td>{{ number_format($batch->stock->yard_cost_price,2) }}</td>
 
+                                    <td>{{ number_format(($batch->stock->selling_price * $batch->stock->available_quantity),2) }}</td>
+                                    <td>{{ number_format(($batch->stock->cost_price * $batch->stock->available_quantity),2) }}</td>
 
                                     <td>
                                         <div class="btn-group">
@@ -62,15 +66,31 @@
                                                 @if(userCanView('stock.toggle'))
                                                     <li><a href="{{ route('stock.toggle',$batch->stock->id) }}">{{ $batch->stock->status == 0 ? 'Enabled' : 'Disabled' }}</a></li>
                                                 @endif
-                                                    @if(userCanView('stock.stock_report'))
-                                                        <li><a href="{{ route('stock.stock_report',$batch->stock->id) }}">Product Report</a></li>
-                                                    @endif
+                                                @if(userCanView('stock.stock_report'))
+                                                    <li><a href="{{ route('stock.stock_report',$batch->stock->id) }}">Product Report</a></li>
+                                                @endif
                                             </ul>
                                         </div>
                                     </td>
                                 </tr>
                             @endforeach
                             </tbody>
+                            <tfoot>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <th></th>
+                                <th>{{ money($total_available_selling) }}</th>
+                                <td></td>
+                            </tr>
+                            </tfoot>
                         </table>
                         {!! $stocks->appends(request()->input())->links() !!}
                     </div>
