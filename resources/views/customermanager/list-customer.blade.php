@@ -70,8 +70,8 @@
                                 <td></td>
                                 <td></td>
                                 <td></td>
-                                <td></td>
                                 <th>{{ number_format($total,2) }}</th>
+                                <td></td>
                                 <td></td>
                                 <td></td>
                             </tr>
