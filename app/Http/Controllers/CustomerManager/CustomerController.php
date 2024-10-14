@@ -100,7 +100,7 @@ class CustomerController extends Controller
                 ]
             ));
 
-            $log = $credit_log = [
+            $log = [
                 'payment_id' => $payment->id,
                 'user_id' => auth()->id(),
                 'payment_method_id' =>$request->payment_method,

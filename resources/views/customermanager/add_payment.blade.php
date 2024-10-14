@@ -55,6 +55,11 @@
                                 <input type="text"  required class="form-control datepicker js-datepicker" value="{{ date('Y-m-d',strtotime(date('Y-m-d'))) }}" data-min-view="2" data-date-format="yyyy-mm-dd" style="background-color: #FFF; color: #000;"   name="payment_date" placeholder="Payment Date"/>
                             </div>
 
+                            <div class="form-group">
+                                <label>Description</label>
+                                <textarea class="form-control" style="height: 300px" placeholder="Payment description or product description" name="description"></textarea>
+                            </div>
+
                             <div id="more_info_appender">
                             </div>
 

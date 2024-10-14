@@ -55,7 +55,7 @@
 </head>
 <body>
 <div id="printbox">
-    <table width="65%">
+    <table width="100%">
         <tr><td valign="top">
                 <h2  class="text-center">{{ $store->name}}</h2>
                 <p align="center">
@@ -71,7 +71,7 @@
                 </p>
             </td>
         </tr>
-        <td valign="top" width="35%">
+        <td valign="top" width="35%" class="text-left" align="right">
             <img style="max-height:100px;float: right;" src="{{ public_path("img/". $store->logo) }}" alt='Logo'>
         </td>
     </table>
@@ -80,39 +80,39 @@
     <table  class="inv_info">
 
         <tr>
-            <td>Invoice / Receipt No</td>
+            <th align="left" class="text-left">Invoice / Receipt No</th>
             <td>{{ $invoice->invoice_paper_number }}</td>
         </tr>
         <tr>
-            <td>Invoice Number</td>
+            <th align="left" class="text-left">Invoice Number</th>
             <td>{{ $invoice->invoice_number }}</td>
         </tr>
         <tr>
-            <td>Invoice Date</td>
+            <th align="left" class="text-left">Invoice Date</th>
             <td>{{ convert_date($invoice->invoice_date)  }}</td>
         </tr>
         <tr>
-            <td>Time</td>
+            <th align="left" class="text-left">Time</th>
             <td>{{ date("h:i a",strtotime($invoice->sales_time)) }}</td>
         </tr>
         <tr>
-            <td>Customer</td>
+            <th align="left" class="text-left">Customer</th>
             <td>{{ $invoice->customer->firstname }} {{ $invoice->customer->lastname }}</td>
         </tr>
         <tr>
-            <td>Status</td>
+            <th align="left" class="text-left">Status</th>
             <td>{{ $invoice->status }}</td>
         </tr>
         <tr>
-            <td>Sales Representative</td>
+            <th align="left" class="text-left">Sales Representative</th>
             <td>{{ $invoice->created_user->name }}</td>
         </tr>
         <tr>
-            <td>Store</td>
+            <th align="left" class="text-left">Store</th>
             <td>{{ optional($invoice)->warehousestore->name }}</td>
         </tr>
         <tr>
-            <td>Credit Balance</td>
+            <th align="left" class="text-left">Credit Balance</th>
             <td>{{ money($invoice->customer->credit_balance) }}</td>
         </tr>
     </table>
@@ -121,12 +121,12 @@
     <h2 style="margin-top:0" class="text-center">Sales Invoice / Receipt</h2>
 
     <table id="products">
-        <tr class="product_row">
-            <td>#</td>
-            <td align="left"><b>Name</b></td>
-            <td align="center"><b>Quantity</b></td>
-            <td align="center"><b>Price</b></td>
-            <td align="right"><b>Total</b></td>
+        <tr class="product_row" style="background: #0a0a0a; color: #FFF">
+            <td style="color: #FFF">#</td>
+            <td align="left" style="color: #FFF"><b>Name</b></td>
+            <td align="center" style="color: #FFF"><b>Quantity</b></td>
+            <td align="center" style="color: #FFF"><b>Price</b></td>
+            <td align="right" style="color: #FFF"><b>Total</b></td>
         </tr>
         <tbody id="appender">
         @foreach($invoice->invoice_items as $item)
@@ -143,16 +143,16 @@
         <tr>
             <td></td>
             <td></td>
-            <td  align="right" class="text-right">Sub Total</td>
-            <td  align="right" class="text-right">{{ number_format($invoice->sub_total,2) }}</td>
             <td></td>
+            <th  align="right" class="text-right">Sub Total</th>
+            <th  align="right" class="text-right">{{ number_format($invoice->sub_total,2) }}</th>
         </tr>
         <tr>
             <td></td>
             <td></td>
-            <td   align="right" class="text-right">Total</td>
-            <td  align="right" class="text-right"><b>{{ number_format(($invoice->sub_total -$invoice->discount_amount),2) }}</b></td>
             <td></td>
+            <th   align="right" class="text-right">Total</th>
+            <th  align="right" class="text-right"><b>{{ number_format(($invoice->sub_total -$invoice->discount_amount),2) }}</b></th>
         </tr>
         </tfoot>
     </table>
@@ -163,6 +163,27 @@
         <img src="data:image/png;base64,' . {{ DNS1D::getBarcodePNG((string)$invoice->id, 'C39',3,60) }} . '" alt="barcode"   />
     </div>
     <br/>
+
+    <br/>
+    <br/>
+
+    <table class="inv_info" width="90%">
+        <tr>
+            <td style="width: 50%" class="text-left">
+                <div style="width: 20%">
+                    <hr style="background: #000; width: 70%"/> <br/>
+                    <center><strong>Company's Signature</strong></center>
+                </div>
+            </td>
+            <td style="width: 50%" class="text-right" align="right">
+                <div style="width: 20%">
+                    <hr style="background: #000; width: 70%"/> <br/>
+                    <center><strong>Customer's Signature</strong></center>
+                </div>
+            </td>
+        </tr>
+    </table>
+
     <div class="text-center"> {!! softwareStampWithDate() !!}</div>
 </div>
 </body>

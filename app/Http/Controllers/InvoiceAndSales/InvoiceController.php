@@ -194,6 +194,8 @@ class InvoiceController extends Controller
         $data['invoice'] = $invoice;
         $data['store'] =  $this->settings->store();
         $pdf = PDF::loadView("print.pos_afour",$data);
+        $pdf->getMpdf()->SetWatermarkText(strtoupper($invoice->status));
+        $pdf->getMpdf()->showWatermarkText = true;
         return $pdf->stream('document.pdf');
     }
 
@@ -203,6 +205,8 @@ class InvoiceController extends Controller
         $data['invoice'] = $invoice;
         $data['store'] =  $this->settings->store();
         $pdf = PDF::loadView("print.pos_afour_waybill",$data);
+        $pdf->getMpdf()->SetWatermarkText(strtoupper($invoice->name));
+        $pdf->getMpdf()->showWatermarkText = true;
         return $pdf->stream('document.pdf');
     }
 
