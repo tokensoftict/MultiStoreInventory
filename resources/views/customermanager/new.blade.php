@@ -51,6 +51,11 @@
                             </div>
 
                             <div class="form-group">
+                                <label>Credit Bought Forward</label>
+                                <input type="number" value=""  class="form-control" name="credit_bought_forward" placeholder="Credit Bought Forward"/>
+                            </div>
+
+                            <div class="form-group">
                                 <label>Phone Number</label>
                                 <input type="text" value="{{ old('phone_number',$customer->phone_number) }}" required  class="form-control" name="phone_number" placeholder="Phone Number"/>
                                 @if ($errors->has('phone_number'))

@@ -28,7 +28,7 @@ class CustomerController extends Controller
         $data['title'] = "List Customer";
         $data['title2'] = "Add Customer";
         $data['customer'] = new Customer();
-        return setPageContent('customermanager.new',$data);
+        return view('customermanager.new',$data);
     }
 
     public function store(Request $request){
@@ -42,6 +42,22 @@ class CustomerController extends Controller
         }
 
         $customer = Customer::create($data);
+
+        if(isset($request->credit_bought_forward) && $request->credit_bought_forward > 0) {
+            $log = [
+                'payment_id' =>NULL,
+                'user_id' => auth()->id(),
+                'payment_method_id' => 1,
+                'customer_id' => $customer->id,
+                'invoice_number' => "CREDIT-PAYMENT",
+                'invoice_id' => NULL,
+                'amount' => -($request->credit_bought_forward),
+                'payment_date' => date('Y-m-d'),
+            ];
+
+          CreditPaymentLog::create($log);
+        }
+
 
         if(!isset($request->ajax))
         {
