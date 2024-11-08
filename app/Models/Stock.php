@@ -79,7 +79,8 @@ class Stock extends Model
         'status',
         'user_id',
         'last_updated_by',
-        'reorder_level'
+        'reorder_level',
+        'stock_limit'
     ];
 
     public static $validation = [
@@ -109,7 +110,8 @@ class Stock extends Model
         'status',
         'user_id',
         'last_updated_by',
-        'reorder_level'
+        'reorder_level',
+        'stock_limit'
     ];
     protected $appends = ['available_quantity','available_yard_quantity'];
 

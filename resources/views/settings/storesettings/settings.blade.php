@@ -26,6 +26,13 @@
                                 @endif
                             </div>
                             <input  type="hidden"  value="Branch" required class="form-control" name="branch_name" placeholder="Branch Name"/>
+                            <div class="form-group">
+                                <label>Allow Edit Selling Price During Invoicing</label>
+                                <select class="form-control" name="allow_edit_price">
+                                    <option {{ @$store->allow_edit_price == "No" ? "selected" : "" }} >No</option>
+                                    <option {{ @$store->allow_edit_price == "Yes" ? "selected" : "" }}>Yes</option>
+                                </select>
+                            </div>
                             <!--
                             <div class="form-group">
                                 <label>Branch Name</label>

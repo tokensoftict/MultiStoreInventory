@@ -41,6 +41,7 @@ class InvoiceController extends Controller
         $data['customers'] = Customer::all();
         $data['payments'] = PaymentMethod::all();
         $data['banks'] = BankAccount::where('status',1)->get();
+        $data['settings'] =  $this->settings;
         $data['invoice_number'] = "";
         if(config('app.generate_invoice_number')) {
             $data['invoice_number'] = generateRandomString(10);
@@ -227,6 +228,7 @@ class InvoiceController extends Controller
         $data['payments'] = PaymentMethod::all();
         $data['invoice'] = Invoice::with(['created_by','customer','invoice_items','payment'])->findorfail($id);
         $data['banks'] = BankAccount::where('status',1)->get();
+        $data['settings'] =  $this->settings;
         return setPageContent('invoice.update-invoice',$data);
     }
 

@@ -372,8 +372,9 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
                 Route::match(['get','post'],'monthly_payment_report_by_method', ['as' => 'monthly_payment_report_by_method', 'uses' => 'PaymentReportController@monthly_payment_report_by_method','custom_label'=>'Monthly Report By Method', 'visible' => false]);
                 Route::match(['get','post'],'payment_analysis', ['as' => 'payment_analysis', 'uses' => 'PaymentReportController@payment_analysis','custom_label'=>'Payment Analysis', 'visible' => false]);
                 Route::match(['get','post'],'income_analysis', ['as' => 'income_analysis', 'uses' => 'PaymentReportController@income_analysis','custom_label'=>'Income Analysis', 'visible' => false]);
+                Route::match(['get','post'],'income_analysis_by_cash', ['as' => 'income_analysis_by_cash', 'uses' => 'PaymentReportController@income_analysis_by_cash', 'custom_label'=>'Income Analysis By Cash', 'visible' => false]);
                 Route::match(['get','post'],'income_analysis_by_department', ['as' => 'income_analysis_by_department', 'uses' => 'PaymentReportController@income_analysis_by_department', 'custom_label'=>'Income Analysis By Store', 'visible' => false]);
-
+                Route::match(['get','post'],'report_by_bank_transfer', ['as' => 'report_by_bank_transfer', 'uses' => 'PaymentReportController@report_by_bank_transfer', 'custom_label'=>'Payment Report By Bank Transfer', 'visible' => false]);
             });
 
             Route::prefix('stockReport')->as('StockReport.')->namespace('StockReport')->group(function(){

@@ -194,6 +194,11 @@
                                             <label>Re-Order Level</label>
                                             <input type="number" value="{{ old('reorder_level', $stock->reorder_level) }}"   class="form-control" name="reorder_level" placeholder="Reorder Level"/>
                                         </div>
+
+                                        <div class="form-group">
+                                            <label>Stock Limit</label>
+                                            <input type="number" value="{{ old('stock_limit', $stock->stock_limit) }}"   class="form-control" name="stock_limit" placeholder="Stock Limit"/>
+                                        </div>
                                     </div>
                                 </section>
                             </div>

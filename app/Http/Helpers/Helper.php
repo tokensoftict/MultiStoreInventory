@@ -311,9 +311,9 @@ function alert($status, $msg)
     return '<div class="alert alert-' . $status . '">' . $msg . '</div>';
 }
 
-function money($amt)
+function money($amt, $decimal = 2)
 {
-    return number_format($amt, 2);
+    return number_format($amt, $decimal);
 }
 
 /**

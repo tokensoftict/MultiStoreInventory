@@ -383,6 +383,17 @@ class Invoice extends Model
                 }
             }
 
+
+            if($prods[$stock->id]['type'] === "quantity"){
+                if(!is_null($stock->stock_limit)) {
+                    $quantity = $stock->available_quantity - $prods[$stock->id]['qty'];
+                    if($quantity <= $stock->stock_limit){
+                        $status = true;
+                        $errors[$stock->id] = $stock->name." limit is ".$stock->stock_limit." transaction can not proceed!";
+                    }
+                }
+            }
+
         }
 
         if(count($errors) > 0){ // a validation error occurred return the batch back
@@ -503,6 +514,17 @@ class Invoice extends Model
                 if((float)$stock->cost_price >= (float)$prods[$stock->id]['price']){
                     $status = true;
                     $errors[$stock->id] = $stock->name." can not be sell under cost price ".number_format($stock->cost_price,2 );
+                }
+            }
+
+
+            if($prods[$stock->id]['type'] === "quantity"){
+                if(!is_null($stock->stock_limit)) {
+                    $quantity = $stock->available_quantity - $prods[$stock->id]['qty'];
+                    if($quantity <= $stock->stock_limit){
+                        $status = true;
+                        $errors[$stock->id] = $stock->name." limit is ".$stock->stock_limit." transaction can not proceed!";
+                    }
                 }
             }
 

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\PaymentReport;
 
 use App\Http\Controllers\Controller;
+use App\Models\Bank;
+use App\Models\BankAccount;
 use App\Models\Expense;
 use App\Models\Payment;
 use App\Models\PaymentMethod;
@@ -85,6 +87,42 @@ class PaymentReportController extends Controller
 
         $data['title'] = "Income Analysis By Store";
         return view('paymentreport.income_analysis_by_department',$data);
+    }
+
+
+
+    public function report_by_bank_transfer(Request $request)
+    {
+        $data['from'] = $request->get('from', date('Y-m-01'));
+        $data['to'] = $request->get('to', date('Y-m-t'));
+        $data['warehousestore_id'] = $request->get('warehousestore_id', getActiveStore()->id);
+        $data['stores'] = getMyAccessStore('name_and_id');
+        $data['banks'] = BankAccount::where('status', '1')->get();
+
+        $data['selected_bank'] = $request->get('selected_bank', 1);
+        $data['bank_info'] = BankAccount::where('id', $data['selected_bank'])->first();
+
+        $data['payments'] = PaymentMethodTable::with(['warehousestore','payment','customer','user','payment_method','invoice'])
+            ->where("payment_info->bank_id",$data['selected_bank'] )
+            ->where('warehousestore_id', $data['warehousestore_id'])->where('warehousestore_id',getActiveStore()->id)->whereBetween('payment_date', [$data['from'],$data['to']])->orderBy('id','DESC')->get();
+
+        $data['title'] = "Payment Report By Bank Transfer";
+        return view('paymentreport.report_by_bank_transfer', $data);
+    }
+
+
+
+    public function income_analysis_by_cash(Request $request)
+    {
+        $data['from'] = $request->get('from', date('Y-m-01'));
+        $data['to'] = $request->get('to', date('Y-m-t'));
+
+
+        $data['expenses'] = Expense::with(['expenses_type','user'])->where('warehousestore_id', getActiveStore()->id)->whereBetween('expense_date',[ $data['from'], $data['to']])->orderBy('id','DESC')->get();
+        $data['payments'] = PaymentMethodTable::with(['warehousestore','payment','customer','user','payment_method','invoice'])->where('payment_method_id', 1)->where('warehousestore_id',getActiveStore()->id)->whereBetween('payment_date', [$data['from'],$data['to']])->orderBy('id','DESC')->get();
+
+        $data['title'] = "Income Analysis By Cash";
+        return setPageContent('paymentreport.income_analysis_by_cash',$data);
     }
 
 }
