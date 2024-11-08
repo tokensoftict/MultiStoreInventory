@@ -53,7 +53,9 @@ class Cashbook extends Model
 		'transaction_date',
 		'type',
 		'bank_account_id',
-		'comment'
+		'comment',
+        'cashbookable_type',
+        'cashbookable_id'
 	];
 
 	public static $fields = [

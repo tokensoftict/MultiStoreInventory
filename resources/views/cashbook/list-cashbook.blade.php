@@ -4,7 +4,7 @@
     <link rel="stylesheet" href="{{ asset('bower_components/select2/dist/css/select2.min.css') }}">
     <link rel="stylesheet" href="{{ asset('bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css') }}">
 
-        <link rel="stylesheet" href="{{ asset('table/datatables.css') }}">
+    <link rel="stylesheet" href="{{ asset('table/datatables.css') }}">
 
 @endpush
 
@@ -35,7 +35,7 @@
                                     <label>Select Bank</label>
                                     <select class="form-control" name="bank_account_id">
                                         @foreach($banks as $bank)
-                                        <option {{ $bank_account_id === $bank->id ? "selected" : "" }} value="{{ $bank->id }}">{{ $bank->bank->name }} - {{ $bank->account_number }}</option>
+                                            <option {{ $bank_account_id === $bank->id ? "selected" : "" }} value="{{ $bank->id }}">{{ $bank->bank->name }} - {{ $bank->account_number }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -84,29 +84,35 @@
                                     <td>{{ $transaction->user->name }}</td>
                                     <td>{{ $transaction->last_update->name }}</td>
                                     <td>
-                                        @if(userCanView('cashbook.edit',$transaction->id))
-                                            <a href="{{ route('cashbook.edit',$transaction->id) }}" class="btn btn-sm btn-primary">Edit</a>
-                                        @endif
-                                        @if(userCanView('cashbook.destroy',$transaction->id))
-                                            <a href="{{ route('cashbook.destroy',$transaction->id) }}" class="btn btn-sm btn-danger">Delete</a>
+                                        @if(is_null($transaction->cashbookable_id))
+                                            @if(userCanView('cashbook.edit',$transaction->id))
+                                                <a href="{{ route('cashbook.edit',$transaction->id) }}" class="btn btn-sm btn-primary">Edit</a>
+                                            @endif
+                                            @if(userCanView('cashbook.destroy',$transaction->id))
+                                                <a href="{{ route('cashbook.destroy',$transaction->id) }}" class="btn btn-sm btn-danger">Delete</a>
+                                            @endif
+
+                                            @else
+
+                                            {{ 'No Action' }}
                                         @endif
                                     </td>
                                 </tr>
                             @endforeach
                             </tbody>
                             <tfoot>
-                                <tr>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td>{{ number_format($opening,2) }}</td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td>{{ number_format($opening,2) }}</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
                             </tfoot>
                         </table>
                     </div>
@@ -123,6 +129,6 @@
     <script   src="{{ asset('assets/js/init-select2.js') }}"></script>
     <script   src="{{ asset('bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js') }}"></script>
 
- <script src="{{ asset('assets/js/init-datatables.js') }}"></script>
+    <script src="{{ asset('assets/js/init-datatables.js') }}"></script>
     <script  src="{{ asset('assets/js/init-datepicker.js') }}"></script>
 @endpush

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\CustomerManager;
 
 use App\Http\Controllers\Controller;
 use App\Models\BankAccount;
+use App\Models\Cashbook;
 use App\Models\CreditPaymentLog;
 use App\Models\Customer;
 use App\Models\Payment;
@@ -12,6 +13,7 @@ use App\Models\PaymentMethodTable;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 
 class CustomerController extends Controller
 {
@@ -71,58 +73,79 @@ class CustomerController extends Controller
 
 
     public function add_payment(Request $request){
+
         if($request->getMethod() == "POST"){
 
-            $payment = Payment::create([
-                'user_id' => auth()->id(),
-                'customer_id' => $request->customer_id,
-                'invoice_number' => "CREDIT-PAYMENT",
-                'invoice_id' => 0,
-                'invoice_type'=>"App\\Models\\CreditPaymentLog",
-                'warehousestore_id' => getActiveStore()->id,
-                'subtotal' => $request->amount,
-                'total_paid' => $request->amount,
-                'payment_time' => Carbon::now()->toTimeString(),
-                'payment_date' => $request->payment_date,
-            ]);
+            return DB::transaction(function() use ($request){
 
-            $payment->payment_method_tables()->save(new PaymentMethodTable(
-                [
+                $payment = Payment::create([
                     'user_id' => auth()->id(),
                     'customer_id' => $request->customer_id,
-                    'payment_method_id' =>$request->payment_method,
+                    'invoice_number' => "CREDIT-PAYMENT",
                     'invoice_id' => 0,
                     'invoice_type'=>"App\\Models\\CreditPaymentLog",
                     'warehousestore_id' => getActiveStore()->id,
+                    'subtotal' => $request->amount,
+                    'total_paid' => $request->amount,
+                    'payment_time' => Carbon::now()->toTimeString(),
                     'payment_date' => $request->payment_date,
+                ]);
+
+                $pmethod = new PaymentMethodTable(
+                    [
+                        'user_id' => auth()->id(),
+                        'customer_id' => $request->customer_id,
+                        'payment_method_id' =>$request->payment_method,
+                        'invoice_id' => 0,
+                        'invoice_type'=>"App\\Models\\CreditPaymentLog",
+                        'warehousestore_id' => getActiveStore()->id,
+                        'payment_date' => $request->payment_date,
+                        'amount' => $request->amount,
+                        'payment_info' => json_encode($request->bank ? ['payment_method_id'=>$request->payment_method ,'bank_id' =>$request->bank] : [])
+                    ]
+                );
+
+                $pmethod->save();
+
+                if($request->payment_method == "3" && isset($request->bank)) {
+                    $cashbookData = [
+                        "type" => "Credit",
+                        "bank_account_id" => $request->bank,
+                        "amount" =>$request->amount,
+                        "comment" => "Customer Payment Credit Payment",
+                        "transaction_date" => $request->payment_date,
+                        "last_updated" => auth()->id(),
+                        "user_id" => auth()->id(),
+                        "cashbookable_type" => Payment::class,
+                        "cashbookable_id" => $payment->id,
+                    ];
+
+                    Cashbook::create($cashbookData);
+                };
+
+
+                $log = [
+                    'payment_id' => $payment->id,
+                    'user_id' => auth()->id(),
+                    'payment_method_id' =>$pmethod->id,
+                    'customer_id' => $request->customer_id,
+                    'invoice_number' => "CREDIT-PAYMENT",
+                    'invoice_id' => NULL,
                     'amount' => $request->amount,
-                    'payment_info' => json_encode([$request->only(['bank'])])
-                ]
-            ));
+                    'payment_date' => $request->payment_date,
+                ];
 
-            $log = [
-                'payment_id' => $payment->id,
-                'user_id' => auth()->id(),
-                'payment_method_id' =>$request->payment_method,
-                'customer_id' => $request->customer_id,
-                'invoice_number' => "CREDIT-PAYMENT",
-                'invoice_id' => NULL,
-                'amount' => $request->amount,
-                'payment_date' => $request->payment_date,
-            ];
+                $log = CreditPaymentLog::create($log);
 
-            $log = CreditPaymentLog::create($log);
+                $payment->invoice_id = $log->id;
+                $payment->update();
 
-            $payment->invoice_id = $log->id;
-            $payment->update();
+                $pmethod->invoice_id = $log->id;
 
-            $Mth = $payment->payment_method_tables()->first();
+                $pmethod->update();
 
-            $Mth->invoice_id = $log->id;
-
-            $Mth->update();
-
-            return redirect()->route('customer.add_payment')->with('success','Payment has been added successfully!');
+                return redirect()->route('customer.add_payment')->with('success','Payment has been added successfully!');
+            });
 
         }
 

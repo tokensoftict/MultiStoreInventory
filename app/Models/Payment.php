@@ -112,7 +112,11 @@ class Payment extends Model
 
         if($paymentInformation['type'] != "Reservation")
         {
-            Payment::where('invoice_type',$invoiceType)->where('invoice_id',$paymentInformation['invoice']->id)->delete();
+            $payment = Payment::where('invoice_type',$invoiceType)->where('invoice_id',$paymentInformation['invoice']->id)->first();
+            if($payment) {
+                Cashbook::where('cashbookable_type', Payment::class)->where('cashbookable_id', $payment->id)->delete();
+                $payment->delete();
+            }
         }
 
         $payment = Payment::create([
@@ -192,6 +196,25 @@ class Payment extends Model
                             'amount' => $amount,
                             'payment_info' => json_encode($paymentInformation['payment_info']['payment_info_data'][$pmthod])
                         ];
+
+                    }
+
+
+                    //add cash book entry
+                    if($pmthod == "3" && isset($paymentInformation['payment_info']['payment_info_data'][$pmthod]['bank_id'])) {
+                        $cashbookData = [
+                            "type" => "Credit",
+                            "bank_account_id" => $paymentInformation['payment_info']['payment_info_data'][$pmthod]['bank_id'],
+                            "amount" =>$amount,
+                            "comment" => "Invoice Payment invoice id :".$paymentInformation['invoice']->invoice_number,
+                            "transaction_date" => $paymentInformation['invoice']->invoice_date,
+                            "last_updated" => auth()->id(),
+                            "user_id" => auth()->id(),
+                            "cashbookable_type" => Payment::class,
+                            "cashbookable_id" => $payment->id,
+                        ];
+
+                        Cashbook::create($cashbookData);
                     }
                 }
             }
@@ -242,6 +265,22 @@ class Payment extends Model
                     'payment_date' => $payment->payment_date,
                 ];
                 CreditPaymentLog::create($credit_log);
+            }
+
+            if($paymentInformation['payment_info']['payment_method_id'] == 3) {
+                $cashbookData = [
+                    "type" => "Credit",
+                    "bank_account_id" => $paymentInformation['payment_info']['bank_id'],
+                    "amount" => $payment_method_id->amount,
+                    "comment" => "Invoice Payment invoice id : ".$paymentInformation['invoice']->invoice_number,
+                    "transaction_date" => $paymentInformation['invoice']->invoice_date,
+                    "last_updated" => auth()->id(),
+                    "user_id" => auth()->id(),
+                    "cashbookable_type" => Payment::class,
+                    "cashbookable_id" => $payment->id,
+                ];
+
+                Cashbook::create($cashbookData);
             }
 
         }

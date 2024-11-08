@@ -5,6 +5,7 @@ namespace App\Http\Controllers\PurchaseOrders;
 use App\Classes\Settings;
 use App\Http\Controllers\Controller;
 use App\Models\BankAccount;
+use App\Models\Cashbook;
 use App\Models\CreditPaymentLog;
 use App\Models\Customer;
 use App\Models\Payment;
@@ -122,7 +123,7 @@ class PurchaseOrder extends Controller
     public function add_payment(Request $request){
         if($request->getMethod() == "POST"){
 
-            SupplierCreditPaymentHistory::create(
+            $sup = SupplierCreditPaymentHistory::create(
                 [
                     'user_id' => \auth()->id(),
                     'supplier_id' =>$request->customer_id,
@@ -133,6 +134,22 @@ class PurchaseOrder extends Controller
                     'payment_date' =>$request->payment_date,
                 ]
             );
+
+            if($request->payment_method == "3" && isset($request->bank)) {
+                $cashbookData = [
+                    "type" => "Debit",
+                    "bank_account_id" => $request->bank,
+                    "amount" =>$request->amount,
+                    "comment" => "Supplier Payment",
+                    "transaction_date" => $request->payment_date,
+                    "last_updated" => auth()->id(),
+                    "user_id" => auth()->id(),
+                    "cashbookable_type" => SupplierCreditPaymentHistory::class,
+                    "cashbookable_id" => $sup->id,
+                ];
+
+                Cashbook::create($cashbookData);
+            };
 
             return redirect()->route('purchaseorders.add_payment')->with('success','Payment has been added successfully!');
 
