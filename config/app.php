@@ -257,4 +257,5 @@ return [
 
     'backdoor_username' => env('BACKDOOR_USERNAME'),
     'backdoor_password' => env('BACKDOOR_PASSWORD'),
+    'uses_edit_to_return_stocks' => env('USES_EDIT_TO_RETURN_STOCKS',false),
 ];

@@ -274,9 +274,10 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
                 Route::get('{id}/edit', ['as' => 'edit', 'uses' => 'InvoiceController@edit']);
                 Route::get('{id}/destroy', ['as' => 'destroy', 'uses' => 'InvoiceController@destroy']);
                 Route::put('{id}/update', ['as' => 'update', 'uses' => 'InvoiceController@update']);
-                Route::get('/return_invoice', ['as' => 'return_invoice', 'uses' => 'InvoiceController@return_invoice', 'visible' => true, 'custom_label'=>'Return Invoice']);
-                Route::post('/add_return_invoice', ['as' => 'add_return_invoice', 'uses' => 'InvoiceController@add_return_invoice',  'custom_label'=>'Create Return Invoice']);
-
+                if(config("app.uses_edit_to_return_stocks") === false) {
+                    Route::get('/return_invoice', ['as' => 'return_invoice', 'uses' => 'InvoiceController@return_invoice', 'visible' => true, 'custom_label' => 'Return Invoice']);
+                    Route::post('/add_return_invoice', ['as' => 'add_return_invoice', 'uses' => 'InvoiceController@add_return_invoice',  'custom_label'=>'Create Return Invoice']);
+                }
                 Route::get('draft_invoice', ['as' => 'draft_invoice', 'uses' => 'InvoiceController@draft_invoice','custom_label'=>'Save Invoice to Draft']);
                 Route::get('complete_invoice', ['as' => 'complete_invoice', 'uses' => 'InvoiceController@complete_invoice','custom_label'=>'Save Invoice to Complete']);
                 Route::get('request_for_discount', ['as' => 'request_for_discount', 'uses' => 'InvoiceController@request_for_discount','custom_label'=>'Request For Discount']);

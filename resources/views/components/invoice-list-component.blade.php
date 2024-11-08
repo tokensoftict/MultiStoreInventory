@@ -54,6 +54,11 @@
                                 @if(userCanView('invoiceandsales.edit') && $invoice->sub_total > -1 && $invoice->status =="DRAFT")
                                     <li><a href="{{ route('invoiceandsales.edit',$invoice->id) }}">Edit Invoice</a></li>
                                 @endif
+
+                                @if(userCanView('invoiceandsales.edit') && $invoice->sub_total > -1 && ($invoice->status =="PAID" || $invoice->status == "COMPLETE") && config('app.uses_edit_to_return_stocks') == true)
+                                    <li><a href="{{ route('invoiceandsales.edit',$invoice->id) }}">Edit Invoice</a></li>
+                                @endif
+
                                 @if(userCanView('invoiceandsales.pos_print') && $invoice->sub_total > -1)
                                     <li><a onclick="open_print_window(this); return false" href="{{ route('invoiceandsales.pos_print',$invoice->id) }}">Print Invoice Pos</a></li>
                                 @endif
