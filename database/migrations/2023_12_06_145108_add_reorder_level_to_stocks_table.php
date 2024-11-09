@@ -15,6 +15,7 @@ class AddReorderLevelToStocksTable extends Migration
     {
         Schema::table('stocks', function (Blueprint $table) {
             $table->integer('reorder_level')->after('expiry')->nullable();
+            $table->integer("stock_limit")->nullable()->after('reorder_level');
         });
     }
 
@@ -26,7 +27,7 @@ class AddReorderLevelToStocksTable extends Migration
     public function down()
     {
         Schema::table('stocks', function (Blueprint $table) {
-            $table->dropColumn('reorder_level');
+            $table->dropColumn(['reorder_level', 'stock_limit']);
         });
     }
 }
