@@ -41,13 +41,14 @@ class CustomerController extends Controller
             $data['credit_limit'] = 0;
         }
 
+
         $customer = Customer::create($data);
 
         if(isset($request->credit_bought_forward) && $request->credit_bought_forward > 0) {
             $log = [
                 'payment_id' =>NULL,
                 'user_id' => auth()->id(),
-                'payment_method_id' => 1,
+                'payment_method_id' => NULL,
                 'customer_id' => $customer->id,
                 'invoice_number' => "CREDIT-PAYMENT",
                 'invoice_id' => NULL,
@@ -71,13 +72,18 @@ class CustomerController extends Controller
         $data['title'] = "Update Customer";
         $data['customer'] = Customer::find($id);
 
-        return setPageContent('customermanager.edit',$data);
+        return view('customermanager.edit',$data);
     }
 
 
     public function update(Request $request, $id){
 
-        $request->validate(Customer::$validate);
+        $request->validate([
+            'firstname'=>'required',
+            'lastname'=>'required',
+            'phone_number' => 'required|unique:customers,phone_number,'.$id,
+            'email'=>'sometimes|nullable|email|unique:customers,email,'.$id,
+        ]);
 
         $customer = Customer::find($id);
 

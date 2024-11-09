@@ -66,7 +66,7 @@
 
                             <div class="form-group">
                                 <label>Address</label>
-                                <textarea class="form-control" name="address">{{ old('phone_number',$customer->address) }}</textarea>
+                                <textarea class="form-control" name="address">{{ old('address',$customer->address) }}</textarea>
                             </div>
                             <div class="pull-left">
                                 <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Add</button>

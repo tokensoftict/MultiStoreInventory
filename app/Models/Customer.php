@@ -100,7 +100,8 @@ class Customer extends Model
     public static $validate = [
         'firstname'=>'required',
         'lastname'=>'required',
-        'phone_number' => 'required'
+        'phone_number' => 'required|unique:customers,phone_number',
+        'email'=>'sometimes|nullable|email|unique:customers,email',
     ];
 
     public function getCreditBalanceAttribute()

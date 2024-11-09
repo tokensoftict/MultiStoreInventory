@@ -15,6 +15,7 @@ class MakeCustomerCreditLogPaymentIdNullable extends Migration
     {
         Schema::table('credit_payment_logs', function (Blueprint $table) {
             $table->foreignId("payment_id")->nullable()->change();
+            $table->foreignId("payment_method_id")->nullable()->change();
         });
     }
 

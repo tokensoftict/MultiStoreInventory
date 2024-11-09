@@ -66,7 +66,8 @@ class TaskGenerate extends Command
             'StockCounting' => 'Stock Counting',
             'StockTransferReport' => 'Stock Transfer Report',
             'CashBookReport' => 'Cash Book Report',
-            'CustomerReport' => 'Customer Report'
+            'CustomerReport' => 'Customer Report',
+            'Dashboard' => 'Dashboard Analysis'
         ];
 
         $taskList = DB::table('tasks')->pluck('route', 'id');

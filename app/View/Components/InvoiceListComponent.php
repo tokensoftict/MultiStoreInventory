@@ -7,14 +7,16 @@ use Illuminate\View\Component;
 class InvoiceListComponent extends Component
 {
     public $lists;
+    public $showTotal;
     /**
      * Create a new component instance.
      *
      * @return void
      */
-    public function __construct($lists)
+    public function __construct($lists, $showTotal = true)
     {
         $this->lists = $lists;
+        $this->showTotal = $showTotal;
     }
 
     /**

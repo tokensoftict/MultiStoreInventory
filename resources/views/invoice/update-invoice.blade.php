@@ -256,8 +256,12 @@
                                     <div class="row">
                                         <div class="col-sm-6">
                                             <div class="form-group">
-                                                <label for="invoice_date">Invoice / Sales date</label>
-                                                <input value="{{ date('Y-m-d',strtotime($invoice->invoice_date)) }}" data-min-view="2" data-date-format="yyyy-mm-dd" class="form-control datepicker js-datepicker" id="invoice_date" placeholder="Invoice / Sales date" type="text">
+                                                @if(userCanView('invoiceandsales.allow_user_to_change_invoice_date'))
+                                                    <input value="{{ date('Y-m-d',strtotime($invoice->invoice_date)) }}" data-min-view="2" data-date-format="yyyy-mm-dd" class="form-control datepicker js-datepicker" id="invoice_date" placeholder="Invoice / Sales date" type="text">
+                                                @else
+                                                    <input type="hidden" value="{{ date('Y-m-d',strtotime($invoice->invoice_date)) }}"  id="invoice_date">
+                                                    <span class="form-control">{{ date('Y-m-d',strtotime($invoice->invoice_date)) }}</span>
+                                                @endif
                                             </div>
                                         </div>
                                         <div class="col-sm-6">

@@ -75,22 +75,24 @@
             </tr>
         @endforeach
         </tbody>
-        <tfoot>
-        <tr>
-            <th></th>
-            <th></th>
-            <th></th>
-            <th></th>
-            <th></th>
-            <th>Total Discount</th>
-            <th>{{ number_format($total_discount,2) }}</th>
-            <th>Total Paid</th>
-            <th>{{ number_format($total,2) }}</th>
-            <th></th>
-            <th></th>
-            <th></th>
-            <th></th>
-        </tr>
-        </tfoot>
+        @if($showTotal)
+            <tfoot>
+            <tr>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th>Total Discount</th>
+                <th>{{ number_format($total_discount,2) }}</th>
+                <th>Total Paid</th>
+                <th>{{ number_format($total,2) }}</th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+            </tfoot>
+        @endif
     </table>
 </div>

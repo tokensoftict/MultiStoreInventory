@@ -36,6 +36,10 @@ class InvoiceController extends Controller
 
     }
 
+    public function allow_user_to_change_invoice_date(){
+
+    }
+
     public function new(){
         $data = [];
         $data['customers'] = Customer::all();
