@@ -150,17 +150,19 @@ class Payment extends Model
                 $paymentInformation['payment_info']['split_method'][4] = ($invoice_amount - $total_amount_paid);
                 $paymentInformation['payment_info']['payment_info_data'][4] = [
                     'payment_method_id' => 4,
-                    'credit' => "credit"
+                    'credit' => "credit",
+                    'overpayment' => false
                 ];
             }
             else if($total_amount_paid > $invoice_amount)
             {
 
-                $paymentInformation['payment_info']['split_method'][4] = -($total_amount_paid- $invoice_amount );
+                $paymentInformation['payment_info']['split_method'][4] = ($total_amount_paid- $invoice_amount );
                 // this is an over payment for this invoice
                 $paymentInformation['payment_info']['payment_info_data'][4] = [
                     'payment_method_id' => 4,
-                    'credit' => "credit"
+                    'credit' => "credit",
+                    'overpayment' => true
                 ];
             }
 
@@ -194,7 +196,8 @@ class Payment extends Model
                             'warehousestore_id' => getActiveStore()->id,
                             'payment_date' => $payment->payment_date,
                             'amount' => $amount,
-                            'payment_info' => json_encode($paymentInformation['payment_info']['payment_info_data'][$pmthod])
+                            'payment_info' => json_encode($paymentInformation['payment_info']['payment_info_data'][$pmthod]),
+                            'overpayment' => $paymentInformation['payment_info']['payment_info_data'][$pmthod]['overpayment']
                         ];
 
                     }
@@ -221,6 +224,8 @@ class Payment extends Model
             $payment->payment_method_tables()->saveMany($splits);
 
             if(isset($credit_payment_info)){
+                $overpayment = $credit_payment_info['overpayment'];
+                unset($credit_payment_info['overpayment']);
                 $payment_method_id = $payment->payment_method_tables()->save(new PaymentMethodTable($credit_payment_info));
 
                 $credit_log = [
@@ -230,7 +235,7 @@ class Payment extends Model
                     'customer_id' =>$paymentInformation['invoice']->customer_id,
                     'invoice_number' => $paymentInformation['invoice']->invoice_number,
                     'invoice_id' => $paymentInformation['invoice']->id,
-                    'amount' => -($payment_method_id->amount),
+                    'amount' => $overpayment ? $payment_method_id->amount : -($payment_method_id->amount),
                     'payment_date' => $payment->payment_date,
                 ];
 
