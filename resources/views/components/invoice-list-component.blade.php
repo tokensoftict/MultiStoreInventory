@@ -60,7 +60,7 @@
                                         <li><a href="{{ route('invoiceandsales.destroy',$invoice->id) }}">Delete Invoice</a></li>
                                     @endif
 
-                                @if(userCanView('invoiceandsales.edit') && ($invoice->status =="PAID" || $invoice->status == "COMPLETE") && config('app.uses_edit_to_return_stocks') == true)
+                                @if(userCanView('invoiceandsales.edit') && $invoice->sub_total > -1 && ($invoice->status =="PAID" || $invoice->status == "COMPLETE") && config('app.uses_edit_to_return_stocks') == true)
                                     <li><a href="{{ route('invoiceandsales.edit',$invoice->id) }}">Edit Invoice</a></li>
                                 @endif
 
