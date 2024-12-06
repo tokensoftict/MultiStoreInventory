@@ -371,13 +371,13 @@ class Invoice extends Model
             $report[$stock->id]['prods'] = $prods[$stock->id];
 
             if($prods[$stock->id]['type'] === "yard_quantity"){
-                if(app(Settings::class)->get('allow_selling_below_cost_price') == "1" and (float)$stock->yard_cost_price >= (float)$prods[$stock->id]['price']){
+                if(app(Settings::class)->get('allow_selling_below_cost_price') == "0" and (float)$stock->yard_cost_price >= (float)$prods[$stock->id]['price']){
                     $status = true;
                     $errors[$stock->id] = $stock->name."can not be sell under cost price ".number_format($stock->yard_cost_price,2 );
                 }
             }
 
-            if(app(Settings::class)->get('allow_selling_below_cost_price') == "1" and $prods[$stock->id]['type'] === "quantity"){
+            if(app(Settings::class)->get('allow_selling_below_cost_price') == "0" and $prods[$stock->id]['type'] === "quantity"){
                 if((float)$stock->cost_price >= (float)$prods[$stock->id]['price']){
                     $status = true;
                     $errors[$stock->id] = $stock->name."can not be sell under cost price ".number_format($stock->cost_price,2 );
@@ -505,14 +505,14 @@ class Invoice extends Model
 
 
             if($prods[$stock->id]['type'] === "yard_quantity"){
-                if(app(Settings::class)->get('allow_selling_below_cost_price') == "1" and (float)$stock->yard_cost_price >= (float)$prods[$stock->id]['price']){
+                if(app(Settings::class)->get('allow_selling_below_cost_price') == "0" and (float)$stock->yard_cost_price >= (float)$prods[$stock->id]['price']){
                     $status = true;
                     $errors[$stock->id] = $stock->name." can not be sell under cost price ".number_format($stock->yard_cost_price,2 );
                 }
             }
 
             if($prods[$stock->id]['type'] === "quantity"){
-                if(app(Settings::class)->get('allow_selling_below_cost_price') == "1" and (float)$stock->cost_price >= (float)$prods[$stock->id]['price']){
+                if(app(Settings::class)->get('allow_selling_below_cost_price') == "0" and (float)$stock->cost_price >= (float)$prods[$stock->id]['price']){
                     $status = true;
                     $errors[$stock->id] = $stock->name." can not be sell under cost price ".number_format($stock->cost_price,2 );
                 }
