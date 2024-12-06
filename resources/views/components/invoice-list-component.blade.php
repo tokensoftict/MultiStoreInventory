@@ -56,7 +56,7 @@
                                     <li><a href="{{ route('invoiceandsales.edit',$invoice->id) }}">Edit Invoice</a></li>
                                 @endif
 
-                                    @if(userCanView('invoiceandsales.destroy') && $invoice->sub_total > -1 && $invoice->status =="DRAFT")
+                                    @if(userCanView('invoiceandsales.destroy')  && $invoice->status =="DRAFT")
                                         <li><a href="{{ route('invoiceandsales.destroy',$invoice->id) }}">Delete Invoice</a></li>
                                     @endif
 
