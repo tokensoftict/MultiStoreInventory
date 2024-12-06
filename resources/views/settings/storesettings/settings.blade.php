@@ -33,6 +33,14 @@
                                     <option {{ @$store->allow_edit_price == "Yes" ? "selected" : "" }}>Yes</option>
                                 </select>
                             </div>
+
+                            <div class="form-group">
+                                <label>Allow Selling Below Cost Price</label>
+                                <select class="form-control" name="allow_edit_price">
+                                    <option value="0" {{ @$store->allow_selling_below_cost_price == "No" ? "selected" : "" }} >No</option>
+                                    <option value="1" {{ @$store->allow_selling_below_cost_price == "Yes" ? "selected" : "" }}>Yes</option>
+                                </select>
+                            </div>
                             <!--
                             <div class="form-group">
                                 <label>Branch Name</label>

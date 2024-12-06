@@ -118,7 +118,7 @@
     </table>
 
 
-    <h2 style="margin-top:0" class="text-center">Sales Invoice / Receipt</h2>
+    <h2 style="margin-top:0" class="text-center">{{ $invoice->status === "DRAFT" ? "Proforma Invoice" : "Sales Invoice / Receipt" }}</h2>
 
     <table id="products">
         <tr class="product_row" style="background: #0a0a0a; color: #FFF">

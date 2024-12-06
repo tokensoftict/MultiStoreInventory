@@ -51,9 +51,14 @@
                                 <li><a href="{{ route('invoiceandsales.apply_invoice_discount',$invoice->id) }}">Apply Discount</a></li>
                             @endif
                             @if($invoice->status !== "DISCOUNT" && $invoice->status !== "DISCOUNT-APPLIED")
+
                                 @if(userCanView('invoiceandsales.edit') && $invoice->sub_total > -1 && $invoice->status =="DRAFT")
                                     <li><a href="{{ route('invoiceandsales.edit',$invoice->id) }}">Edit Invoice</a></li>
                                 @endif
+
+                                    @if(userCanView('invoiceandsales.edit') && $invoice->sub_total > -1 && $invoice->status =="DRAFT")
+                                        <li><a href="{{ route('invoiceandsales.destroy',$invoice->id) }}">Delete Invoice</a></li>
+                                    @endif
 
                                 @if(userCanView('invoiceandsales.edit') && $invoice->sub_total > -1 && ($invoice->status =="PAID" || $invoice->status == "COMPLETE") && config('app.uses_edit_to_return_stocks') == true)
                                     <li><a href="{{ route('invoiceandsales.edit',$invoice->id) }}">Edit Invoice</a></li>

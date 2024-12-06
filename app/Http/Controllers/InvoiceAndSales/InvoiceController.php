@@ -240,8 +240,15 @@ class InvoiceController extends Controller
     public function destroy($id){
         $invoice = Invoice::find($id);
 
-        if($invoice->status == "DRAFT")
+        if($invoice->status == "DRAFT") {
+            foreach ($invoice->invoice_item_batches()->get() as $invoice_batch){
+                $batch = $invoice_batch->stockbatch;
+                $batch->{$invoice_batch->store} += $invoice_batch->quantity;
+                $batch->update();
+            }
             $invoice->delete();
+        }
+
 
         return redirect()->route('invoiceandsales.draft')->with('success','Invoice has been deleted successfully');
 
