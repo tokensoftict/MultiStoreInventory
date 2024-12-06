@@ -127,7 +127,7 @@
                                                     </tfoot>
                                                 </table>
                                                 @if(userCanView("invoiceandsales.cancel_discount"))
-                                                <a href="{{ route('invoiceandsales.view', $invoice->id) }}" class="btn btn-sm btn-danger">Cancel Discount Request and send back to Draft</a>
+                                                <a href="{{ route('invoiceandsales.cancel_discount', $invoice->id) }}" class="btn btn-sm btn-danger">Cancel Discount Request and send back to Draft</a>
                                                 @endif
                                             </div>
                                         </div>
