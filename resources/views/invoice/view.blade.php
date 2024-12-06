@@ -19,6 +19,18 @@
                                 @if(userCanView('invoiceandsales.print_way_bill'))
                                     <a href="{{ route('invoiceandsales.print_way_bill',$invoice->id) }}"  onclick="return open_print_window(this);" class="btn btn-primary btn-sm" ><i class="fa fa-print"></i> Print Waybill</a>
                                 @endif
+
+                                @if(userCanView('invoiceandsales.edit') && $invoice->sub_total > -1 && $invoice->status =="DRAFT")
+                                    <a href="{{ route('invoiceandsales.edit',$invoice->id) }}" class="btn btn-success btn-sm">Edit Invoice</a>
+                                @endif
+
+                                @if(userCanView('invoiceandsales.destroy') && $invoice->sub_total > -1 && $invoice->status =="DRAFT")
+                                    <a href="{{ route('invoiceandsales.destroy',$invoice->id) }}" class="btn btn-danger btn-sm">Delete Invoice</a>
+                                @endif
+
+                                @if(userCanView('invoiceandsales.edit')  && ($invoice->status =="PAID" || $invoice->status == "COMPLETE") && config('app.uses_edit_to_return_stocks') == true)
+                                    <a href="{{ route('invoiceandsales.edit',$invoice->id) }}" class="btn btn-primary btn-sm">Edit Invoice</a>
+                                @endif
                             @endif
                         </span>
                     </header>
@@ -71,7 +83,7 @@
 
                                     @if($invoice->status == "DISCOUNT-APPLIED")
                                         <form id="complete_payment"  action="{{ route('invoiceandsales.create')."?no_stock=true" }}" method="post">
-                                           @csrf
+                                            @csrf
                                             <br/>
                                             <hr/>
                                             <br/>
