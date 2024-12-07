@@ -386,7 +386,7 @@ class Invoice extends Model
 
 
             if($prods[$stock->id]['type'] === "quantity"){
-                if(!is_null($stock->stock_limit)) {
+                if(!is_null($stock->stock_limit) && $stock->stock_limit > 0) {
                     $quantity = $stock->available_quantity - $prods[$stock->id]['qty'];
                     if($quantity <= $stock->stock_limit){
                         $status = true;
@@ -520,7 +520,7 @@ class Invoice extends Model
 
 
             if($prods[$stock->id]['type'] === "quantity"){
-                if(!is_null($stock->stock_limit)) {
+                if(!is_null($stock->stock_limit) && $stock->stock_limit > 0) {
                     $quantity = $stock->available_quantity - $prods[$stock->id]['qty'];
                     if($quantity <= $stock->stock_limit){
                         $status = true;
