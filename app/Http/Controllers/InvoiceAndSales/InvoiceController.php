@@ -331,4 +331,10 @@ class InvoiceController extends Controller
         return redirect()->route("invoiceandsales.view", $invoice)->with('success', "Discount has been cancel successfully!");
     }
 
+
+
+    public function checkoutScan()
+    {
+        return view('invoice.scaninvoice');
+    }
 }

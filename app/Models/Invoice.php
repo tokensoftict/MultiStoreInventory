@@ -10,6 +10,7 @@ use App\Classes\Settings;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Arr;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -67,7 +68,10 @@ class Invoice extends Model
         'vat_amount' => 'float',
         'created_by' => 'int',
         'last_updated_by' => 'int',
-        'voided_by' => 'int'
+        'voided_by' => 'int',
+        'scan_user_id' => 'int',
+        'scan_date' => 'date',
+        'scan_time' => 'datetime',
     ];
 
     protected $dates = [
@@ -101,12 +105,20 @@ class Invoice extends Model
         'sales_time',
         'void_reason',
         'date_voided',
-        'void_time'
+        'void_time',
+        'scan_user_id',
+        'scan_date',
+        'scan_time'
     ];
 
     public function created_by()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function scan_by() : BelongsTo
+    {
+        return $this->belongsTo(User::class, 'scan_user_id');
     }
 
 
@@ -165,7 +177,6 @@ class Invoice extends Model
 
     public function paymentMethodTable()
     {
-
         return $this->morphMany(PaymentMethodTable::class,'invoice');
     }
 

@@ -45,6 +45,7 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
         Route::get('/findselectstock', ['as' => 'findselectstock', 'uses' => 'AjaxController@findselectstock']);
         Route::get('/findimage', ['as' => 'findimage', 'uses' => 'AjaxController@findimage']);
         Route::get('/findpurchaseorderstock', ['as' => 'findpurchaseorderstock', 'uses' => 'AjaxController@findpurchaseorderstock']);
+        Route::get('/processScaninvoice', ['as' => 'processScaninvoice', 'uses' => 'AjaxController@processScaninvoice']);
     });
 
     Route::middleware(['permit.task'])->group(function () {
@@ -284,6 +285,7 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
                 Route::match(['get', 'post'],'{id}/apply_invoice_discount', ['as' => 'apply_invoice_discount', 'uses' => 'InvoiceController@apply_invoice_discount','custom_label'=>'Apply Invoice Discount']);
                 Route::get('{id}/cancel_discount', ['as' => 'cancel_discount', 'uses' => 'InvoiceController@cancel_discount','custom_label'=>'Cancel Discount Request']);
                 Route::get('allow_user_to_change_invoice_date', ['as' => 'allow_user_to_change_invoice_date', 'uses' => 'InvoiceController@allow_user_to_change_invoice_date','custom_label'=>'Allow user to change invoice date']);
+                Route::get('checkoutScan', ['as' => 'checkoutScan', 'uses' => 'InvoiceController@checkoutScan','custom_label'=>'Scan Invoice for Product Checkout', 'visible' => true]);
             });
 
         });

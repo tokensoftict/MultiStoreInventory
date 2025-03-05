@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Ajax;
 
 use App\Http\Controllers\Controller;
+use App\Models\Invoice;
 use App\Models\Stock;
 use App\Models\Stockbatch;
 use App\Models\Warehousestore;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 
 class AjaxController extends Controller
@@ -227,6 +230,30 @@ class AjaxController extends Controller
         }
 
         return response()->json(['status'=>false]);
+    }
+
+
+    public function processScaninvoice(Request $request){
+        $invoiceCode = $request->get('invoice_code');
+
+       $invoice =  Invoice::where(function($sub) use($invoiceCode){
+            $sub->orWhere('id', $invoiceCode)->orWhere('invoice_number', $invoiceCode);
+        })->first();
+
+       if(!$invoice){
+           return response()->json(['status'=>false, "message" => "Invoice not found, Please try again."]);
+       }
+
+       if(!is_null($invoice->scan_user_id)){
+           return response()->json(['status'=>false, "message" => "Invoice has already been scanned by ".$invoice->scan_by->name." this might be a duplicate receipt"]);
+       }
+
+        $invoice->scan_user_id = \auth()->id();
+        $invoice->scan_time = Carbon::now();
+        $invoice->scan_date = now()->format('Y-m-d');
+        $invoice->update();
+
+        return response()->json(['status'=>true]);
     }
 
 }

@@ -38,8 +38,7 @@
                                                 </div>
                                             </div>
                                             @if ($errors->has('name'))
-                                                <label for="name-error" class="error"
-                                                       style="display: inline-block;">{{ $errors->first('name') }}</label>
+                                                <label for="name-error" class="error" style="display: inline-block;">{{ $errors->first('name') }}</label>
                                             @endif
                                         </div>
 
