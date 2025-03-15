@@ -204,7 +204,7 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
                 Route::get('{id}/edit', ['as' => 'edit', 'uses' => 'CustomerController@edit']);
                 Route::put('{id}', ['as' => 'update', 'uses' => 'CustomerController@update']);
                 Route::match(['get','post'],'/add_payment', ['as' => 'add_payment', 'uses' => 'CustomerController@add_payment', 'custom_label'=>"Add Credit Payment" ,'visible' => true]);
-
+                Route::match(['get','post'],'{id}/edit_payment', ['as' => 'edit_payment', 'uses' => 'CustomerController@edit_payment', 'custom_label'=>"Edit Customer Credit Payment", 'visible' => false]);
             });
 
         });
@@ -406,7 +406,6 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
                 Route::match(['get','post'],'/payment_report', ['as' => 'payment_report', 'uses' => 'CustomerReportController@payment_report', 'custom_label'=>"Customer Payment Report" ,'visible' => false]);
                 Route::match(['get','post'],'/balance_sheet', ['as' => 'balance_sheet', 'uses' => 'CustomerReportController@balance_sheet', 'custom_label'=>"Customer Balance Sheet" ,'visible' => false]);
                 Route::match(['get','post'],'/add_payment', ['as' => 'add_payment', 'uses' => 'CustomerReportController@add_payment', 'custom_label'=>"Add Credit Payment" ,'visible' => false]);
-
             });
 
             Route::prefix('stockTransferReport')->as('stockTransferReport.')->namespace('StockTransferReport')->group(function(){

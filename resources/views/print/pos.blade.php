@@ -126,8 +126,15 @@
             <td></td>
             <td></td>
             <td></td>
+            <td class="text-right">Discount</td>
+            <td class="text-right">{{ number_format($invoice->discount_amount,2) }}</td>
+        </tr>
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
             <td  align="right" class="text-right">Total</td>
-            <td  align="right" class="text-right"><b>{{ number_format(($invoice->sub_total),2) }}</b></td>
+            <td  align="right" class="text-right"><b>{{ number_format(($invoice->sub_total - $invoice->discount_amount),2) }}</b></td>
         </tr>
         </tfoot>
     </table>

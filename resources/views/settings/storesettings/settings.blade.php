@@ -41,6 +41,21 @@
                                     <option value="1" {{ @$store->allow_selling_below_cost_price == "1" ? "selected" : "" }}>Yes</option>
                                 </select>
                             </div>
+
+                            <div class="form-group">
+                                <label>Allow Store to Share the same Stock and Product</label>
+                                <select class="form-control" name="allow_store_to_share_the_same_product">
+                                    <option value="0" {{ @$store->allow_store_to_share_the_same_product == "0" ? "selected" : "" }} >No</option>
+                                    <option value="1" {{ @$store->allow_store_to_share_the_same_product == "1" ? "selected" : "" }}>Yes</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Allow Store to Share the same Customer</label>
+                                <select class="form-control" name="allow_store_to_share_the_same_customer">
+                                    <option value="0" {{ @$store->allow_store_to_share_the_same_customer == "0" ? "selected" : "" }} >No</option>
+                                    <option value="1" {{ @$store->allow_store_to_share_the_same_customer == "1" ? "selected" : "" }}>Yes</option>
+                                </select>
+                            </div>
                             <!--
                             <div class="form-group">
                                 <label>Branch Name</label>

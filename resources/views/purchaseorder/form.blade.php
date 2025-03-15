@@ -68,18 +68,26 @@
                                                                style="display: inline-block;">{{ $errors->first('supplier') }}</label>
                                                     @endif
                                                 </div>
-                                                <div class="col-md-3">
-                                                    <label>Select Store</label>
-                                                    <select required id="store" name="store" class="form-control select2">
-                                                        @foreach($stores as $store)
-                                                            <option  {{ old('store',$porder->store) == $store->packed_column ? "selected" : "" }} value="{{ $store->packed_column }}">{{ $store->name }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                    @if ($errors->has('store'))
-                                                        <label for="name-error" class="error"
-                                                               style="display: inline-block;">{{ $errors->first('store') }}</label>
-                                                    @endif
-                                                </div>
+                                                @if(app(\App\Classes\Settings::class)->store()->allow_store_to_share_the_same_product == "0")
+                                                    <div class="col-md-3">
+                                                        <label>Store</label>
+                                                        <span class="form-control">{{ getActiveStore()->name }}</span>
+                                                        <input type="hidden" name="store" value="{{ getActiveStore()->packed_column }}">
+                                                    </div>
+                                                @else
+                                                    <div class="col-md-3">
+                                                        <label>Select Store</label>
+                                                        <select required id="store" name="store" class="form-control select2">
+                                                            @foreach($stores as $store)
+                                                                <option  {{ old('store',$porder->store) == $store->packed_column ? "selected" : "" }} value="{{ $store->packed_column }}">{{ $store->name }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                        @if ($errors->has('store'))
+                                                            <label for="name-error" class="error"
+                                                                   style="display: inline-block;">{{ $errors->first('store') }}</label>
+                                                        @endif
+                                                    </div>
+                                                @endif
                                                 <div class="col-md-3">
                                                     <label>Date</label>
                                                     <input class="form-control datepicker js-datepicker" data-min-view="2" data-date-format="yyyy-mm-dd" style="background-color: #FFF; color: #000;"  name="date_created" value="{{ old('date_created', \Carbon\Carbon::today()->toDateString()) }}"/>

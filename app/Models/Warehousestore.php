@@ -44,7 +44,12 @@ class Warehousestore extends Model
         'yard_column',
         'type',
         'default',
-        'status'
+        'status',
+        'first_address',
+        'second_address',
+        'contact_number',
+        'footer_notes',
+        'logo'
     ];
 
 
@@ -63,7 +68,11 @@ class Warehousestore extends Model
         'yard_column',
         'type',
         'default',
-        'status'
+        'status',
+        'first_address',
+        'second_address',
+        'contact_number',
+        'footer_notes',
     ];
 
 

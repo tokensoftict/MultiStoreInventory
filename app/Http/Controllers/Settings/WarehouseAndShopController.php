@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Settings;
 
+use App\Classes\Settings;
 use App\Http\Controllers\Controller;
 use App\Models\Bank;
 use App\Models\BankAccount;
@@ -28,11 +29,31 @@ class WarehouseAndShopController extends Controller
 
     public function store(Request $request){
 
-        $request->validate(Warehousestore::$validate);
+        $val = Warehousestore::$validate;
+
+        $file = $request->file('logo');
+
+        if($file){
+            $val['logo'] = 'mimes:jpeg,jpg,png,gif|required|max:10000';
+        }
+
+        $request->validate($val);
 
         $data = $request->only(Warehousestore::$field);
 
         $data['status'] = 1;
+
+        if ($file) {
+            $imageName = time().'.'. $request->logo->getClientOriginalExtension();
+
+            $request->logo->move(public_path('img'), $imageName);
+
+            $data['logo'] = $imageName;
+
+            if(!empty($store->logo)) {
+                @unlink(public_path('img/' . $store->logo));
+            }
+        }
 
         Warehousestore::create($data);
 
@@ -65,9 +86,28 @@ class WarehouseAndShopController extends Controller
 
         $validate['name'] = "required|unique:warehousestores,name,".$id;
 
+        $file = $request->file('logo');
+
+        if($file){
+            $validate['logo'] = 'mimes:jpeg,jpg,png,gif|required|max:10000';
+        }
+
+
         $request->validate($validate);
 
         $data = $request->only(Warehousestore::$field);
+
+        if ($file) {
+            $imageName = time().'.'. $request->logo->getClientOriginalExtension();
+
+            $request->logo->move(public_path('img'), $imageName);
+
+            $data['logo'] = $imageName;
+
+            if(!empty($store->logo)) {
+                @unlink(public_path('img/' . $store->logo));
+            }
+        }
 
         Warehousestore::find($id)->update($data);
 

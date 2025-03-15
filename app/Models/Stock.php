@@ -6,8 +6,9 @@
 
 namespace App\Models;
 
+use App\Classes\Settings;
 use Carbon\Carbon;
-use http\Env\Request;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -80,7 +81,8 @@ class Stock extends Model
         'user_id',
         'last_updated_by',
         'reorder_level',
-        'stock_limit'
+        'stock_limit',
+        'warehousestore_id'
     ];
 
     public static $validation = [
@@ -111,7 +113,8 @@ class Stock extends Model
         'user_id',
         'last_updated_by',
         'reorder_level',
-        'stock_limit'
+        'stock_limit',
+        'warehousestore_id'
     ];
     protected $appends = ['available_quantity','available_yard_quantity'];
 
@@ -122,8 +125,8 @@ class Stock extends Model
         self::creating(function($stock){
 
             $stock->user_id = auth()->id();
-
             $stock->last_updated_by = auth()->id();
+            $stock->warehousestore_id = getActiveStore()->id;
 
         });
 
@@ -134,6 +137,13 @@ class Stock extends Model
 
         });
 
+        if(!app()->runningInConsole()){
+            if(app(Settings::class)->store()->allow_store_to_share_the_same_product == "0") {
+                static::addGlobalScope("filter_stocks", function (Builder $builder) {
+                    $builder->where("warehousestore_id", getActiveStore()->id);
+                });
+            }
+        }
     }
 
 
@@ -165,6 +175,10 @@ class Stock extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function warehousestore()
+    {
+        return $this->belongsTo(Warehousestore::class);
+    }
     public function last_updated()
     {
         return $this->belongsTo(User::class,'last_updated_by');

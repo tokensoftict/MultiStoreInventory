@@ -20,7 +20,7 @@ class StockExport implements FromCollection, WithHeadings
         $this->stockTaking = $stockTaking;
     }
 
-        /**
+    /**
      * @return \Illuminate\Support\Collection
      */
     public function collection()
@@ -30,20 +30,20 @@ class StockExport implements FromCollection, WithHeadings
         $packed_column = $store->packed_column;
         $yard_column = $store->yard_column;
 
-
-        $stocks =   DB::table('stocks')->select(
-            'stocks.id',
-            'stocks.name',
-            'product_category.name as cat_name',
-        ) ->leftJoin('product_category', 'stocks.product_category_id','=','product_category.id')
-            ->where('stocks.status', 1);
-
         /*
+               $stocks =   DB::table('stocks')->select(
+                   'stocks.id',
+                   'stocks.name',
+                   'product_category.name as cat_name',
+               ) ->leftJoin('product_category', 'stocks.product_category_id','=','product_category.id')
+                   ->where('stocks.status', 1);
+        */
+
         $stocks =  DB::table('stockbatches')->select(
             'stocks.id',
             'stocks.name',
-            //DB::raw('SUM(stockbatches.' . $packed_column . ') as bundle_quantity'),
-            //DB::raw('SUM(stockbatches.' . $yard_column . ') as yard_quantity'),
+            DB::raw('SUM(stockbatches.' . $packed_column . ') as bundle_quantity'),
+            DB::raw('SUM(stockbatches.' . $yard_column . ') as yard_quantity'),
             'product_category.name as cat_name',
         )
             ->join('stocks', 'stocks.id', '=', 'stockbatches.stock_id')
@@ -51,7 +51,7 @@ class StockExport implements FromCollection, WithHeadings
             ->where('stocks.status', 1)
             ->groupBy('stocks.id')
             ->groupBy('stocks.name');
-        */
+
         if(request()->has('categories')){
             if(in_array("all",  request()->get('categories'))) {
             }else{
@@ -72,8 +72,8 @@ class StockExport implements FromCollection, WithHeadings
         return [
             'ID',
             'NAME',
-            //'BUNDLE QUANTITY',
-            //'YARD QUANTITY',
+            'BUNDLE QUANTITY',
+            'YARD QUANTITY',
             'CATEGORY',
             'COUNTED BUNDLE QUANTITY',
             'COUNTED YARD QUANTITY',

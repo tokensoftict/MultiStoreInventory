@@ -17,8 +17,10 @@
                         <table class="table table-hover table-hover">
                             <tr>
                                 <th>#</th>
+                                <th></th>
                                 <th>Name</th>
                                 <th>Type</th>
+                                <th>Address Line 1</th>
                                 <th>Status</th>
                                 <th>Default</th>
                                 <th>Action</th>
@@ -26,8 +28,14 @@
                             @foreach($warehouse_and_shops as $warehouse_and_shop)
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
+                                    <td style="width: 100px;">
+                                        @if(!empty($warehouse_and_shop->logo))
+                                            <img src="{{ asset('img/'.$warehouse_and_shop->logo) }}"  class="img-responsive" style="width:100%; margin: auto; display: block;"/>
+                                        @endif
+                                    </td>
                                     <td>{{ $warehouse_and_shop->name }}</td>
                                     <td>{{ $warehouse_and_shop->type }}</td>
+                                    <td>{{ $warehouse_and_shop->first_address }}</td>
                                     <td>{!! $warehouse_and_shop->status == 1 ? label("Active","success") : label("Inactive","danger") !!}</td>
                                     <td>{!! $warehouse_and_shop->default == 1 ? label("Default","success") : "" !!}</td>
                                     <td>
@@ -76,6 +84,29 @@
                                         <option>SHOP</option>
                                         <option>WAREHOUSE</option>
                                     </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Address Line 1</label>
+                                    <input type="text" value="{{ old('first_address') }}"   class="form-control" name="first_address" placeholder="Address Line 1"/>
+                                </div>
+                                <div class="form-group">
+                                    <label>Address Line 2</label>
+                                    <input type="text" value="{{ old('second_address') }}"   class="form-control" name="second_address" placeholder="Address Line 2"/>
+                                </div>
+                                <div class="form-group">
+                                    <label>Contact Phone Number</label>
+                                    <input type="text" value="{{ old('contact_number') }}"   class="form-control" name="contact_number" placeholder="Contact Phone Number"/>
+                                </div>
+                                <div class="form-group">
+                                    <label>Logo</label>
+                                    <input type="file"  name="logo" class="form-control">
+                                    @if ($errors->has('logo'))
+                                        <label for="name-error" class="error" style="display: inline-block;">{{ $errors->first('logo') }}</label>
+                                    @endif
+                                </div>
+                                <div class="form-group">
+                                    <label>Footer Notes</label>
+                                    <input type="text" value="{{ old('footer_notes') }}"   class="form-control" name="footer_notes" placeholder="Footer Notes"/>
                                 </div>
                                 <div class="pull-left">
                                     <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>

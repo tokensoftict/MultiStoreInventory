@@ -27,6 +27,32 @@
                                     <option {{ old('type',$warehouse_and_shop->type) == "WAREHOUSE" ? "selected" : "" }}>WAREHOUSE</option>
                                 </select>
                             </div>
+                            <div class="form-group">
+                                <label>Address Line 1</label>
+                                <input type="text" value="{{ old('first_address', $warehouse_and_shop->first_address) }}"   class="form-control" name="first_address" placeholder="Address Line 1"/>
+                            </div>
+                            <div class="form-group">
+                                <label>Address Line 2</label>
+                                <input type="text" value="{{ old('second_address', $warehouse_and_shop->second_address) }}"   class="form-control" name="second_address" placeholder="Address Line 2"/>
+                            </div>
+                            <div class="form-group">
+                                <label>Contact Phone Number</label>
+                                <input type="text" value="{{ old('contact_number', $warehouse_and_shop->contact_number) }}"   class="form-control" name="contact_number" placeholder="Contact Phone Number"/>
+                            </div>
+                            <div class="form-group">
+                                <label>Logo</label>
+                                <input type="file"  name="logo" class="form-control">
+                                @if ($errors->has('logo'))
+                                    <label for="name-error" class="error" style="display: inline-block;">{{ $errors->first('logo') }}</label>
+                                @endif
+                            </div>
+                            @if(!empty($warehouse_and_shop->logo))
+                                <img src="{{ asset('img/'.$warehouse_and_shop->logo) }}"  class="img-responsive" style="width:30%; margin: auto; display: block;"/>
+                            @endif
+                            <div class="form-group">
+                                <label>Footer Notes</label>
+                                <input type="text" value="{{ old('footer_notes',  $warehouse_and_shop->footer_notes) }}"   class="form-control" name="footer_notes" placeholder="Footer Notes"/>
+                            </div>
                             <div class="pull-left">
                                 <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Update</button>
                             </div>

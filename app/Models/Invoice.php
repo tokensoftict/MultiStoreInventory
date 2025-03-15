@@ -416,6 +416,10 @@ class Invoice extends Model
             }
         }
 
+        $invoice->discount_type = "none";
+        $invoice->discount_amount = 0;
+        $invoice->update();
+
         return ['status'=> $status, 'data'=>$report,'errors'=> $errors,'returnLogs'=>$returnLogs];
 
     }

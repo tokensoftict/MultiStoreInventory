@@ -21,13 +21,14 @@ class CashBookController extends Controller
             $data['to'] = date('Y-m-t');
             $data['bank_account_id'] = 1;
         }
+
         $credit_bal = Cashbook::where('transaction_date','<', $data['from'])->where('bank_account_id',$data['bank_account_id'])->where('type','Credit')->sum('amount');
         $debit_bal = Cashbook::where('transaction_date','<', $data['from'])->where('bank_account_id',$data['bank_account_id'])->where('type','Debit')->sum('amount');
         $data['opening'] = $credit_bal - $debit_bal;
         $data['title'] = 'List Cashbook';
         $data['banks'] = BankAccount::all();
-        $data['transactions'] = Cashbook::whereBetween('transaction_date',[ $data['from'],$data['to']])->get();
-        return setPageContent('cashbook.list-cashbook',$data);
+        $data['transactions'] = Cashbook::whereBetween('transaction_date',[ $data['from'],$data['to']])->where('bank_account_id',$data['bank_account_id'])->get();
+        return view('cashbook.list-cashbook',$data);
     }
 
 

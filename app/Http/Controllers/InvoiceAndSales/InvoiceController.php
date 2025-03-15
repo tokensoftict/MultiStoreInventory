@@ -173,7 +173,7 @@ class InvoiceController extends Controller
         $data = [];
         $invoice = Invoice::with(['created_user','customer','invoice_items'])->find($id);
         $data['invoice'] =$invoice;
-        $data['store'] =  $this->settings->store();
+        $data['store'] =  $invoice->warehousestore_id == 1 ? $this->settings->store() : $invoice->warehousestore;
         $page_size = $invoice->invoice_items()->get()->count() * 15;
         $page_size += 180;
         $pdf = PDF::loadView('print.pos', $data,[],[
@@ -197,7 +197,7 @@ class InvoiceController extends Controller
         $data = [];
         $invoice = Invoice::with(['created_user','customer','invoice_items'])->find($id);
         $data['invoice'] = $invoice;
-        $data['store'] =  $this->settings->store();
+        $data['store'] =  $invoice->warehousestore_id == 1 ? $this->settings->store() : $invoice->warehousestore;
         $pdf = PDF::loadView("print.pos_afour",$data);
         $pdf->getMpdf()->SetWatermarkText(strtoupper($invoice->status));
         $pdf->getMpdf()->showWatermarkText = true;
@@ -208,7 +208,7 @@ class InvoiceController extends Controller
         $data = [];
         $invoice = Invoice::with(['created_user','customer','invoice_items'])->find($id);
         $data['invoice'] = $invoice;
-        $data['store'] =  $this->settings->store();
+        $data['store'] =  $invoice->warehousestore_id == 1 ? $this->settings->store() : $invoice->warehousestore;
         $pdf = PDF::loadView("print.pos_afour_waybill",$data);
         $pdf->getMpdf()->SetWatermarkText(strtoupper($invoice->name));
         $pdf->getMpdf()->showWatermarkText = true;

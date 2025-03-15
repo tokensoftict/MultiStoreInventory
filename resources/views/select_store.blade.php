@@ -45,6 +45,9 @@
                             <div class="panel text-center">
                                 <a href="{{ route('selected-store', $store->warehousestore_id) }}">
                                     <div class="state-title">
+                                        @if(!empty($store->warehousestore->logo))
+                                            <img src="{{ asset('img/'.$store->warehousestore->logo) }}"  class="img-responsive" style="width:40%; margin: 10px auto; display: block;"/>
+                                        @endif
                                         <span class="value" style="font-size: 22px; font-weight: bolder">{{ $store->warehousestore->name }}</span>
                                         <span class="info">Click to Select</span>
                                     </div>

@@ -31,13 +31,21 @@ class PurchaseOrder extends Controller
 
     public function index(){
         $data['title'] = "List Today's Purchase Orders";
-        $data['purchase_orders'] = Po::with(['supplier','purchase_order_items','user','created_user'])->where('type', 'PURCHASE')->where('date_created',date('Y-m-d'))->orderBy('id','DESC')->get();
+        $data['purchase_orders'] = Po::with(['supplier','purchase_order_items','user','created_user'])->where('type', 'PURCHASE')->where('date_created',date('Y-m-d'))->orderBy('id','DESC');
+        if(app(\App\Classes\Settings::class)->store()->allow_store_to_share_the_same_product == "0") {
+            $data['purchase_orders'] = $data['purchase_orders']->where('warehousestore_id', getActiveStore()->id);
+        }
+        $data['purchase_orders'] = $data['purchase_orders']->get();
         return view('purchaseorder.list', $data);
     }
 
     public function returns(){
         $data['title'] = "List Today's Purchase Returns";
-        $data['purchase_orders'] = Po::with(['supplier','purchase_order_items','user','created_user'])->where('type', 'RETURN')->where('date_created',date('Y-m-d'))->orderBy('id','DESC')->get();
+        $data['purchase_orders'] = Po::with(['supplier','purchase_order_items','user','created_user'])->where('type', 'RETURN')->where('date_created',date('Y-m-d'))->orderBy('id','DESC');
+        if(app(\App\Classes\Settings::class)->store()->allow_store_to_share_the_same_product == "0") {
+            $data['purchase_orders'] = $data['purchase_orders']->where('warehousestore_id', getActiveStore()->id);
+        }
+        $data['purchase_orders'] = $data['purchase_orders']->get();
         return view('purchaseorder.list', $data);
     }
 
@@ -71,8 +79,7 @@ class PurchaseOrder extends Controller
     public function print($id){
         $data['title'] = 'Print Purchase Order';
         $data['porder'] = Po::with(['supplier','purchase_order_items','user','created_user'])->find($id);
-        $data['settings'] = $this->settings->store();
-
+        $data['settings'] = $data['porder']->warehousestore_id == 1 ? $this->settings->store() : $data['porder']->warehousestore;
         $pdf = PDF::loadView("print.print_purchase", $data);
         return $pdf->stream('document.pdf');
     }
@@ -80,7 +87,7 @@ class PurchaseOrder extends Controller
     public function show($id){
         $data['title'] = 'View Purchase Order';
         $data['porder'] = Po::with(['supplier','purchase_order_items','user','created_user'])->find($id);
-        $data['settings'] = $this->settings->store();
+        $data['settings'] = $data['porder']->warehousestore_id == 1 ? $this->settings->store() : $data['porder']->warehousestore;;
         return view('purchaseorder.show', $data);
     }
 

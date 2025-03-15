@@ -164,7 +164,8 @@
                                         <tbody>
                                         @php
                                             $total=0;
-                                        $payments = \App\Models\Payment::query()->latest()->limit(15)->get();
+                                        $payments = \App\Models\Payment::query()
+                                        ->where('warehousestore_id', getActiveStore()->id)->latest()->limit(15)->get();
                                         @endphp
                                         @forelse($payments as $payment)
                                             @php

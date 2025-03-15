@@ -36,7 +36,7 @@
                 <td>{{ number_format($invoice->sub_total,2) }}</td>
                 <td>{{ number_format($invoice->discount_amount,2) }}</td>
                 <td>{{ number_format(($invoice->sub_total -$invoice->discount_amount) ,2) }}</td>
-                <td>{{ number_format($invoice->total_amount_paid,2) }}</td>
+                <td>{{ number_format($invoice->total_amount_paid ,2) }}</td>
                 <td>{{ convert_date2($invoice->invoice_date) }}</td>
                 <td>{{ $invoice->sales_time->format('h:i a') }}</td>
                 <td>{{ $invoice->created_user->name }}</td>

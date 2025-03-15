@@ -3,6 +3,7 @@ namespace App\Classes;
 
 use App\Models\Expense;
 use App\Models\Payment;
+use App\Models\PaymentMethodTable;
 use Carbon\Carbon;
 
 class Dashboard
@@ -13,7 +14,9 @@ class Dashboard
      */
     public final function todaysIncome()
     {
-        return Payment::query()->where('warehousestore_id', getActiveStore()->id)->where('payment_date', now()->format('Y-m-d'))->sum('total_paid');
+        return PaymentMethodTable::query()->where('warehousestore_id', getActiveStore()->id)->where('payment_date', now()->format('Y-m-d'))
+            ->whereIn('payment_method_id', [1,2,3,5])
+            ->sum('amount');
     }
 
     /**
@@ -29,7 +32,9 @@ class Dashboard
      */
     public final function currentMonthIncome()
     {
-        return Payment::query()->where('warehousestore_id', getActiveStore()->id)->whereBetween('payment_date', [now()->startOfMonth()->format("Y-m-d"), now()->endOfMonth()->format("Y-m-d")])->sum('total_paid');
+        return PaymentMethodTable::query()->where('warehousestore_id', getActiveStore()->id)->whereBetween('payment_date', [now()->startOfMonth()->format("Y-m-d"), now()->endOfMonth()->format("Y-m-d")])
+            ->whereIn('payment_method_id', [1,2,3,5])
+            ->sum('amount');
     }
 
     /**
@@ -71,7 +76,9 @@ class Dashboard
 
             $yearlyReports[] = [
                 "name" => $month['month'],
-                "totalIncome" => Payment::query()->where('warehousestore_id', getActiveStore()->id)->whereBetween('payment_date',[$month['start_date'], $month['end_date']])->sum('total_paid'),
+                "totalIncome" => PaymentMethodTable::query()->where('warehousestore_id', getActiveStore()->id)
+                    ->whereIn('payment_method_id', [1,2,3,5])
+                    ->whereBetween('payment_date',[$month['start_date'], $month['end_date']])->sum('amount'),
                 "totalExpenses" => Expense::query()->where('warehousestore_id', getActiveStore()->id)->whereBetween('expense_date', [$month['start_date'], $month['end_date']])->sum('amount'),
             ];
         }
