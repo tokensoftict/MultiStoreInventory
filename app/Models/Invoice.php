@@ -323,6 +323,7 @@ class Invoice extends Model
 
             foreach ($products as $product) {
 
+                if(!isset($product['invoice_item_id'])) continue;
                 if ($product['invoice_item_id'] == "new") continue;
 
                 $invoice_item = InvoiceItem::find($product['invoice_item_id']);
