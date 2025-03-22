@@ -16,6 +16,9 @@
                                 @if(userCanView('invoiceandsales.print_afour'))
                                     <a href="{{ route('invoiceandsales.print_afour',$invoice->id) }}"  onclick="return open_print_window(this);" class="btn btn-info btn-sm" ><i class="fa fa-print"></i> Print A4</a>
                                 @endif
+                                    @if(userCanView('invoiceandsales.print_afive'))
+                                        <a href="{{ route('invoiceandsales.print_afive',$invoice->id) }}"  onclick="return open_print_window(this);" class="btn btn-info btn-sm" ><i class="fa fa-print"></i> Print A5</a>
+                                    @endif
                                 @if(userCanView('invoiceandsales.print_way_bill'))
                                     <a href="{{ route('invoiceandsales.print_way_bill',$invoice->id) }}"  onclick="return open_print_window(this);" class="btn btn-primary btn-sm" ><i class="fa fa-print"></i> Print Waybill</a>
                                 @endif

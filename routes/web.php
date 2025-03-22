@@ -270,6 +270,7 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
                 Route::get('discount', ['as' => 'discount', 'uses' => 'InvoiceController@discount', 'custom_label'=>"Pending Discount's Invoice" ,'visible' => true]);
                 Route::get('{id}/pos_print', ['as' => 'pos_print', 'uses' => 'InvoiceController@print_pos' ]);
                 Route::get('{id}/print_afour', ['as' => 'print_afour', 'uses' => 'InvoiceController@print_afour']);
+                Route::get('{id}/print_afive', ['as' => 'print_afive', 'uses' => 'InvoiceController@print_afive']);
                 Route::get('{id}/print_way_bill', ['as' => 'print_way_bill', 'uses' => 'InvoiceController@print_way_bill']);
                 Route::get('{id}/view', ['as' => 'view', 'uses' => 'InvoiceController@view']);
                 Route::get('{id}/edit', ['as' => 'edit', 'uses' => 'InvoiceController@edit']);

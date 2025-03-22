@@ -70,6 +70,9 @@
                                 @if(userCanView('invoiceandsales.print_afour') && $invoice->sub_total > -1)
                                     <li><a onclick="open_print_window(this); return false" href="{{ route('invoiceandsales.print_afour',$invoice->id) }}">Print Invoice A4</a></li>
                                 @endif
+                                    @if(userCanView('invoiceandsales.print_afour') && $invoice->sub_total > -1)
+                                        <li><a onclick="open_print_window(this); return false" href="{{ route('invoiceandsales.print_afive',$invoice->id) }}">Print Small A5</a></li>
+                                    @endif
                                 @if(userCanView('invoiceandsales.print_way_bill') && $invoice->sub_total > -1)
                                     <li><a onclick="open_print_window(this); return false" href="{{ route('invoiceandsales.print_way_bill',$invoice->id) }}">Print Waybill</a></li>
                                 @endif

@@ -204,6 +204,15 @@ class InvoiceController extends Controller
         return $pdf->stream('document.pdf');
     }
 
+    public function print_afive($id){
+        $data = [];
+        $invoice = Invoice::with(['created_user','customer','invoice_items'])->find($id);
+        $data['invoice'] = $invoice;
+        $data['store'] =  $invoice->warehousestore_id == 1 ? $this->settings->store() : $invoice->warehousestore;
+        $pdf = PDF::loadView("print.pos_afive",$data);
+        return $pdf->stream('document.pdf');
+    }
+
     public function print_way_bill($id){
         $data = [];
         $invoice = Invoice::with(['created_user','customer','invoice_items'])->find($id);
