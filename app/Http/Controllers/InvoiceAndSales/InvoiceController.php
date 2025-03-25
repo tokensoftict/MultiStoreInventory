@@ -211,11 +211,14 @@ class InvoiceController extends Controller
         $data['store'] =  $invoice->warehousestore_id == 1 ? $this->settings->store() : $invoice->warehousestore;
         $page_size = $invoice->invoice_items()->get()->count() * 15;
         $page_size += 180;
+
         $pdf = PDF::loadView("print.pos_afive", $data,[],[
             'format' => [148,$page_size],
             'display_mode'         => 'fullpage',
             'orientation'          => 'L',
         ]);
+        $pdf->getMpdf()->SetWatermarkText(strtoupper($invoice->name));
+        $pdf->getMpdf()->showWatermarkText = true;
         return $pdf->stream('document.pdf');
     }
 

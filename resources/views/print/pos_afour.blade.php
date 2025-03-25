@@ -59,14 +59,14 @@
         <tr><td valign="top">
                 <h2  class="text-center">{{ $store->name}}</h2>
                 <p align="center">
-                    {{ $store->first_address }}
+                    {!! $store->first_address !!}
                     @if(!empty($store->second_address))
                         <br/>
-                        {{ $store->second_address }}
+                        {!! $store->second_address !!}
                     @endif
                     @if(!empty($store->contact_number))
                         <br/>
-                        {{ $store->contact_number }}
+                        {!! $store->contact_number !!}
                     @endif
                 </p>
             </td>
@@ -133,7 +133,7 @@
             <tr>
                 <td>{{ $loop->iteration }}</td>
                 <td align="left" class="text-left">{{ $item->stock->name }}</td>
-                <td align="center" class="text-center">{{ $item->quantity }}</td>
+                <td align="center" class="text-center">{{ $item->quantity }} {{ $item->store == "yard_quantity" ? "pcs" : "carton" }}</td>
                 <td align="center" class="text-center">{{ number_format($item->selling_price,2) }}</td>
                 <td align="right" class="text-right">{{ number_format(($item->total_selling_price),2) }}</td>
             </tr>
