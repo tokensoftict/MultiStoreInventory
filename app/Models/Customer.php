@@ -102,8 +102,8 @@ class Customer extends Model
     protected $appends = ['credit_balance'];
 
     public static $validate = [
-        'firstname'=>'required',
-        'lastname'=>'required',
+        'firstname'=>'required|unique:customers,firstname',
+        'lastname'=>'required|unique:customers,lastname',
         'phone_number' => 'required|unique:customers,phone_number',
         'email'=>'sometimes|nullable|email|unique:customers,email',
     ];
