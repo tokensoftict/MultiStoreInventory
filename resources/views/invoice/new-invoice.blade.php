@@ -719,10 +719,10 @@
                 $('.split_control').each(function(){
 
 
-
-                    if(getTotalSplitPayemnt() !== calculateTotal() && $('#customer_id').val() === "1")
+                    //&& $('#customer_id').val() === "1"
+                    if(getTotalSplitPayemnt() !== calculateTotal() )
                     {
-                        alert("You can not sell credit to a Generic Customer, Please select real customer");
+                        alert("Total amount entered is not equal to total invoice amount");
                         error = true;
                         return false;
                     }
@@ -841,10 +841,10 @@
 
             function handle_split_method(){
                 $('.split_control').on("keyup",function(){
-                    var total = 0;
+                    var total = calculateTotal();
                     $('.split_control').each(function(index,elem){
                         if($(elem).val() !="") {
-                            total += parseFloat($(elem).val());
+                            total -= parseFloat($(elem).val());
                         }
                     });
                     $("#total_split").html(formatMoney(total));
