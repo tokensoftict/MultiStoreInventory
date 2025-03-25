@@ -157,6 +157,7 @@
                                         <tr>
                                             <th>#</th>
                                             <th>Customer</th>
+                                            <th>Payment Method</th>
                                             <th>Total Paid</th>
                                             <th>Payment Time</th>
                                         </tr>
@@ -164,7 +165,7 @@
                                         <tbody>
                                         @php
                                             $total=0;
-                                        $payments = \App\Models\Payment::query()
+                                        $payments = \App\Models\PaymentMethodTable::query()
                                         ->where('warehousestore_id', getActiveStore()->id)->latest()->limit(15)->get();
                                         @endphp
                                         @forelse($payments as $payment)
@@ -174,6 +175,7 @@
                                             <tr>
                                                 <td>{{ $loop->iteration }}</td>
                                                 <td>{{ $payment->customer->firstname }} {{ $payment->customer->lastname }}</td>
+                                                <td>{{ $payment->payment_method->name }}</td>
                                                 <td>{{ money($payment->total_paid) }}</td>
                                                 <td>{{ date("h:i a",strtotime($payment->payment_time)) }}</td>
                                             </tr>
