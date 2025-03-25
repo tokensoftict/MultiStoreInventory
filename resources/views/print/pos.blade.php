@@ -53,24 +53,24 @@
 <div id="printbox">
     <h2 style="margin:-2px;padding: 0px" class="text-center">{{ $store->name}}</h2>
     <div align="center" >
-        {{ $store->first_address }}
+       {!! $store->first_address !!}
         @if(!empty($store->second_address))
             <br/>
-            {{ $store->second_address }}
+            {!!  $store->second_address !!}
         @endif
         @if(!empty($store->contact_number))
             <br/>
-            {{ $store->contact_number }}
+           {!! $store->contact_number !!}
         @endif
     </div>
     <table class="inv_info">
         <tr>
             <td>Invoice / Receipt No</td>
-            <td>{{ $invoice->invoice_paper_number }}</td>
+            <td>{!! $invoice->invoice_paper_number !!}</td>
         </tr>
         <tr>
             <td>Invoice Number</td>
-            <td>{{ $invoice->invoice_number }}</td>
+            <td>{!! $invoice->invoice_number !!}</td>
         </tr>
         <tr>
             <td>Invoice Date</td>
