@@ -337,6 +337,9 @@ class Stock extends Model
         $stock->update();
 
         $batches = $stock->getSaleableBatches(getActiveStore()->packed_column, $num_qty_to_convert);
+        if($batches === false) {
+            return redirect()->route('stock.convert')->with('error','Not enough quantity to convert');
+        }
         foreach ($batches as $key=>$batch){
             $b = Stockbatch::find($key);
             //$b->yard_cost_price = $request->yard_cost_price;

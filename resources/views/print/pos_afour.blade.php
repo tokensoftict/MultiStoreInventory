@@ -80,10 +80,6 @@
     <table  class="inv_info">
 
         <tr>
-            <th align="left" class="text-left">Invoice / Receipt No</th>
-            <td>{{ $invoice->invoice_paper_number }}</td>
-        </tr>
-        <tr>
             <th align="left" class="text-left">Invoice Number</th>
             <td>{{ $invoice->invoice_number }}</td>
         </tr>
@@ -112,8 +108,12 @@
             <td>{{ optional($invoice)->warehousestore->name }}</td>
         </tr>
         <tr>
-            <th align="left" class="text-left">Credit Balance</th>
-            <td>{{ money($invoice->customer->credit_balance) }}</td>
+            <td>Method Of Payment</td>
+            <td>
+                @foreach($invoice->paymentMethodTable as $method)
+                    <b>{{ $method->payment_method->name }}</b> : {{ money($method->amount) }}
+                @endforeach
+            </td>
         </tr>
     </table>
 

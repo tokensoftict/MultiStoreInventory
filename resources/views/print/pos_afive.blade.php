@@ -7,7 +7,7 @@
         html, body {
             margin: 0;
             padding: 0;
-            font-size: 9pt;
+            font-size: 6pt;
             background-color: #fff;
         }
 
@@ -59,14 +59,14 @@
         <tr><td valign="top">
                 <h2  class="text-center">{{ $store->name}}</h2>
                 <p align="center">
-                    {{ $store->first_address }}
+                    {!! $store->first_address !!}
                     @if(!empty($store->second_address))
                         <br/>
-                        {{ $store->second_address }}
+                        {!! $store->second_address !!}
                     @endif
                     @if(!empty($store->contact_number))
                         <br/>
-                        {{ $store->contact_number }}
+                        {!! $store->contact_number !!}
                     @endif
                 </p>
             </td>
@@ -80,28 +80,30 @@
     <table  class="inv_info" width="100%">
 
         <tr>
-            <th align="left" class="text-left">Invoice / Receipt No</th>
-            <td>{{ $invoice->invoice_paper_number }}</td>
             <th align="left" class="text-left">Invoice Number</th>
             <td>{{ $invoice->invoice_number }}</td>
-        </tr>
-        <tr>
             <th align="left" class="text-left">Invoice Date</th>
             <td>{{ convert_date($invoice->invoice_date)  }}</td>
-            <th align="left" class="text-left">Time</th>
-            <td>{{ date("h:i a",strtotime($invoice->sales_time)) }}</td>
         </tr>
         <tr>
             <th align="left" class="text-left">Customer</th>
             <td>{{ $invoice->customer->firstname }} {{ $invoice->customer->lastname }}</td>
-            <th align="left" class="text-left">Status</th>
-            <td>{{ $invoice->status }}</td>
+            <th align="left" class="text-left">Time</th>
+            <td>{{ date("h:i a",strtotime($invoice->sales_time)) }}</td>
         </tr>
         <tr>
             <th align="left" class="text-left">Sales Representative</th>
             <td>{{ $invoice->created_user->name }}</td>
-            <th align="left" class="text-left">Store</th>
-            <td>{{ optional($invoice)->warehousestore->name }}</td>
+            <th align="left" class="text-left">Status</th>
+            <td>{{ $invoice->status }}</td>
+        </tr>
+        <tr>
+            <th align="left" class="text-left">Method Of Payment</th>
+            <td colspan="3">
+            @foreach($invoice->paymentMethodTable as $method)
+                <b>{{ $method->payment_method->name }}</b> : {{  money($method->amount) }}
+            @endforeach
+            </td>
         </tr>
 
     </table>
@@ -122,7 +124,7 @@
             <tr>
                 <td>{{ $loop->iteration }}</td>
                 <td align="left" class="text-left">{{ $item->stock->name }}</td>
-                <td align="center" class="text-center">{{ $item->quantity }}</td>
+                <td align="center" class="text-center">{{ $item->quantity }} {{ $item->store == "yard_quantity" ? "pcs" : "carton" }}</td>
                 <td align="center" class="text-center">{{ number_format($item->selling_price,2) }}</td>
                 <td align="right" class="text-right">{{ number_format(($item->total_selling_price),2) }}</td>
             </tr>

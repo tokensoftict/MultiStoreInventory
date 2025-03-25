@@ -88,6 +88,14 @@
             <td>Sales Representative</td>
             <td>{{ $invoice->created_user->name }}</td>
         </tr>
+        <tr>
+            <td>Method Of Payment</td>
+            <td>
+                @foreach($invoice->paymentMethodTable as $method)
+                    <b>{{ $method->payment_method->name }}</b> : {{  money($method->amount) }}
+                @endforeach
+            </td>
+        </tr>
     </table>
     <hr>
     <table id="products">
