@@ -92,6 +92,10 @@
             <td>{{ date("h:i a",strtotime($invoice->sales_time)) }}</td>
         </tr>
         <tr>
+            <th align="left" class="text-left">Customer Address</th>
+            <td colspan="3">{{ $invoice->customer->address }}</td>
+        </tr>
+        <tr>
             <th align="left" class="text-left">Sales Representative</th>
             <td>{{ $invoice->created_user->name }}</td>
             <th align="left" class="text-left">Status</th>

@@ -77,44 +77,39 @@
     </table>
 
 
-    <table  class="inv_info">
+    <table  class="inv_info" width="100%">
 
         <tr>
             <th align="left" class="text-left">Invoice Number</th>
             <td>{{ $invoice->invoice_number }}</td>
-        </tr>
-        <tr>
             <th align="left" class="text-left">Invoice Date</th>
             <td>{{ convert_date($invoice->invoice_date)  }}</td>
         </tr>
         <tr>
+            <th align="left" class="text-left">Customer</th>
+            <td>{{ $invoice->customer->firstname }} {{ $invoice->customer->lastname }}</td>
             <th align="left" class="text-left">Time</th>
             <td>{{ date("h:i a",strtotime($invoice->sales_time)) }}</td>
         </tr>
         <tr>
-            <th align="left" class="text-left">Customer</th>
-            <td>{{ $invoice->customer->firstname }} {{ $invoice->customer->lastname }}</td>
-        </tr>
-        <tr>
-            <th align="left" class="text-left">Status</th>
-            <td>{{ $invoice->status }}</td>
+            <th align="left" class="text-left">Customer Address</th>
+            <td colspan="3">{{ $invoice->customer->address }}</td>
         </tr>
         <tr>
             <th align="left" class="text-left">Sales Representative</th>
             <td>{{ $invoice->created_user->name }}</td>
+            <th align="left" class="text-left">Status</th>
+            <td>{{ $invoice->status }}</td>
         </tr>
         <tr>
-            <th align="left" class="text-left">Store</th>
-            <td>{{ optional($invoice)->warehousestore->name }}</td>
-        </tr>
-        <tr>
-            <td>Method Of Payment</td>
-            <td>
+            <th align="left" class="text-left">Method Of Payment</th>
+            <td colspan="3">
                 @foreach($invoice->paymentMethodTable as $method)
-                    <b>{{ $method->payment_method->name }}</b> : {{ money($method->amount) }}
+                    <b>{{ $method->payment_method->name }}</b> : {{  money($method->amount) }}
                 @endforeach
             </td>
         </tr>
+
     </table>
 
 
