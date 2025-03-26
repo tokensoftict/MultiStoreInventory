@@ -57,7 +57,7 @@
 <div id="printbox">
     <table width="100%">
         <tr><td valign="top">
-                <h2  class="text-center">{{ $store->name}}</h2>
+                <h1  class="text-center">{{ $store->name}}</h1>
                 <p align="center">
                     {!! $store->first_address !!}
                     @if(!empty($store->second_address))
@@ -108,6 +108,10 @@
                     <b>{{ $method->payment_method->name }}</b> : {{  money($method->amount) }}
                 @endforeach
             </td>
+        </tr>
+        <tr>
+            <th align="left" class="text-left">Credit Balance: </th>
+            <td>{{ money($invoice->customer->credit_balance) }}</td>
         </tr>
 
     </table>
