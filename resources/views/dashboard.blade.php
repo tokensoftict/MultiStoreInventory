@@ -177,7 +177,7 @@
                                                 <td>{{ $payment->customer->firstname }} {{ $payment->customer->lastname }}</td>
                                                 <td>{{ $payment->payment_method->name }}</td>
                                                 <td>{{ money($payment->amount) }}</td>
-                                                <td>{{ date("h:i a",strtotime($payment->payment_time)) }}</td>
+                                                <td>{{ date("h:i a",strtotime($payment->created_at)) }}</td>
                                             </tr>
 
                                         @empty
