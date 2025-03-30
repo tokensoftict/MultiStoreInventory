@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\ReturnLog;
 use App\Models\Stock;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use PDF;
@@ -167,5 +168,23 @@ class InvoiceReportController extends Controller
         return view('invoicereport.full_invoice_report',$data);
     }
 
+
+    public function by_user(Request $request)
+    {
+        if($request->get('from') && $request->get('to')){
+            $data['from'] = $request->get('from');
+            $data['to'] = $request->get('to');
+            $data['user_id'] = $request->get('user_id', auth()->user()->id);
+        }else{
+            $data['from'] = date('Y-m-01');
+            $data['to'] = date('Y-m-t');
+            $data['user_id'] = auth()->user()->id;
+        }
+
+        $data['users'] = User::where("status", "1")->get();
+        $data['title'] = "Monthly Invoice Report By User";
+        $data['invoices'] = Invoice::with(['created_user','customer'])->where("created_by",  $data['user_id'])->where('warehousestore_id',getActiveStore()->id)->where('status', "COMPLETE")->whereBetween('invoice_date', [$data['from'],$data['to']])->get();
+        return view('invoicereport.by_user',$data);
+    }
 
 }

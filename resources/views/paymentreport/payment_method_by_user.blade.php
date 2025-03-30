@@ -6,6 +6,7 @@
 
     <link rel="stylesheet" href="{{ asset('table/datatables.css') }}">
 
+
 @endpush
 
 
@@ -30,10 +31,10 @@
                                     <input type="text" class="form-control datepicker js-datepicker" data-min-view="2" data-date-format="yyyy-mm-dd" style="background-color: #FFF; color: #000;"  value="{{ $to }}" name="to" placeholder="TO"/>
                                 </div>
                                 <div class="col-sm-3">
-                                    <label>Banks</label>
-                                    <select class="form-control" name="selected_bank">
-                                        @foreach($banks as $bank)
-                                            <option {{ $selected_bank == $bank->id ? "selected" : "" }} value="{{ $bank->id }}">{{ $bank->account_name }} ({{ $bank->bank->name }})</option>
+                                    <label>Select User</label>
+                                    <select class="form-control" name="user_id">
+                                        @foreach($users as $user)
+                                            <option value="{{ $user->id }}" {{ $user->id == $user_id ? 'selected' : '' }}>{{ $user->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -51,7 +52,6 @@
                                 <th>#</th>
                                 <th>Customer</th>
                                 <th>Store</th>
-                                <th>Bank</th>
                                 <th>Invoice / Receipt Number</th>
                                 <th>Sub Total</th>
                                 <th>Total Paid</th>
@@ -65,16 +65,15 @@
                             @endphp
                             @forelse($payments as $payment)
                                 @php
-                                    $total+=$payment->amount;
+                                    $total+=$payment->total_paid;
                                 @endphp
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
                                     <td>{{ $payment->customer->firstname }} {{ $payment->customer->lastname }}</td>
                                     <td>{{ $payment->warehousestore->name }}</td>
-                                    <td>{{ $bank_info->account_name }} - {{ $bank_info->bank->name }} </td>
                                     <td>{{ optional($payment->invoice)->invoice_paper_number }}</td>
-                                    <td>{{ number_format($payment->amount,2) }}</td>
-                                    <td>{{ number_format($payment->amount,2) }}</td>
+                                    <td>{{ number_format($payment->subtotal,2) }}</td>
+                                    <td>{{ number_format($payment->total_paid,2) }}</td>
                                     <td>{{ date("h:i a",strtotime($payment->payment_time)) }}</td>
                                     <td>{{ convert_date($payment->payment_date) }}</td>
                                 </tr>
@@ -85,7 +84,6 @@
                             </tbody>
                             <tfoot>
                             <tr>
-                                <th></th>
                                 <th></th>
                                 <th></th>
                                 <th></th>
@@ -111,6 +109,10 @@
     <script   src="{{ asset('bower_components/select2/dist/js/select2.min.js') }}"></script>
     <script   src="{{ asset('assets/js/init-select2.js') }}"></script>
     <script   src="{{ asset('bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js') }}"></script>
+
+
+
+
     <script src="{{ asset('assets/js/init-datatables.js') }}"></script>
     <script  src="{{ asset('assets/js/init-datepicker.js') }}"></script>
 @endpush

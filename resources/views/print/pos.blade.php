@@ -81,6 +81,10 @@
             <td>{{ $invoice->customer->firstname }} {{ $invoice->customer->lastname }}</td>
         </tr>
         <tr>
+            <td>Customer Address</td>
+            <td>{{ $invoice->customer->address }}</td>
+        </tr>
+        <tr>
             <td>Status</td>
             <td>{{ $invoice->status }}</td>
         </tr>

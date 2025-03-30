@@ -9,6 +9,7 @@ use App\Models\Expense;
 use App\Models\Payment;
 use App\Models\PaymentMethod;
 use App\Models\PaymentMethodTable;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class PaymentReportController extends Controller
@@ -44,6 +45,18 @@ class PaymentReportController extends Controller
         $data['title'] = "Monthly Payment Report By Payment Method";
         $data['pmthods'] = PaymentMethod::all();
         return setPageContent('paymentreport.monthly_payment_reports_by_method',$data);
+    }
+
+    public function payment_report_user(Request $request)
+    {
+        $data['from'] = $request->get('from', date('Y-m-01'));
+        $data['to'] = $request->get('to', date('Y-m-t'));
+        $data['user_id'] = $request->get('user_id', auth()->user()->id);
+
+        $data['payments'] = Payment::with(['warehousestore','customer','user','invoice'])->where('user_id', $data['user_id'])->where('warehousestore_id',getActiveStore()->id)->whereBetween('payment_date', [$data['from'],$data['to']])->orderBy('id','DESC')->get();
+        $data['title'] = "Monthly Payment Report By User";
+        $data['users'] = User::where("status", "1")->get();
+        return view('paymentreport.payment_method_by_user',$data);
     }
 
     public function payment_analysis(Request $request)

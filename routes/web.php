@@ -375,6 +375,7 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
                 Route::match(['get','post'],'income_analysis_by_cash', ['as' => 'income_analysis_by_cash', 'uses' => 'PaymentReportController@income_analysis_by_cash', 'custom_label'=>'Income Analysis By Cash', 'visible' => false]);
                 Route::match(['get','post'],'income_analysis_by_department', ['as' => 'income_analysis_by_department', 'uses' => 'PaymentReportController@income_analysis_by_department', 'custom_label'=>'Income Analysis By Store', 'visible' => false]);
                 Route::match(['get','post'],'report_by_bank_transfer', ['as' => 'report_by_bank_transfer', 'uses' => 'PaymentReportController@report_by_bank_transfer', 'custom_label'=>'Payment Report By Bank Transfer', 'visible' => false]);
+                Route::match(['get','post'],'payment_report_user', ['as' => 'payment_report_user', 'uses' => 'PaymentReportController@payment_report_user', 'custom_label'=>'Payment Report By User', 'visible' => false]);
             });
 
             Route::prefix('stockReport')->as('StockReport.')->namespace('StockReport')->group(function(){
@@ -399,6 +400,7 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
                 Route::match(['post','get'],'/store_monthly', ['as' => 'store_monthly', 'uses' => 'InvoiceReportController@store_monthly', 'custom_label'=>'Invoice Report By Store','visible' => false]);
                 Route::match(['post','get'],'/sales_analysis', ['as' => 'sales_analysis', 'uses' => 'InvoiceReportController@sales_analysis','custom_label'=>'Sales Analysis', 'visible' => false]);
                 Route::match(['post','get'],'/return_logs', ['as' => 'return_logs', 'uses' => 'InvoiceReportController@return_logs','custom_label'=>'Sales Return', 'visible' => false]);
+                Route::match(['post','get'],'/by_user', ['as' => 'by_user', 'uses' => 'InvoiceReportController@by_user','custom_label'=>'Invoice Report By User', 'visible' => false]);
                 //Route::match(['post','get'],'/full_invoice_report', ['as' => 'full_invoice_report', 'uses' => 'InvoiceReportController@full_invoice_report','custom_label'=>'Complete Invoice Report', 'visible' => false]);
             });
 
