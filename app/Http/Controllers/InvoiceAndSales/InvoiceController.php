@@ -213,7 +213,7 @@ class InvoiceController extends Controller
         $page_size += 180;
 
         $pdf = PDF::loadView("print.pos_afive", $data,[],[
-            'format' => [148,$page_size],
+            'format' => [148,210],
             'display_mode'         => 'fullpage',
             'orientation'          => 'L',
         ]);
