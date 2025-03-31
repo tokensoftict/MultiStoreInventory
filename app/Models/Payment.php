@@ -335,7 +335,17 @@ class Payment extends Model
             return false;
         }
 
-        if($total_credit > 0) return false;
+        if($total_credit > 0) { // the user as money in his/her wallet
+           $remaining = $total_credit - $total;
+           if($remaining < 0) {
+               $remaining = -$remaining;
+               if($remaining > $credit_limit) {
+                   return true;
+               }
+           } else {
+               return false;
+           }
+        }
 
         if($total_credit < 0){
             $total_credit = -$total_credit;

@@ -158,6 +158,7 @@
                                             <th>#</th>
                                             <th>Customer</th>
                                             <th>Payment Method</th>
+                                            <th>Bank</th>
                                             <th>Total Paid</th>
                                             <th>Payment Time</th>
                                         </tr>
@@ -171,11 +172,18 @@
                                         @forelse($payments as $payment)
                                             @php
                                                 $total+=$payment->amount;
+                                                $bank = "";
+                                                $bankpayment = json_decode($payment->payment_info);
+                                                if(isset($bankpayment->bank_id)){
+                                                    $bank = \App\Models\BankAccount::find($bankpayment->bank_id);
+                                                    $bank = $bank->bank->name."-".$bank->account_number;
+                                                }
                                             @endphp
                                             <tr>
                                                 <td>{{ $loop->iteration }}</td>
                                                 <td>{{ $payment->customer->firstname }} {{ $payment->customer->lastname }}</td>
                                                 <td>{{ $payment->payment_method->name }}</td>
+                                                <td>{{ $bank }} </td>
                                                 <td>{{ money($payment->amount) }}</td>
                                                 <td>{{ date("h:i a",strtotime($payment->created_at)) }}</td>
                                             </tr>
