@@ -103,7 +103,7 @@ class Customer extends Model
 
     public static $validate = [
         'firstname'=>'required|unique:customers,firstname',
-        'lastname'=>'required|unique:customers,lastname',
+        'lastname'=>'sometimes|unique:customers,lastname',
         //'phone_number' => 'required|unique:customers,phone_number',
         'email'=>'sometimes|nullable|email|unique:customers,email',
     ];

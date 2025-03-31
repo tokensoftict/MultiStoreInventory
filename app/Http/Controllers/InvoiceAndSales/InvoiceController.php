@@ -56,14 +56,14 @@ class InvoiceController extends Controller
     public function draft(){
         $data = [];
         $data['title'] = 'Draft Invoice List';
-        $data['invoices'] = Invoice::with(['created_user','customer'])->where('warehousestore_id', getActiveStore()->id)->where('status','DRAFT')->where('invoice_date',date('Y-m-d'))->get();
+        $data['invoices'] = Invoice::with(['created_user','customer'])->where('warehousestore_id', getActiveStore()->id)->where('status','DRAFT')->where('invoice_date',date('Y-m-d'))->orderBy("id", "DESC")->get();
         return view('invoice.draft-invoice',$data);
     }
 
     public function paid(){
         $data = [];
         $data['title'] = 'Completed Invoice List';
-        $data['invoices'] = Invoice::with(['created_user','customer'])->where('warehousestore_id', getActiveStore()->id)->where('status','COMPLETE')->where('invoice_date',date('Y-m-d'))->get();
+        $data['invoices'] = Invoice::with(['created_user','customer'])->where('warehousestore_id', getActiveStore()->id)->where('status','COMPLETE')->where('invoice_date',date('Y-m-d'))->orderBy("id", "DESC")->get();
         return view('invoice.paid-invoice',$data);
     }
 
@@ -72,7 +72,7 @@ class InvoiceController extends Controller
         $data['title'] = 'Pending Discount Invoice List';
         $data['invoices'] = Invoice::with(['created_user','customer'])->where('warehousestore_id', getActiveStore()->id)->where(function($query){
             $query->orWhere('status', "DISCOUNT-APPLIED")->orWhere('status', "DISCOUNT");
-        })->where('invoice_date',date('Y-m-d'))->get();
+        })->where('invoice_date',date('Y-m-d'))->orderBy("id", "DESC")->get();
         return view('invoice.paid-invoice',$data);
     }
 
