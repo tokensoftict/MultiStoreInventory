@@ -25,7 +25,7 @@ class InvoiceReportController extends Controller
             $data['status'] = "COMPLETE";
         }
         $data['title'] = "Daily Invoice Report";
-        $data['invoices'] = Invoice::with(['created_user','customer'])->where('warehousestore_id', getActiveStore()->id)->where('status', $data['status'])->where('invoice_date', $data['date'])->get();
+        $data['invoices'] = Invoice::with(['created_user','customer'])->where('warehousestore_id', getActiveStore()->id)->where('status', $data['status'])->where('invoice_date', $data['date'])->orderBy("id", "DESC")->get();
         return view('invoicereport.daily',$data);
     }
 
@@ -40,7 +40,7 @@ class InvoiceReportController extends Controller
             $data['status'] = "COMPLETE";
         }
         $data['title'] = "Monthly Invoice Report";
-        $data['invoices'] = Invoice::with(['created_user','customer'])->where('warehousestore_id', getActiveStore()->id)->where('status', $data['status'])->whereBetween('invoice_date', [$data['from'],$data['to']])->get();
+        $data['invoices'] = Invoice::with(['created_user','customer'])->where('warehousestore_id', getActiveStore()->id)->where('status', $data['status'])->whereBetween('invoice_date', [$data['from'],$data['to']])->orderBy("id", "DESC")->get();
         return view('invoicereport.monthly',$data);
     }
 
@@ -57,7 +57,7 @@ class InvoiceReportController extends Controller
         }
         $data['customers'] = Customer::all();
         $data['title'] = "Monthly Customer Invoice Report";
-        $data['invoices'] = Invoice::with(['created_user','customer'])->where('warehousestore_id',getActiveStore()->id)->where('customer_id', $data['customer'])->where('status', "COMPLETE")->whereBetween('invoice_date', [$data['from'],$data['to']])->get();
+        $data['invoices'] = Invoice::with(['created_user','customer'])->where('warehousestore_id',getActiveStore()->id)->where('customer_id', $data['customer'])->where('status', "COMPLETE")->whereBetween('invoice_date', [$data['from'],$data['to']])->orderBy("id", "DESC")->get();
         return view('invoicereport.customer_monthly',$data);
     }
 
@@ -71,7 +71,7 @@ class InvoiceReportController extends Controller
 
         $data['customers'] = Customer::all();
         $data['title'] = "Monthly Invoice Report By Store";
-        $data['invoices'] = Invoice::with(['created_user','customer'])->where('warehousestore_id',$data['warehousestore_id'])->where('status', "COMPLETE")->whereBetween('invoice_date', [$data['from'],$data['to']])->get();
+        $data['invoices'] = Invoice::with(['created_user','customer'])->where('warehousestore_id',$data['warehousestore_id'])->where('status', "COMPLETE")->whereBetween('invoice_date', [$data['from'],$data['to']])->orderBy("id", "DESC")->get();
         return view('invoicereport.store_monthly',$data);
     }
 
@@ -94,7 +94,7 @@ class InvoiceReportController extends Controller
             ->whereHas('invoice',function($q) use($data){
                 $q->whereBetween('invoice_date', [$data['from'],$data['to']])
                     ->where('status','COMPLETE');
-            })->get();
+            })->orderBy("id", "DESC")->get();
 
 
         $data['customers'] = Customer::all();
@@ -145,7 +145,7 @@ class InvoiceReportController extends Controller
             $data['from'] = date('Y-m-01');
             $data['to'] = date('Y-m-t');
         }
-        $lists = ReturnLog::whereBetween('date_added',[$data['from'],$data['to']])->where('warehousestore_id', getActiveStore()->id)->get();
+        $lists = ReturnLog::whereBetween('date_added',[$data['from'],$data['to']])->where('warehousestore_id', getActiveStore()->id)->orderBy("id", "DESC")->get();
         $data['title'] = "Sales Returns Report";
         $data['logs'] = $lists;
         return view('invoicereport.return_logs',$data);
@@ -183,7 +183,7 @@ class InvoiceReportController extends Controller
 
         $data['users'] = User::where("status", "1")->get();
         $data['title'] = "Monthly Invoice Report By User";
-        $data['invoices'] = Invoice::with(['created_user','customer'])->where("created_by",  $data['user_id'])->where('warehousestore_id',getActiveStore()->id)->where('status', "COMPLETE")->whereBetween('invoice_date', [$data['from'],$data['to']])->get();
+        $data['invoices'] = Invoice::with(['created_user','customer'])->where("created_by",  $data['user_id'])->where('warehousestore_id',getActiveStore()->id)->where('status', "COMPLETE")->whereBetween('invoice_date', [$data['from'],$data['to']])->orderBy("id", "DESC")->get();
         return view('invoicereport.by_user',$data);
     }
 
