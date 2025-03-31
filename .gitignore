@@ -42,4 +42,4 @@ auth.json
 /storage/!.gitignore
 /public/*.*
 /public/*
-storage/*.*
+/storage/*.*
