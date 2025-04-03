@@ -376,6 +376,7 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
                 Route::match(['get','post'],'income_analysis_by_department', ['as' => 'income_analysis_by_department', 'uses' => 'PaymentReportController@income_analysis_by_department', 'custom_label'=>'Income Analysis By Store', 'visible' => false]);
                 Route::match(['get','post'],'report_by_bank_transfer', ['as' => 'report_by_bank_transfer', 'uses' => 'PaymentReportController@report_by_bank_transfer', 'custom_label'=>'Payment Report By Bank Transfer', 'visible' => false]);
                 Route::match(['get','post'],'payment_report_user', ['as' => 'payment_report_user', 'uses' => 'PaymentReportController@payment_report_user', 'custom_label'=>'Payment Report By User', 'visible' => false]);
+                Route::match(['get','post'],'payment_analysis_user', ['as' => 'payment_analysis_user', 'uses' => 'PaymentReportController@payment_analysis_by_user', 'custom_label'=>'Payment Analysis Report By User', 'visible' => false]);
             });
 
             Route::prefix('stockReport')->as('StockReport.')->namespace('StockReport')->group(function(){

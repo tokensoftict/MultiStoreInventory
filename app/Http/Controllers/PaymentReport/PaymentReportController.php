@@ -138,4 +138,18 @@ class PaymentReportController extends Controller
         return setPageContent('paymentreport.income_analysis_by_cash',$data);
     }
 
+
+    public function payment_analysis_by_user(Request $request)
+    {
+
+        $data['date'] = $request->get('from', dailyDate());
+
+        $data['title'] = "Payment Analysis By User";
+
+        $data['payment_methods'] = PaymentMethod::all();
+        $data['user_id'] = $request->get('user_id', auth()->user()->id);
+        $data['users'] = User::where("status", "1")->get();
+        return view('paymentreport.payment_analysis_by_user',$data);
+    }
+
 }

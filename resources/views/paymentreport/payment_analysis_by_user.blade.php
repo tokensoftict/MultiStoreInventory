@@ -21,9 +21,17 @@
                         <form action=""  class="tools pull-right" style="margin-right: 80px" method="post">
                             {{ csrf_field() }}
                             <div class="row">
-                                <div class="col-sm-8">
+                                <div class="col-sm-4">
                                     <label>Date</label>
                                     <input type="text" class="form-control datepicker js-datepicker" data-min-view="2" data-date-format="yyyy-mm-dd" style="background-color: #FFF; color: #000;"  value="{{ $date }}" name="from" placeholder="From"/>
+                                </div>
+                                <div class="col-sm-4">
+                                    <label>Select User</label>
+                                    <select class="form-control" name="user_id">
+                                        @foreach($users as $user)
+                                            <option value="{{ $user->id }}" {{ $user->id == $user_id ? 'selected' : '' }}>{{ $user->name }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
                                 <div class="col-sm-3"><br/>
                                     <button type="submit" style="margin-top: 5px;" class="btn btn-primary">Submit</button>
@@ -59,27 +67,27 @@
                                 @php
                                     $total=0;
                                 @endphp
-                                    @foreach(\App\Models\PaymentMethodTable::where('payment_method_id',$payment_method->id)->where('payment_date',$date)->get() as $payment)
-                                        @php
-                                            $total+=$payment->amount;
-                                            $all_total+=$payment->amount;
-                                            if($payment_method->id === 4){
-                                                $totalCredit+=$payment->amount;
-                                            }
-                                        @endphp
-                                        <tr>
-                                            <td>{{ $loop->iteration }}</td>
-                                            <td>{{ $payment->customer->firstname }} {{ $payment->customer->lastname }}</td>
-                                            <td>{{ $payment->warehousestore->name }}</td>
-                                            <td>{{ $payment->payment_method->name }}</td>
-                                            <td>{{ optional($payment->invoice)->invoice_paper_number }}</td>
-                                            <td>{{ number_format($payment->amount,2) }}</td>
-                                            <td>{{ number_format($payment->amount,2) }}</td>
-                                            <td>{{ date("h:i a",strtotime($payment->created_at)) }}</td>
-                                            <td>{{ convert_date($payment->payment_date) }}</td>
-                                            <td>{{ $payment->user->name }}</td>
-                                        </tr>
-                                    @endforeach
+                                @foreach(\App\Models\PaymentMethodTable::where('payment_method_id',$payment_method->id)->where('user_id', $user_id)->where('payment_date',$date)->get() as $payment)
+                                    @php
+                                        $total+=$payment->amount;
+                                        $all_total+=$payment->amount;
+                                        if($payment_method->id === 4){
+                                            $totalCredit+=$payment->amount;
+                                        }
+                                    @endphp
+                                    <tr>
+                                        <td>{{ $loop->iteration }}</td>
+                                        <td>{{ $payment->customer->firstname }} {{ $payment->customer->lastname }}</td>
+                                        <td>{{ $payment->warehousestore->name }}</td>
+                                        <td>{{ $payment->payment_method->name }}</td>
+                                        <td>{{ optional($payment->invoice)->invoice_paper_number }}</td>
+                                        <td>{{ number_format($payment->amount,2) }}</td>
+                                        <td>{{ number_format($payment->amount,2) }}</td>
+                                        <td>{{ date("h:i a",strtotime($payment->created_at)) }}</td>
+                                        <td>{{ convert_date($payment->payment_date) }}</td>
+                                        <td>{{ $payment->user->name }}</td>
+                                    </tr>
+                                @endforeach
                                 </tbody>
                                 <tfoot>
                                 <tr>
@@ -98,8 +106,8 @@
                             </table>
                         @endforeach
                         <div class="pull-right">
-                        <h2>Total Credit : {{ number_format($totalCredit,2) }}</h2>
-                        <h2>Grand Total : {{ number_format($all_total - $totalCredit,2) }}</h2>
+                            <h2>Total Credit : {{ number_format($totalCredit,2) }}</h2>
+                            <h2>Grand Total : {{ number_format($all_total - $totalCredit,2) }}</h2>
                         </div>
                     </div>
                 </section>
