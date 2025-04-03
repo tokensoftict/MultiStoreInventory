@@ -251,7 +251,7 @@ class InvoiceController extends Controller
         $data['invoice'] = Invoice::with(['created_by','customer','invoice_items','payment'])->findorfail($id);
         $data['banks'] = BankAccount::where('status',1)->get();
         $data['settings'] =  $this->settings;
-        return setPageContent('invoice.update-invoice',$data);
+        return view('invoice.update-invoice',$data);
     }
 
 

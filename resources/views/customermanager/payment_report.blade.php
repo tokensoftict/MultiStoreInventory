@@ -71,8 +71,13 @@
                                     <td>{{ convert_date($history->payment_date) }}</td>
                                     <td>{{ $history->user->name }}</td>
                                     <td>
-                                        @if(userCanView('customer.edit_payment'))
-                                            <a href="{{ route('customer.edit_payment', $history->payment_id) }}" class="btn btn-success btn-sm">Edit</a>
+                                        @if(userCanView('customer.edit_payment') || userCanView('customer.delete_payment'))
+                                            @if(userCanView('customer.edit_payment'))
+                                                <a href="{{ route('customer.edit_payment', $history->payment_id) }}" class="btn btn-success btn-sm">Edit</a>
+                                            @endif
+                                            @if(userCanView('customer.delete_payment'))
+                                                <a href="{{ route('customer.delete_payment', $history->payment_id) }}" onclick="return confirm('Are you sure, you want to delete this payment')" class="btn btn-danger btn-sm">Delete</a>
+                                            @endif
                                         @else
                                             No Action
                                         @endif

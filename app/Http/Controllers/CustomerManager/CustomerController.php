@@ -179,6 +179,16 @@ class CustomerController extends Controller
         return setPageContent('customermanager.add_payment',$data);
     }
 
+    public function delete_payment($id){
+        return DB::transaction(function() use ($id){
+            $payment = Payment::find($id);
+            $payment->payment_method_tables()->delete();
+            Cashbook::where('cashbookable_type',get_class($payment))->where('cashbookable_id', $payment->id)->delete();
+            $payment->delete();
+            CreditPaymentLog::where('payment_id',$payment->id)->delete();
+            return redirect()->route('reports.customerReport.payment_report')->with('success','Payment has been deleted successfully!');
+        });
+    }
 
     public function edit_payment(Request $request, $id){
         $payment = Payment::find($id);
@@ -255,7 +265,7 @@ class CustomerController extends Controller
 
                 $pmethod->update();
 
-                return redirect()->route('reports.customerReport.payment_report')->with('success','Payment has been added successfully!');
+                return redirect()->route('reports.customerReport.payment_report')->with('success','Payment has been updated successfully!');
             });
         }
 

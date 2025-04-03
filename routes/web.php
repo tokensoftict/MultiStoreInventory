@@ -205,6 +205,7 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
                 Route::put('{id}', ['as' => 'update', 'uses' => 'CustomerController@update']);
                 Route::match(['get','post'],'/add_payment', ['as' => 'add_payment', 'uses' => 'CustomerController@add_payment', 'custom_label'=>"Add Credit Payment" ,'visible' => true]);
                 Route::match(['get','post'],'{id}/edit_payment', ['as' => 'edit_payment', 'uses' => 'CustomerController@edit_payment', 'custom_label'=>"Edit Customer Credit Payment", 'visible' => false]);
+                Route::get('{id}/delete_payment', ['as' => 'delete_payment', 'uses' => 'CustomerController@delete_payment', 'custom_label'=>"Delete Customer Credit Payment", 'visible' => false]);
             });
 
         });
