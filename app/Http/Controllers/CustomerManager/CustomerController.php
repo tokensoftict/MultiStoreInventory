@@ -14,6 +14,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Reliese\Meta\MySql\Schema;
 
 class CustomerController extends Controller
 {
@@ -176,16 +177,18 @@ class CustomerController extends Controller
         $data['payments'] = PaymentMethod::where('status',1)->where('id','<>',4)->get();
         $data['banks'] = BankAccount::where('status',1)->get();
         $data['customers'] = Customer::where('id','>',1)->get();
-        return setPageContent('customermanager.add_payment',$data);
+        return view('customermanager.add_payment',$data);
     }
 
     public function delete_payment($id){
         return DB::transaction(function() use ($id){
+            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
             $payment = Payment::find($id);
             $payment->payment_method_tables()->delete();
             Cashbook::where('cashbookable_type',get_class($payment))->where('cashbookable_id', $payment->id)->delete();
             $payment->delete();
             CreditPaymentLog::where('payment_id',$payment->id)->delete();
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
             return redirect()->route('reports.customerReport.payment_report')->with('success','Payment has been deleted successfully!');
         });
     }
@@ -194,6 +197,7 @@ class CustomerController extends Controller
         $payment = Payment::find($id);
         if($request->getMethod() == "POST"){
             return DB::transaction(function() use ($request, $id){
+                DB::statement('SET FOREIGN_KEY_CHECKS=0;');
                 $payment = Payment::find($id);
                 $payment->payment_method_tables()->delete();
                 Cashbook::where('cashbookable_type',get_class($payment))->where('cashbookable_id', $payment->id)->delete();
@@ -264,7 +268,7 @@ class CustomerController extends Controller
                 $pmethod->invoice_id = $log->id;
 
                 $pmethod->update();
-
+                DB::statement('SET FOREIGN_KEY_CHECKS=1;');
                 return redirect()->route('reports.customerReport.payment_report')->with('success','Payment has been updated successfully!');
             });
         }
