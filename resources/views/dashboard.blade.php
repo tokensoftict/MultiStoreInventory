@@ -182,7 +182,7 @@
                                             <tr>
                                                 <td>{{ $loop->iteration }}</td>
                                                 <td>{{ $payment->customer->firstname }} {{ $payment->customer->lastname }}</td>
-                                                <td>{{ $payment->payment_method->name }}</td>
+                                                <td>{{ optional($payment->payment_method)->name }}</td>
                                                 <td>{{ $bank }} </td>
                                                 <td>{{ money($payment->amount) }}</td>
                                                 <td>{{ date("h:i a",strtotime($payment->created_at)) }}</td>
