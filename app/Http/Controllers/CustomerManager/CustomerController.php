@@ -39,7 +39,7 @@ class CustomerController extends Controller
         $data = $request->only(Customer::$fields);
 
         if(empty($data['credit_limit'])){
-            $data['credit_limit'] = 0;
+            $data['credit_limit'] = 1;
         }
 
 
