@@ -46,7 +46,7 @@
                                             <label>Stock Type  <span style="color:red;">*</span></label>
                                             <select class="form-control" required name="type">
                                                 @foreach(config('stock_type')[config('app.store')] as $key=>$type)
-                                                    <option {{ old('type', $stock->type) == "NORMAL" ? "selected" : "" }} value="{{ $type }}">{{ $key }}</option>
+                                                    <option {{ old('type', $stock->type) == $type ? "selected" : "" }} value="{{ $type }}">{{ $key }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
