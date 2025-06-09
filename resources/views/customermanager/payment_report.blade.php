@@ -64,8 +64,8 @@
                                 @endphp
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
-                                    <td>{{ $history->customer->firstname }} {{ $history->customer->lastname }}</td>
-                                    <td>{{ $history->customer->phone_number }}</td>
+                                    <td>{{ optional($history->customer)->firstname }} {{ optional($history->customer)->lastname }}</td>
+                                    <td>{{ optional($history->customer)->phone_number }}</td>
                                     <td>{{ $history->payment_method_table->payment_method->name ?? "" }}</td>
                                     <td>{{ number_format($history->amount,2) }}</td>
                                     <td>{{ convert_date($history->payment_date) }}</td>
