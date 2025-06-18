@@ -17,6 +17,7 @@ class CustomerSeeder extends Seeder
         DB::table('customers')->insert([
             'firstname'=>'Generic',
             'lastname'=> 'Customer',
+            'warehousestore_id' => 1
         ]);
     }
 }

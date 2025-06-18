@@ -19,10 +19,10 @@ class DatabaseSeeder extends Seeder
        $this->call(GroupSeeder::class);
        Artisan::call('task:generate');
        $this->call(PermissionSeeder::class);
-        $this->call(CustomerSeeder::class);
        $this->call(StatusSeeder::class);
        $this->call(PaymentMethodSeeder::class);
        $this->call(UserSeeder::class);
         $this->call(WarehouseSeeder::class);
+        $this->call(CustomerSeeder::class);
     }
 }

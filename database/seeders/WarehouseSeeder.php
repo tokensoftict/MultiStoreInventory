@@ -15,7 +15,7 @@ class WarehouseSeeder extends Seeder
     public function run()
     {
         DB::table('warehousestores')->insert([
-            'name'=>'Store',
+            'name'=>'My Store',
             'packed_column'=>'quantity',
             'yard_column'=>'yard_quantity',
             'type'=>'SHOP',
