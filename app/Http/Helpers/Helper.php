@@ -604,7 +604,14 @@ function getActiveStore($force = false){
         return (object)session()->get('activeStore');
     }
 
-    return Warehousestore::query()->where('default',1)->where('status',1)->first();
+    $store = Warehousestore::query()->where('default',1)->where('status',1)->first();
+
+    if($store) {
+        return $store;
+    } else {
+        return Warehousestore::find(1);
+    }
+
 }
 
 

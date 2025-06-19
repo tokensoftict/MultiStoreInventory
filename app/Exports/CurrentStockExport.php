@@ -40,6 +40,7 @@ class CurrentStockExport implements FromCollection, WithHeadings, WithTitle
             ->leftJoin('manufacturers','stocks.manufacturer_id','=','manufacturers.id')
             ->leftJoin('product_category','stocks.product_category_id','=','product_category.id')
             ->where('stocks.status',1)
+            ->where('stocks.warehousestore_id', getActiveStore()->id)
             ->groupBy('stocks.id')
             ->groupBy('stocks.name')
             ->groupBy('stocks.selling_price')
