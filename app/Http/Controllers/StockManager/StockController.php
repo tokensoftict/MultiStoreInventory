@@ -98,8 +98,8 @@ class StockController extends Controller
                 $batch['received_date'] = date('Y-m-d');
                 $store = getActiveStore();
                 $quantity = $batch['quantity'];
-                $batch[$store->packed_column] = $quantity;
                 unset($batch['quantity']);
+                $batch[$store->packed_column] = $quantity;
                 $stock->stockbatches()->create($batch);
             }
         });
