@@ -89,14 +89,20 @@ class StockController extends Controller
         }
 
 
-        $stock = Stock::create( $stock_data);
+        DB::transaction(function() use ($stock_data, $request){
+            $stock = Stock::create( $stock_data);
 
-        $batch = $request->get('stock_batch');
+            $batch = $request->get('stock_batch');
 
-        if($request->get('stock_batch') && (!empty($batch['quantity']) && $batch['quantity']!=0)) {
-            $batch['received_date'] = date('Y-m-d');
-            $stock->stockbatches()->create($batch);
-        }
+            if($request->get('stock_batch') && (!empty($batch['quantity']) && $batch['quantity']!=0)) {
+                $batch['received_date'] = date('Y-m-d');
+                $store = getActiveStore();
+                $quantity = $batch['quantity'];
+                $batch[$store->packed_column] = $quantity;
+                unset($batch['quantity']);
+                $stock->stockbatches()->create($batch);
+            }
+        });
 
         return redirect()->route('stock.create')->with('success','Stock has been created successful!');
     }
