@@ -17,7 +17,7 @@
                         {{ $title }}
                         @if(userCanView('purchaseorders.create'))
                             <span class="tools pull-right">
-                                  <a  href="{{ route('purchaseorders.create') }}" class="btn btn-primary"><i class="fa fa-plus"></i> New Purchase Returns</a>
+                                  <a  href="{{ route('purchaseorders.create') }}" class="btn btn-primary"><i class="fa fa-plus"></i> New Purchase Orders</a>
                             </span>
                         @endif
                     </header>
