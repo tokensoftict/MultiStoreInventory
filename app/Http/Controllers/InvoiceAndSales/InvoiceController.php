@@ -215,7 +215,7 @@ class InvoiceController extends Controller
         $pdf = PDF::loadView("print.pos_afive", $data,[],[
             'format' => [148,210],
             'display_mode'         => 'fullpage',
-            'orientation'          => 'L',
+            'orientation'          => 'P',
         ]);
         $pdf->getMpdf()->SetWatermarkText(strtoupper($invoice->name));
         $pdf->getMpdf()->showWatermarkText = true;
