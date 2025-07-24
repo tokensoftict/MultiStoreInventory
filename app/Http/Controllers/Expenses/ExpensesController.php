@@ -67,7 +67,7 @@ class ExpensesController extends Controller
 
         $ex->delete();
 
-        return redirect()->route('expenses_type.index')->with('success','Expenses as been deleted successful!');
+        return redirect()->route('expenses.index')->with('success','Expenses as been deleted successful!');
 
     }
 
