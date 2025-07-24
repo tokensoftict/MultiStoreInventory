@@ -127,8 +127,8 @@ class PaymentReportController extends Controller
 
     public function income_analysis_by_cash(Request $request)
     {
-        $data['from'] = $request->get('from', date('Y-m-01'));
-        $data['to'] = $request->get('to', date('Y-m-t'));
+        $data['from'] = $request->get('from', date('Y-m-d'));
+        $data['to'] = $request->get('to', date('Y-m-d'));
 
 
         $data['expenses'] = Expense::with(['expenses_type','user'])->where('warehousestore_id', getActiveStore()->id)->whereBetween('expense_date',[ $data['from'], $data['to']])->orderBy('id','DESC')->get();
