@@ -26,7 +26,7 @@ class CustomerController extends Controller
     }
 
     public function create(){
-        $data['title'] = "List Customer";
+        $data['title'] = "Add Customer";
         $data['title2'] = "Add Customer";
         $data['customer'] = new Customer();
         return view('customermanager.new',$data);
