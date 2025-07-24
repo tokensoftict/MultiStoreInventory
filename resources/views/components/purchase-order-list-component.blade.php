@@ -44,7 +44,7 @@
                             @if(userCanView('purchaseorders.markAsComplete') && $purchase_order->status == "DRAFT")
                                 <li><a href="{{ route('purchaseorders.markAsComplete',$purchase_order->id) }}">Complete Purchase {{ ucwords(strtolower($purchase_order->type)) }}</a></li>
                             @endif
-                            @if(userCanView('purchaseorders.destroy') && $purchase_order->status == "DRAFT")
+                            @if(userCanView('purchaseorders.destroy'))
                                 <li><a href="{{ route('purchaseorders.destroy',$purchase_order->id) }}">Delete Purchase {{ ucwords(strtolower($purchase_order->type)) }}</a></li>
                             @endif
 
