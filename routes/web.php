@@ -314,7 +314,7 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
                 Route::get('{id}/edit', ['as' => 'edit', 'uses' => 'ExpensesController@edit']);
                 Route::get('{id}/toggle', ['as' => 'toggle', 'uses' => 'ExpensesController@toggle']);
                 Route::put('{id}', ['as' => 'update', 'uses' => 'ExpensesController@update']);
-                Route::delete('{id}', ['as' => 'destroy', 'uses' => 'ExpensesController@destroy']);
+                Route::get('{id}/expense', ['as' => 'destroy', 'uses' => 'ExpensesController@destroy']);
             });
         });
         Route::prefix('purchaseorders')->namespace('PurchaseOrders')->group(function () {
