@@ -615,16 +615,20 @@ function getActiveStore($force = false){
 }
 
 
-function getMyAccessStore($column = "all")
+function getMyAccessStore($column = "all", $allstore = false)
 {
-    $data = request()->user()->userstoremappers->map(function($storemapper){
-        return [
-            'id' => $storemapper->warehousestore->id,
-            'name' => $storemapper->warehousestore->name,
-            'packed_column' => $storemapper->warehousestore->packed_column,
-            'yard_column' => $storemapper->warehousestore->yard_column,
-        ];
-    });
+    if($allstore) {
+        $data = Warehousestore::query()->get();
+    } else {
+        $data = request()->user()->userstoremappers->map(function ($storemapper) {
+            return [
+                'id' => $storemapper->warehousestore->id,
+                'name' => $storemapper->warehousestore->name,
+                'packed_column' => $storemapper->warehousestore->packed_column,
+                'yard_column' => $storemapper->warehousestore->yard_column,
+            ];
+        });
+    }
 
     if($column == "id") return $data->map(function($store){ return $store['id']; })->toArray();
 
