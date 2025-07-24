@@ -83,8 +83,8 @@ class InvoiceReportController extends Controller
             $data['product'] = $request->get('product');
             $data['product_name'] = Stock::find($request->get('product'))->name;
         }else{
-            $data['from'] = date('Y-m-01');
-            $data['to'] = date('Y-m-t');
+            $data['from'] = date('Y-m-d');
+            $data['to'] = date('Y-m-d');
             $data['product'] = 1;
             $data['product_name'] = Stock::find(1)->name;
         }
