@@ -23,13 +23,18 @@
                         <form action="" method="post" enctype="multipart/form-data">
                             {{ csrf_field() }}
                             <div class="form-group">
-                                <label for="exampleInputEmail1">Select Payment</label>
+                                <label for="exampleInputEmail1">Select Supplier</label>
                                 <select class="form-control  select-supplier" required name="customer_id">
                                     <option value="">Select Supplier</option>
                                     @foreach($customers as $customer)
-                                        <option  value="{{ $customer->id }}">{{ $customer->name }} {{ $customer->phonenumber }}</option>
+                                        <option {{ $supplier_id== $customer->id ? "selected" : "" }}  value="{{ $customer->id }}">{{ $customer->name }} {{ $customer->phonenumber }}</option>
                                     @endforeach
                                 </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="exampleInputEmail1">Amount Paid</label>
+                                <input type="number" required {!! $amount > 0 ? 'value="'.$amount.'"' : "" !!}  placeholder="Amount Paid" class="form-control" name="amount"/>
                             </div>
 
                             <div class="form-group">
@@ -43,10 +48,7 @@
                                 </select>
                             </div>
 
-                            <div class="form-group">
-                                <label for="exampleInputEmail1">Amount Paid</label>
-                                <input type="number" required  placeholder="Amount Paid" class="form-control" name="amount"/>
-                            </div>
+
 
                             <div class="form-group">
                                 <label>Payment Date</label>

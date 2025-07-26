@@ -332,6 +332,7 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
                 Route::get('{id}/markAsComplete', ['as' => 'markAsComplete', 'uses' => 'PurchaseOrder@markAsComplete', 'custom_label'=>'Complete Purchase Order']);
                 Route::put('{id}/update', ['as' => 'update', 'uses' => 'PurchaseOrder@update']);
                 Route::match(['get','post'],'/add_payment', ['as' => 'add_payment', 'uses' => 'PurchaseOrder@add_payment', 'custom_label'=>"Add Supplier Payment" ,'visible' => true]);
+                Route::get('supplier_and_report', ['as' => 'supplier_and_report',  'custom_label'=>"Suppliers and Payment" ,'visible' => true, 'uses' => 'PurchaseOrder@supplier_and_report']);
             });
         });
         Route::prefix('stockcounting')->namespace('StockCounting')->group(function () {

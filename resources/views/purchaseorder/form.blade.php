@@ -149,7 +149,9 @@
                                             </div>
                                         </div>
                                         <div class="panel-footer">
+
                                             <button class="btn btn-success btn-sm" type="submit" name="status" value="DRAFT"><i class="fa fa-save"></i> Draft Purchase Order</button>
+
                                             <button class="btn btn-primary btn-sm" type="submit" name="status" value="COMPLETE"><i class="fa fa-save"></i> Complete Purchase Order</button>
                                         </div>
                                     </form>
@@ -258,12 +260,12 @@
                 return false;
             }
 
-
+/*
             if($('#purchase_order_invoice_number').val() == ""){
                 alert("Please enter Purchase Invoice Number");
                 return false;
             }
-
+*/
             return true
         }
     </script>

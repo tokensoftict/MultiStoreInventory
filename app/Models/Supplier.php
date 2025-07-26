@@ -60,6 +60,8 @@ class Supplier extends Model
         'phonenumber'=>'required',
     ];
 
+    protected $appends = ['credit_balance'];
+
 	public function purchase_orders()
 	{
 		return $this->hasMany(PurchaseOrder::class);
@@ -74,4 +76,10 @@ class Supplier extends Model
 	{
 		return $this->hasMany(SupplierCreditPaymentHistory::class);
 	}
+
+
+    public function getCreditBalanceAttribute()
+    {
+        return $this->supplier_credit_payment_histories()->sum('amount');
+    }
 }

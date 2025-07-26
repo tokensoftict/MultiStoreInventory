@@ -158,6 +158,9 @@ class PurchaseOrder extends Controller
                 Cashbook::create($cashbookData);
             };
 
+            if(isset($request->supplier_id)) {
+                return redirect()->route('purchaseorders.supplier_and_report')->with('success','Payment has been added successfully!');
+            }
             return redirect()->route('purchaseorders.add_payment')->with('success','Payment has been added successfully!');
 
         }
@@ -166,7 +169,24 @@ class PurchaseOrder extends Controller
         $data['payments'] = PaymentMethod::where('status',1)->where('id','<>',4)->get();
         $data['banks'] = BankAccount::where('status',1)->get();
         $data['customers'] = Supplier::all();
-        return setPageContent('purchaseorder.add_payment',$data);
+        $data['supplier_id'] =0;
+        $data['amount'] = 0;
+        if(isset($request->supplier_id)) {
+            $data['supplier_id'] = $request->supplier_id;
+        }
+        if(isset($request->amount)) {
+            $data['amount'] = $request->amount;
+        }
+        return view('purchaseorder.add_payment',$data);
+    }
+
+
+
+    public function supplier_and_report()
+    {
+        $data['title'] = "Suppliers and Payment";
+        $data['suppliers'] = Supplier::all();
+        return setPageContent('purchaseorder.supplier_and_payment',$data);
     }
 
 
