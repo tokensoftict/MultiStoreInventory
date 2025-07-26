@@ -329,6 +329,7 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
                 Route::get('{id}/remove', ['as' => 'destroy', 'uses' => 'PurchaseOrder@destroy']);
 
                 Route::get('{id}/edit', ['as' => 'edit', 'uses' => 'PurchaseOrder@edit']);
+                Route::get('showpo_total', ['as' => 'showpo_total', 'custom_label'=>"Show Total Purchase Price",'uses' => 'PurchaseOrder@showpo_total']);
                 Route::get('{id}/markAsComplete', ['as' => 'markAsComplete', 'uses' => 'PurchaseOrder@markAsComplete', 'custom_label'=>'Complete Purchase Order']);
                 Route::put('{id}/update', ['as' => 'update', 'uses' => 'PurchaseOrder@update']);
                 Route::match(['get','post'],'/add_payment', ['as' => 'add_payment', 'uses' => 'PurchaseOrder@add_payment', 'custom_label'=>"Add Supplier Payment" ,'visible' => true]);

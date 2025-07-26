@@ -9,7 +9,9 @@
             <th>Type</th>
             <th>Store</th>
             <th>Total Items</th>
+            @if(userCanView('purchaseorders.showpo_total'))
             <th>Total Amount</th>
+            @endif
             <th>Date</th>
             <th>Status</th>
             <th>Last Updated</th>
@@ -26,7 +28,9 @@
                 <td>{{ $purchase_order->type }}</td>
                 <td>{{ $purchase_order->warehousestore->name ?? "" }}</td>
                 <td>{{ $purchase_order->purchase_order_items->count() }}</td>
+                @if(userCanView('purchaseorders.showpo_total'))
                 <td>{{ number_format($purchase_order->purchase_order_items()->sum(DB::raw('cost_price * qty')),2) }}</td>
+                @endif
                 <td>{{ convert_date2($purchase_order->date_created) }}</td>
                 <td>{!! $purchase_order->status == "DRAFT" ? label('DRAFT','primary') :   label('COMPLETE','success') !!}</td>
                 <td>{{ $purchase_order->user->name }}</td>
@@ -64,11 +68,13 @@
         <th></th>
         <th></th>
         <th>Total</th>
+        @if(userCanView('purchaseorders.showpo_total'))
         <th>{{
                  number_format($purchaseorders->sum(function($order){
                      return $order->purchase_order_items()->sum(DB::raw('cost_price * qty'));
                  }),2)
             }}</th>
+        @endif
         <th></th>
         <th></th>
         <th></th>

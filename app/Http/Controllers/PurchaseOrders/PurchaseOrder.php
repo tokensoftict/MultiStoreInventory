@@ -190,4 +190,8 @@ class PurchaseOrder extends Controller
     }
 
 
+    public function showpo_total()
+    {}
+
+
 }
