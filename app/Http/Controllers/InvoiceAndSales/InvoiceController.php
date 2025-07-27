@@ -56,23 +56,38 @@ class InvoiceController extends Controller
     public function draft(){
         $data = [];
         $data['title'] = 'Draft Invoice List';
-        $data['invoices'] = Invoice::with(['created_user','customer'])->where('warehousestore_id', getActiveStore()->id)->where('status','DRAFT')->where('invoice_date',date('Y-m-d'))->orderBy("id", "DESC")->get();
+        $date = date('Y-m-d');
+        if(isset($request->date)){
+            $date = $request->date;
+        }
+        $data['date'] = $date;
+        $data['invoices'] = Invoice::with(['created_user','customer'])->where('warehousestore_id', getActiveStore()->id)->where('status','DRAFT')->where('invoice_date', $date)->orderBy("id", "DESC")->get();
         return view('invoice.draft-invoice',$data);
     }
 
     public function paid(){
         $data = [];
         $data['title'] = 'Completed Invoice List';
-        $data['invoices'] = Invoice::with(['created_user','customer'])->where('warehousestore_id', getActiveStore()->id)->where('status','COMPLETE')->where('invoice_date',date('Y-m-d'))->orderBy("id", "DESC")->get();
+        $date = date('Y-m-d');
+        if(isset($request->date)){
+            $date = $request->date;
+        }
+        $data['date'] = $date;
+        $data['invoices'] = Invoice::with(['created_user','customer'])->where('warehousestore_id', getActiveStore()->id)->where('status','COMPLETE')->where('invoice_date', $date)->orderBy("id", "DESC")->get();
         return view('invoice.paid-invoice',$data);
     }
 
     public function discount(){
         $data = [];
         $data['title'] = 'Pending Discount Invoice List';
+        $date = date('Y-m-d');
+        if(isset($request->date)){
+            $date = $request->date;
+        }
+        $data['date'] = $date;
         $data['invoices'] = Invoice::with(['created_user','customer'])->where('warehousestore_id', getActiveStore()->id)->where(function($query){
             $query->orWhere('status', "DISCOUNT-APPLIED")->orWhere('status', "DISCOUNT");
-        })->where('invoice_date',date('Y-m-d'))->orderBy("id", "DESC")->get();
+        })->where('invoice_date',$date)->orderBy("id", "DESC")->get();
         return view('invoice.paid-invoice',$data);
     }
 

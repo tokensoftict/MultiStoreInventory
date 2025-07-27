@@ -266,9 +266,9 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
             Route::prefix('invoiceandsales')->as('invoiceandsales.')->group(function () {
                 Route::get('', ['as' => 'new', 'uses' => 'InvoiceController@new', 'visible' => true]);
                 Route::post('create', ['as' => 'create', 'uses' => 'InvoiceController@create']);
-                Route::get('draft', ['as' => 'draft', 'uses' => 'InvoiceController@draft', 'custom_label'=>"Today's Draft Invoice", 'visible' => true]);
-                Route::get('paid', ['as' => 'paid', 'uses' => 'InvoiceController@paid', 'custom_label'=>"Today's Complete Invoice" ,'visible' => true]);
-                Route::get('discount', ['as' => 'discount', 'uses' => 'InvoiceController@discount', 'custom_label'=>"Pending Discount's Invoice" ,'visible' => true]);
+                Route::match(['get', 'post'],'draft', ['as' => 'draft', 'uses' => 'InvoiceController@draft', 'custom_label'=>"Today's Draft Invoice", 'visible' => true]);
+                Route::match(['get', 'post'],'paid', ['as' => 'paid', 'uses' => 'InvoiceController@paid', 'custom_label'=>"Today's Complete Invoice" ,'visible' => true]);
+                Route::match(['get', 'post'],'discount', ['as' => 'discount', 'uses' => 'InvoiceController@discount', 'custom_label'=>"Pending Discount's Invoice" ,'visible' => true]);
                 Route::get('{id}/pos_print', ['as' => 'pos_print', 'uses' => 'InvoiceController@print_pos' ]);
                 Route::get('{id}/print_afour', ['as' => 'print_afour', 'uses' => 'InvoiceController@print_afour']);
                 Route::get('{id}/print_afive', ['as' => 'print_afive', 'uses' => 'InvoiceController@print_afive']);

@@ -21,9 +21,9 @@ class PurchaseReportsController extends Controller
         $data['purchase_orders'] = Po::with(['supplier','purchase_order_items','user','created_user'])
             ->whereBetween('date_created',[$data['from'],$data['to']])
             ->orderBy('id','DESC');
-        if(app(\App\Classes\Settings::class)->store()->allow_store_to_share_the_same_product == "0") {
+        //if(app(\App\Classes\Settings::class)->store()->allow_store_to_share_the_same_product == "0") {
             $data['purchase_orders'] = $data['purchase_orders']->where('warehousestore_id', getActiveStore()->id);
-        }
+       // }
         $data['purchase_orders'] = $data['purchase_orders']->get();
         return view('purchasereport.general', $data);
     }
@@ -33,7 +33,8 @@ class PurchaseReportsController extends Controller
         $data['type'] = $request->get('type', 'PURCHASE');
         $data['title'] = 'Daily Purchase Orders / Returns';
         $data['purchase_orders'] = Po::with(['supplier','purchase_order_items','user','created_user'])
-            ->whereIn('warehousestore_id', getMyAccessStore('id'))
+            //->whereIn('warehousestore_id', getMyAccessStore('id'))
+            ->where('warehousestore_id', getActiveStore()->id)
             ->where('date_created',$data['date'])
             ->where('type', $data['type'])
             ->orderBy('id','DESC');
@@ -52,7 +53,8 @@ class PurchaseReportsController extends Controller
 
         $data['title'] = 'Monthly Purchase Orders / Returns';
         $data['purchase_orders'] = Po::with(['supplier','purchase_order_items','user','created_user'])
-            ->whereIn('warehousestore_id', getMyAccessStore('id'))
+            //->whereIn('warehousestore_id', getMyAccessStore('id'))
+            ->where('warehousestore_id', getActiveStore()->id)
             ->where('type', $data['type'])
             ->whereBetween('date_created',[$data['from'],$data['to']])->orderBy('id','DESC');
         if(app(\App\Classes\Settings::class)->store()->allow_store_to_share_the_same_product == "0") {
@@ -73,7 +75,8 @@ class PurchaseReportsController extends Controller
 
         $data['title'] = 'Monthly Purchase Orders / Returns By Supplier';
         $data['purchase_orders'] = Po::with(['supplier','purchase_order_items','user','created_user'])
-            ->whereIn('warehousestore_id', getMyAccessStore('id'))
+            //->whereIn('warehousestore_id', getMyAccessStore('id'))
+            ->where('warehousestore_id', getActiveStore()->id)
             ->where('supplier_id', $data['supplier_id'])
             ->where('type',  $data['type'])
             ->whereBetween('date_created',[$data['from'],$data['to']])->orderBy('id','DESC');
@@ -116,7 +119,8 @@ class PurchaseReportsController extends Controller
 
         $data['title'] = 'Monthly Purchase Orders / Returns By User';
         $data['purchase_orders'] = Po::with(['supplier','purchase_order_items','user','created_user'])
-            ->whereIn('warehousestore_id', getMyAccessStore('id'))
+            //->whereIn('warehousestore_id', getMyAccessStore('id'))
+            ->where('warehousestore_id', getActiveStore()->id)
             ->whereBetween('date_created',[$data['from'],$data['to']])
             ->where('created_by', $data['user_id'])
             ->where('type',  $data['type'])
