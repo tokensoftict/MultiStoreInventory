@@ -79,7 +79,7 @@
                                                         <label>Select Store</label>
                                                         <select required id="store" name="store" class="form-control select2">
                                                             @foreach($stores as $store)
-                                                                <option  {{ old('store',$porder->store) == $store->packed_column ? "selected" : "" }} value="{{ $store->packed_column }}">{{ $store->name }}</option>
+                                                                <option  {{ old('store',($porder->store ?? getActiveStore()->packed_column)) == $store->packed_column ? "selected" : "" }} value="{{ $store->packed_column }}">{{ $store->name }}</option>
                                                             @endforeach
                                                         </select>
                                                         @if ($errors->has('store'))

@@ -27,6 +27,18 @@
                         @elseif(session('error'))
                             {!! alert_error(session('error')) !!}
                         @endif
+                            <form action="" method="post">
+                                {{ csrf_field() }}
+                                <div class="row">
+                                    <div class="col-sm-2">
+                                        <label>Select Date</label>
+                                        <input type="text" autocomplete="off" class="form-control datepicker js-datepicker" value="{{ $date }}" data-min-view="2" data-date-format="yyyy-mm-dd" style="background-color: #FFF; color: #000;"   name="date" placeholder="From"/>
+                                    </div>
+                                    <div class="col-sm-2"><br/>
+                                        <button type="submit" style="margin-top: 5px;" class="btn btn-primary">Submit</button>
+                                    </div>
+                                </div>
+                            </form>
                         <x-purchase-order-list-component :purchaseorders="$purchase_orders"/>
                     </div>
                 </section>

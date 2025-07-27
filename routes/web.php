@@ -319,7 +319,7 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
         });
         Route::prefix('purchaseorders')->namespace('PurchaseOrders')->group(function () {
             Route::prefix('purchaseorders')->as('purchaseorders.')->group(function () {
-                Route::get('', ['as' => 'index', 'uses' => 'PurchaseOrder@index', 'visible' => true, 'custom_label'=>'List Purchases']);
+                Route::match(['get', 'post'],'', ['as' => 'index', 'uses' => 'PurchaseOrder@index', 'visible' => true, 'custom_label'=>'List Purchases']);
                 Route::get('/returns', ['as' => 'returns', 'uses' => 'PurchaseOrder@returns', 'visible' => true, 'custom_label'=>'List Returns']);
                 Route::get('{id}/show', ['as' => 'show', 'uses' => 'PurchaseOrder@show']);
                 Route::get('{id}/print', ['as' => 'print', 'uses' => 'PurchaseOrder@print', 'custom_label' => "Print Purchase Order"]);
