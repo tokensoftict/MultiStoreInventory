@@ -48,8 +48,10 @@
                                     <th>Supplier</th>
                                     <th>Stock</th>
                                     <th>Quantity</th>
+                                    @if(userCanView('purchaseorders.showpo_total'))
                                     <th>Total Selling Price</th>
                                     <th>Total Cost Price</th>
+                                    @endif
                                     <th>Date</th>
                                     <th>By</th>
                                     <th>Action</th>
@@ -63,8 +65,10 @@
                                         <td>{{ $data->purchase_order->supplier->name }}</td>
                                         <td>{{ $data->stock->name }}</td>
                                         <td>{{ $data->qty }}</td>
+                                        @if(userCanView('purchaseorders.showpo_total'))
                                         <td>{{ number_format(($data->cost_price * $data->qty),2) }}</td>
                                         <td>{{ number_format(($data->selling_price * $data->qty),2) }}</td>
+                                        @endif
                                         <td>{{ convert_date2($data->purchase_order->date_created) }}</td>
                                         <td>{{ $data->user->name }}</td>
                                         <td>
@@ -93,6 +97,7 @@
                                     <th></th>
                                     <th></th>
                                     <th>Total</th>
+                                    @if(userCanView('purchaseorders.showpo_total'))
                                     <th>{{ $purchase_orders->sum('qty') }}</th>
                                     <th>{{ number_format($purchase_orders->sum(function($data){
                                                 return ($data->selling_price * $data->qty);
@@ -100,6 +105,7 @@
                                     <th>{{ number_format($purchase_orders->sum(function($data){
                                                 return ($data->cost_price * $data->qty);
                                             }),2) }}</th>
+                                    @endif
                                     <th></th>
                                     <th></th>
                                     <th></th>
