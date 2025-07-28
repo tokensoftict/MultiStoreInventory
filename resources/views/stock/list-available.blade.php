@@ -53,8 +53,9 @@
                                     <td>{{ number_format($batch->stock->yard_selling_price,2) }}</td>
                                     <td>{{ number_format($batch->stock->yard_cost_price,2) }}</td>
 
-                                    <td>{{ number_format(($batch->stock->selling_price * $batch->stock->available_quantity),2) }}</td>
                                     <td>{{ number_format(($batch->stock->cost_price * $batch->stock->available_quantity),2) }}</td>
+                                    <td>{{ number_format(($batch->stock->selling_price * $batch->stock->available_quantity),2) }}</td>
+
 
                                     <td>
                                         <div class="btn-group">
