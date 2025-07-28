@@ -49,8 +49,8 @@
                                     <th>Stock</th>
                                     <th>Quantity</th>
                                     @if(userCanView('purchaseorders.showpo_total'))
-                                    <th>Total Selling Price</th>
                                     <th>Total Cost Price</th>
+                                    <th>Total Selling Price</th>
                                     @endif
                                     <th>Date</th>
                                     <th>By</th>
@@ -99,11 +99,11 @@
                                     <th>Total</th>
                                     @if(userCanView('purchaseorders.showpo_total'))
                                     <th>{{ $purchase_orders->sum('qty') }}</th>
-                                    <th>{{ number_format($purchase_orders->sum(function($data){
-                                                return ($data->selling_price * $data->qty);
+                                        <th>{{ number_format($purchase_orders->sum(function($data){
+                                                return ($data->cost_price * $data->qty);
                                             }),2) }}</th>
                                     <th>{{ number_format($purchase_orders->sum(function($data){
-                                                return ($data->cost_price * $data->qty);
+                                                return ($data->selling_price * $data->qty);
                                             }),2) }}</th>
                                     @endif
                                     <th></th>
