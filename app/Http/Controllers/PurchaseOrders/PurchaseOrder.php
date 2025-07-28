@@ -6,15 +6,11 @@ use App\Classes\Settings;
 use App\Http\Controllers\Controller;
 use App\Models\BankAccount;
 use App\Models\Cashbook;
-use App\Models\CreditPaymentLog;
-use App\Models\Customer;
-use App\Models\Payment;
 use App\Models\PaymentMethod;
-use App\Models\PaymentMethodTable;
+use App\Models\PurchaseOrderItem;
 use App\Models\Supplier;
 use App\Models\SupplierCreditPaymentHistory;
 use App\Models\Warehousestore;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Models\PurchaseOrder as Po;
 use PDF;
@@ -26,6 +22,27 @@ class PurchaseOrder extends Controller
 
     public function __construct(Settings $_settings){
         $this->settings = $_settings;
+    }
+
+
+    public final function list_product(Request $request)
+    {
+        $data['title'] = "List Today's Purchase Orders";
+        $date = date('Y-m-d');
+        if(isset($request->date)){
+            $date = $request->date;
+        }
+        $data['date'] = $date;
+
+        $data['purchase_orders'] = PurchaseOrderItem::query()
+            ->with(['user','purchase_order','purchase_order.created_user'])
+            ->whereHas('purchase_order', function ($query) use ($date) {
+                $query->where('type', 'PURCHASE')
+                    ->where('date_created',$date)
+                    ->where('warehousestore_id', getActiveStore()->id);
+            })->get();
+
+        return view('purchaseorder.list_product', $data);
     }
 
 

@@ -154,7 +154,11 @@ class PurchaseOrder extends Model
         );
 
         if($this->type == "PURCHASE"){
-            $route = 'purchaseorders.index';
+            if(config('app.go_to_list_product') === true) {
+                $route = 'purchaseorders.list_product';
+            } else {
+                $route = 'purchaseorders.index';
+            }
         }else{
             $route = 'purchaseorders.returns';
         }
@@ -212,7 +216,11 @@ class PurchaseOrder extends Model
         }
 
         if($po->type == "PURCHASE"){
-            $route = 'purchaseorders.index';
+            if(config('app.go_to_list_product') === true) {
+                $route = 'purchaseorders.list_product';
+            } else {
+                $route = 'purchaseorders.index';
+            }
         }else{
             $route = 'purchaseorders.returns';
         }
@@ -264,7 +272,12 @@ class PurchaseOrder extends Model
         }
 
         if($po->type == "PURCHASE"){
-            $route = 'purchaseorders.index';
+            if(config('app.go_to_list_product') === true) {
+                $route = 'purchaseorders.list_product';
+            } else {
+                $route = 'purchaseorders.index';
+            }
+
         }else{
             $route = 'purchaseorders.returns';
         }
