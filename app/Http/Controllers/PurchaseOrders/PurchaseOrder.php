@@ -40,7 +40,7 @@ class PurchaseOrder extends Controller
                 $query->where('type', 'PURCHASE')
                     ->where('date_created',$date)
                     ->where('warehousestore_id', getActiveStore()->id);
-            })->get();
+            })->orderBy('id', 'desc')->get();
 
         return view('purchaseorder.list_product', $data);
     }
@@ -57,7 +57,7 @@ class PurchaseOrder extends Controller
         //if(app(\App\Classes\Settings::class)->store()->allow_store_to_share_the_same_product == "0") {
             $data['purchase_orders'] = $data['purchase_orders']->where('warehousestore_id', getActiveStore()->id);
         //}
-        $data['purchase_orders'] = $data['purchase_orders']->get();
+        $data['purchase_orders'] = $data['purchase_orders']->orderBy('id', 'desc')get();
         return view('purchaseorder.list', $data);
     }
 
