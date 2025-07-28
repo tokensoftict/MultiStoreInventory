@@ -77,11 +77,12 @@ $.widget("ui.autocomplete", $.ui.autocomplete, {
                 event.preventDefault();
             }
         })
+
             .data('ui-autocomplete')._renderItem = function(ul, item) {
             console.log(item);
             return $('<li></li>')
                 .data("item.autocomplete", item)
-                .append('<a>' + item['stock']['name'] + '</a>&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-size: 10px;color:blue">Price : &#x20A6; '+formatMoney(item.stock.selling_price)+'&nbsp;&nbsp;&nbsp;</span><span style="font-size: 10px;color:green">Yard Price : &#x20A6;'+formatMoney(item.stock.yard_selling_price)+'</span>&nbsp;&nbsp;&nbsp;<span  style="font-size: 10px;color:red">Ava. Qty :'+item.stock.available_quantity+'</span>&nbsp;&nbsp;&nbsp;<span  style="font-size: 10px;color:red">Ava. Yard Qty :'+item.stock.available_yard_quantity+'</span>')
+                .append('<a>' + item['stock']['name'] + '</a>&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-size: 15px;color:blue">Price : &#x20A6; '+formatMoney(item.stock.selling_price)+'&nbsp;&nbsp;&nbsp;</span><span style="font-size: 15px;color:green">Yard Price : &#x20A6;'+formatMoney(item.stock.yard_selling_price)+'</span>&nbsp;&nbsp;&nbsp;<span  style="font-size: 15px;color:red">Ava. Qty :'+item.stock.available_quantity+'</span>&nbsp;&nbsp;&nbsp;<span  style="font-size: 15px;color:red">Ava. Yard Qty :'+item.stock.available_yard_quantity+'</span>')
                 .appendTo(ul);
         };
         // end autocomplete
