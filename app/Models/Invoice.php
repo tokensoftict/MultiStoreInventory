@@ -210,11 +210,10 @@ class Invoice extends Model
 
             if($payment_id != NULL) {
                 $payment = Payment::find($payment_id);
-
+                Cashbook::where('cashbookable_id',$payment->id)->where('cashbookable_type', Payment::class)->delete();
+                CreditPaymentLog::where('payment_id',$payment->id)->delete();
                 $payment->delete();
             }
-
-
 
 
         }

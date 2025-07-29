@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\InvoiceAndSales;
 
 use App\Models\BankAccount;
+use App\Models\Cashbook;
+use App\Models\CreditPaymentLog;
 use App\Models\Payment;
+use App\Models\PaymentMethodTable;
 use PDF;
 use App\Classes\Settings;
 use App\Http\Controllers\Controller;
@@ -294,10 +297,26 @@ class InvoiceController extends Controller
             }
         }
 
-        $invoice->paymentMethodTable()->delete();
-        $invoice->delete();
-        $invoice->payment()->delete();
+        $invoice->invoice_items()->delete();
 
+        $invoice->invoice_item_batches()->delete();
+
+        $payment_id = $invoice->payment_id;
+
+        $invoice->payment_id = NULL;
+
+        $invoice->total_amount_paid = 0;
+
+        $invoice->update();
+
+        if($payment_id != NULL) {
+            $payment = Payment::find($payment_id);
+            Cashbook::where('cashbookable_id',$payment_id)->where('cashbookable_type', Payment::class)->delete();
+            CreditPaymentLog::where('payment_id',$payment_id)->delete();
+            $payment->delete();
+        }
+
+        $invoice->delete();
 
         if(in_array($status, ['PAID','COMPLETE'])) {
             $route = 'invoiceandsales.paid';
