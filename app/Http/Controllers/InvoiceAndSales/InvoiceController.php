@@ -53,7 +53,7 @@ class InvoiceController extends Controller
         return setPageContent('invoice.new-invoice',$data);
     }
 
-    public function draft(){
+    public function draft(Request $request){
         $data = [];
         $data['title'] = 'Draft Invoice List';
         $date = date('Y-m-d');
@@ -65,7 +65,7 @@ class InvoiceController extends Controller
         return view('invoice.draft-invoice',$data);
     }
 
-    public function paid(){
+    public function paid(Request $request){
         $data = [];
         $data['title'] = 'Completed Invoice List';
         $date = date('Y-m-d');
@@ -77,7 +77,7 @@ class InvoiceController extends Controller
         return view('invoice.paid-invoice',$data);
     }
 
-    public function discount(){
+    public function discount(Request $request){
         $data = [];
         $data['title'] = 'Pending Discount Invoice List';
         $date = date('Y-m-d');
