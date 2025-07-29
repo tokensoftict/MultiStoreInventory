@@ -65,7 +65,7 @@
                                 @endif
 
                                     @if(userCanView('invoiceandsales.destroy'))
-                                        <li><a href="{{ route('invoiceandsales.destroy',$invoice->id) }}">Delete Invoice</a></li>
+                                        <li><a data-msg="Are you sure, you want to delete this invoice" class="confirm_action" href="{{ route('invoiceandsales.destroy',$invoice->id) }}" >Delete Invoice</a></li>
                                     @endif
 
                                 @if(userCanView('invoiceandsales.edit')  && ($invoice->status =="PAID" || $invoice->status == "COMPLETE") && config('app.uses_edit_to_return_stocks') == true)

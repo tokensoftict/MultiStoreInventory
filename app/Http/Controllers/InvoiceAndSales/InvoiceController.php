@@ -272,8 +272,8 @@ class InvoiceController extends Controller
 
     public function destroy($id){
         $invoice = Invoice::find($id);
-
-        if($invoice->status == "DRAFT" and $invoice->sub_total > -1) {
+        $status = $invoice->status;
+        if($invoice->sub_total > -1) {
             foreach ($invoice->invoice_item_batches()->get() as $invoice_batch) {
                 $batch = $invoice_batch->stockbatch;
                 $batch->{$invoice_batch->store} += $invoice_batch->quantity;
@@ -282,7 +282,7 @@ class InvoiceController extends Controller
 
         }
 
-        if($invoice->status == "DRAFT" and $invoice->sub_total < 0) {
+        if($invoice->sub_total < 0) {
             foreach ($invoice->invoice_item_batches()->get() as $invoice_batch) {
                 $batch = $invoice_batch->stockbatch;
                 $cache =  $batch->{$invoice_batch->store};
@@ -294,9 +294,18 @@ class InvoiceController extends Controller
             }
         }
 
+        $invoice->paymentMethodTable()->delete();
         $invoice->delete();
+        $invoice->payment()->delete();
 
-        return redirect()->route('invoiceandsales.draft')->with('success', 'Invoice has been deleted successfully');
+
+        if(in_array($status, ['PAID','COMPLETE'])) {
+            $route = 'invoiceandsales.paid';
+        } else {
+            $route = 'invoiceandsales.draft';
+        }
+
+        return redirect()->route($route)->with('success', 'Invoice has been deleted successfully');
 
     }
 
