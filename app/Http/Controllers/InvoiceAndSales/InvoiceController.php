@@ -65,7 +65,7 @@ class InvoiceController extends Controller
         return view('invoice.draft-invoice',$data);
     }
 
-    public function paid(Request $request){
+    public function paid(Request $request) {
         $data = [];
         $data['title'] = 'Completed Invoice List';
         $date = date('Y-m-d');
@@ -73,7 +73,7 @@ class InvoiceController extends Controller
             $date = $request->date;
         }
         $data['date'] = $date;
-        $data['invoices'] = Invoice::with(['created_user','customer'])->where('warehousestore_id', getActiveStore()->id)->where('status','COMPLETE')->where('invoice_date', $date)->orderBy("id", "DESC")->get();
+        $data['invoices'] = Invoice::with(['created_user','customer', 'paymentMethodTable'])->where('warehousestore_id', getActiveStore()->id)->where('status','COMPLETE')->where('invoice_date', $date)->orderBy("id", "DESC")->get();
         return view('invoice.paid-invoice',$data);
     }
 
@@ -85,7 +85,7 @@ class InvoiceController extends Controller
             $date = $request->date;
         }
         $data['date'] = $date;
-        $data['invoices'] = Invoice::with(['created_user','customer'])->where('warehousestore_id', getActiveStore()->id)->where(function($query){
+        $data['invoices'] = Invoice::with(['created_user','customer', 'paymentMethodTable'])->where('warehousestore_id', getActiveStore()->id)->where(function($query){
             $query->orWhere('status', "DISCOUNT-APPLIED")->orWhere('status', "DISCOUNT");
         })->where('invoice_date',$date)->orderBy("id", "DESC")->get();
         return view('invoice.paid-invoice',$data);
