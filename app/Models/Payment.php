@@ -204,12 +204,13 @@ class Payment extends Model
 
 
                     //add cash book entry
-                    if($pmthod == "3" && isset($paymentInformation['payment_info']['payment_info_data'][$pmthod]['bank_id'])) {
+                    if(($pmthod == "3" or $pmthod == "2") && isset($paymentInformation['payment_info']['payment_info_data'][$pmthod]['bank_id'])) {
+                        $type  = PaymentMethod::find($pmthod);
                         $cashbookData = [
                             "type" => "Credit",
                             "bank_account_id" => $paymentInformation['payment_info']['payment_info_data'][$pmthod]['bank_id'],
                             "amount" =>$amount,
-                            "comment" => "Invoice Payment invoice id :".$paymentInformation['invoice']->invoice_number,
+                            "comment" => "Invoice $type->name Payment invoice id :".$paymentInformation['invoice']->invoice_number,
                             "transaction_date" => $paymentInformation['invoice']->invoice_date,
                             "last_updated" => auth()->id(),
                             "user_id" => auth()->id(),
@@ -272,12 +273,13 @@ class Payment extends Model
                 CreditPaymentLog::create($credit_log);
             }
 
-            if($paymentInformation['payment_info']['payment_method_id'] == 3) {
+            if($paymentInformation['payment_info']['payment_method_id'] == 3 or $paymentInformation['payment_info']['payment_method_id'] == 2) {
+                $type  = PaymentMethod::find($paymentInformation['payment_info']['payment_method_id']);
                 $cashbookData = [
                     "type" => "Credit",
                     "bank_account_id" => $paymentInformation['payment_info']['bank_id'],
                     "amount" => $payment_method_id->amount,
-                    "comment" => "Invoice Payment invoice id : ".$paymentInformation['invoice']->invoice_number,
+                    "comment" => "Invoice $type->name Payment invoice id : ".$paymentInformation['invoice']->invoice_number,
                     "transaction_date" => $paymentInformation['invoice']->invoice_date,
                     "last_updated" => auth()->id(),
                     "user_id" => auth()->id(),
