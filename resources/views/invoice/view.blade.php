@@ -16,9 +16,9 @@
                                 @if(userCanView('invoiceandsales.print_afour'))
                                     <a href="{{ route('invoiceandsales.print_afour',$invoice->id) }}"  onclick="return open_print_window(this);" class="btn btn-info btn-sm" ><i class="fa fa-print"></i> Print A4</a>
                                 @endif
-                                    @if(userCanView('invoiceandsales.print_afive'))
-                                        <a href="{{ route('invoiceandsales.print_afive',$invoice->id) }}"  onclick="return open_print_window(this);" class="btn btn-info btn-sm" ><i class="fa fa-print"></i> Print A5</a>
-                                    @endif
+                                @if(userCanView('invoiceandsales.print_afive'))
+                                    <a href="{{ route('invoiceandsales.print_afive',$invoice->id) }}"  onclick="return open_print_window(this);" class="btn btn-info btn-sm" ><i class="fa fa-print"></i> Print A5</a>
+                                @endif
                                 @if(userCanView('invoiceandsales.print_way_bill'))
                                     <a href="{{ route('invoiceandsales.print_way_bill',$invoice->id) }}"  onclick="return open_print_window(this);" class="btn btn-primary btn-sm" ><i class="fa fa-print"></i> Print Waybill</a>
                                 @endif
@@ -83,7 +83,14 @@
                                         <label style="font-size: 12px">Sales Representative</label><br/>
                                         <label style="font-size: 15px">{{ $invoice->created_user->name }}</label>
                                     </div>
-
+                                    @if($invoice->status === "PAID" || $invoice->status === "COMPLETE")
+                                        <div class="form-group">
+                                            <label style="font-size: 12px">Payment Method</label><br/>
+                                            @foreach($invoice->paymentMethodTable as $method)
+                                                <b>{{ $method->payment_method->name }}</b> : {{  money($method->amount) }}<br/>
+                                            @endforeach
+                                        </div>
+                                    @endif
                                     @if($invoice->status == "DISCOUNT-APPLIED")
                                         <form id="complete_payment"  action="{{ route('invoiceandsales.create')."?no_stock=true" }}" method="post">
                                             @csrf

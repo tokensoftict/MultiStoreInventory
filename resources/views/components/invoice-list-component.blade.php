@@ -11,6 +11,7 @@
             <th>Discount</th>
             <th>Total</th>
             <th>Total Paid</th>
+            <th>Payment Method</th>
             <th>Date</th>
             <th>Time</th>
             <th>By</th>
@@ -37,6 +38,13 @@
                 <td>{{ number_format($invoice->discount_amount,2) }}</td>
                 <td>{{ number_format(($invoice->sub_total -$invoice->discount_amount) ,2) }}</td>
                 <td>{{ number_format($invoice->total_amount_paid ,2) }}</td>
+                <td>
+                    @if($invoice->status === "PAID" || $invoice->status === "COMPLETE")
+                    @foreach($invoice->paymentMethodTable as $method)
+                        <b>{{ $method->payment_method->name }}</b> : {{  money($method->amount) }}<br/>
+                    @endforeach
+                    @endif
+                </td>
                 <td>{{ convert_date2($invoice->invoice_date) }}</td>
                 <td>{{ $invoice->sales_time->format('h:i a') }}</td>
                 <td>{{ $invoice->created_user->name }}</td>
@@ -95,6 +103,7 @@
                 <th>{{ number_format($total_discount,2) }}</th>
                 <th>Total Paid</th>
                 <th>{{ number_format($total,2) }}</th>
+                <th></th>
                 <th></th>
                 <th></th>
                 <th></th>
