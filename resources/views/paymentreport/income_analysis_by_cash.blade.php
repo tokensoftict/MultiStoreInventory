@@ -120,7 +120,7 @@
                                         <td>{{ $expense->expenses_type->name }}</td>
                                         <td>{{ number_format($expense->amount,2) }}</td>
                                         <td>{{ $expense->department }}</td>
-                                        <td>{{ $expense->description }}</td>
+                                        <td>{{ $expense->purpose }}</td>
                                         <td>{{ convert_date($expense->expense_date) }}</td>
 
                                     </tr>

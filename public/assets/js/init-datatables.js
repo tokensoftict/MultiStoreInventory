@@ -105,6 +105,10 @@ $('.responsive-data-table').dataTable(
             },
             'copy', 'excel', 'pdf',
         ],
+        aLengthMenu: [
+            [500, 1000, 1000, 3000,4000, -1],
+            [500, 1000, 1000, 3000,4000, "All"]
+        ],
         dom:  "<'row be-datatable-header'<'col-sm-2'l><'col-sm-5 text-right'B><'col-sm-4 text-right'f>>" +
             "<'row be-datatable-body'<'col-sm-12'tr>>" +
             "<'row be-datatable-footer'<'col-sm-5'i><'col-sm-7'p>>"
