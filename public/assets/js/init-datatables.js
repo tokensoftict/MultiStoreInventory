@@ -22,11 +22,6 @@ function format(d) {
 
 $('.convert-data-table').dataTable(
     {
-        /*
-        buttons: [
-            'copy', 'excel', 'pdf', 'print'
-        ],
-         */
         buttons :[
             {
                 extend: 'print',
@@ -34,13 +29,16 @@ $('.convert-data-table').dataTable(
                 title: '',
                 //For repeating heading.
                 repeatingHead: {
-                    logo: 'https://www.google.co.in/logos/doodles/2018/world-cup-2018-day-22-5384495837478912-s.png',
                     logoPosition: 'right',
                     logoStyle: '',
                     title: '<h3></h3>'
                 }
             },
             'copy', 'excel', 'pdf',
+        ],
+        aLengthMenu: [
+            [500, 1000, 1000, 3000,4000, -1],
+            [500, 1000, 1000, 3000,4000, "All"]
         ],
         dom:  "<'row be-datatable-header'<'col-sm-2'l><'col-sm-5 text-right'B><'col-sm-4 text-right'f>>" +
             "<'row be-datatable-body'<'col-sm-12'tr>>" +
@@ -72,6 +70,10 @@ $('.colvis-data-table').dataTable(
                 }
             },
             'copy', 'excel', 'pdf',
+        ],
+        aLengthMenu: [
+            [500, 1000, 1000, 3000,4000, -1],
+            [500, 1000, 1000, 3000,4000, "All"]
         ],
         dom:  "<'row be-datatable-header'<'col-sm-2'l><'col-sm-5 text-right'B><'col-sm-4 text-right'f>>" +
             "<'row be-datatable-body'<'col-sm-12'tr>>" +

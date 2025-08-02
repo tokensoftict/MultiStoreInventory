@@ -101,6 +101,7 @@
                                     <th>Type</th>
                                     <th>Amount</th>
                                     <th>Department</th>
+                                    <th>Description</th>
                                     <th>Date</th>
                                 </tr>
                                 </thead>
@@ -119,6 +120,7 @@
                                         <td>{{ $expense->expenses_type->name }}</td>
                                         <td>{{ number_format($expense->amount,2) }}</td>
                                         <td>{{ $expense->department }}</td>
+                                        <td>{{ $expense->description }}</td>
                                         <td>{{ convert_date($expense->expense_date) }}</td>
 
                                     </tr>

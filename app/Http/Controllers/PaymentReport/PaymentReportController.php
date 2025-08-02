@@ -135,7 +135,7 @@ class PaymentReportController extends Controller
         $data['payments'] = PaymentMethodTable::with(['warehousestore','payment','customer','user','payment_method','invoice'])->where('payment_method_id', 1)->where('warehousestore_id',getActiveStore()->id)->whereBetween('payment_date', [$data['from'],$data['to']])->orderBy('id','DESC')->get();
 
         $data['title'] = "Income Analysis By Cash";
-        return setPageContent('paymentreport.income_analysis_by_cash',$data);
+        return view('paymentreport.income_analysis_by_cash',$data);
     }
 
 

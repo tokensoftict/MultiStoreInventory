@@ -268,6 +268,7 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
                 Route::post('create', ['as' => 'create', 'uses' => 'InvoiceController@create']);
                 Route::match(['get', 'post'],'draft', ['as' => 'draft', 'uses' => 'InvoiceController@draft', 'custom_label'=>"Today's Draft Invoice", 'visible' => true]);
                 Route::match(['get', 'post'],'paid', ['as' => 'paid', 'uses' => 'InvoiceController@paid', 'custom_label'=>"Today's Complete Invoice" ,'visible' => true]);
+                Route::match(['get', 'post'],'paid_stock', ['as' => 'paid_stock', 'uses' => 'InvoiceController@paid_stock', 'custom_label'=>"Today's Complete Invoice(Product)" ,'visible' => true]);
                 Route::match(['get', 'post'],'discount', ['as' => 'discount', 'uses' => 'InvoiceController@discount', 'custom_label'=>"Pending Discount's Invoice" ,'visible' => true]);
                 Route::get('{id}/pos_print', ['as' => 'pos_print', 'uses' => 'InvoiceController@print_pos' ]);
                 Route::get('{id}/print_afour', ['as' => 'print_afour', 'uses' => 'InvoiceController@print_afour']);

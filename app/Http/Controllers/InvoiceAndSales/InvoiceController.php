@@ -5,6 +5,7 @@ namespace App\Http\Controllers\InvoiceAndSales;
 use App\Models\BankAccount;
 use App\Models\Cashbook;
 use App\Models\CreditPaymentLog;
+use App\Models\InvoiceItem;
 use App\Models\Payment;
 use App\Models\PaymentMethodTable;
 use PDF;
@@ -78,6 +79,26 @@ class InvoiceController extends Controller
         $data['date'] = $date;
         $data['invoices'] = Invoice::with(['created_user','customer', 'paymentMethodTable'])->where('warehousestore_id', getActiveStore()->id)->where('status','COMPLETE')->where('invoice_date', $date)->orderBy("id", "DESC")->get();
         return view('invoice.paid-invoice',$data);
+    }
+
+
+    public function paid_stock(Request $request) {
+        $data = [];
+        $data['title'] = 'Completed Invoice List';
+        $date = date('Y-m-d');
+        if(isset($request->date)){
+            $date = $request->date;
+        }
+        $data['date'] = $date;
+        $data['invoices'] = InvoiceItem::with(['invoice','invoice.created_user','invoice.customer'])
+            ->whereHas('invoice', function($q) use($date) {
+                $q->where('warehousestore_id', getActiveStore()->id)
+                    ->where('invoice_date', $date)
+                    ->where('status','COMPLETE');
+
+            })->orderBy("id", "DESC")->get();
+
+        return view('invoice.paid-stock-invoice',$data);
     }
 
     public function discount(Request $request){
