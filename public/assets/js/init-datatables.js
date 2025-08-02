@@ -56,6 +56,7 @@ $('.colvis-data-table').dataTable(
             'copy', 'excel', 'pdf', 'print'
         ],
          */
+
         buttons :[
             {
                 extend: 'print',
