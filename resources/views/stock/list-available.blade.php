@@ -20,8 +20,11 @@
                         @endif
                     </header>
                     <div class="panel-body">
-                        <x-search-component placeholder="Search for available products.."/>
-                        <table class="table table-bordered table-responsive table-striped" style="font-size: 12px">
+                        @if(config('app.dont_show_all_product'))
+                            <x-search-component placeholder="Search for available products.."/>
+                        @endif
+
+                        <table class="table table-bordered table-responsive table-striped @if(config('app.convert-data-table')) convert-data-table  @endif" style="font-size: 12px">
                             <thead>
                             <tr>
                                 <th>#</th>
@@ -93,7 +96,9 @@
                             </tr>
                             </tfoot>
                         </table>
-                        {!! $stocks->appends(request()->input())->links() !!}
+                        @if(config('app.dont_show_all_product'))
+                            {!! $stocks->appends(request()->input())->links() !!}
+                        @endif
                     </div>
                 </section>
             </div>

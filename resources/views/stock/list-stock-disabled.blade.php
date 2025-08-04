@@ -19,8 +19,10 @@
                         @endif
                     </header>
                     <div class="panel-body">
-                        <x-search-component placeholder="Search for available products.."/>
-                        <table class="table table-bordered table-responsive table convert-data-table table-striped" style="font-size: 12px">
+                        @if(config('app.dont_show_all_product'))
+                            <x-search-component placeholder="Search for disabled products.."/>
+                        @endif
+                        <table class="table table-bordered table-responsive table @if(config('app.convert-data-table')) convert-data-table  @endif table-striped" style="font-size: 12px">
                             <thead>
                             <tr>
                                 <th>#</th>
@@ -55,9 +57,9 @@
                                                 @if(userCanView('stock.toggle'))
                                                     <li><a href="{{ route('stock.toggle',$stock->id) }}">{{ $stock->status == 0 ? 'Enabled' : 'Disabled' }}</a></li>
                                                 @endif
-                                                    @if(userCanView('stock.stock_report'))
-                                                        <li><a href="{{ route('stock.stock_report',$stock->id) }}">Product Report</a></li>
-                                                    @endif
+                                                @if(userCanView('stock.stock_report'))
+                                                    <li><a href="{{ route('stock.stock_report',$stock->id) }}">Product Report</a></li>
+                                                @endif
                                             </ul>
                                         </div>
                                     </td>
@@ -65,7 +67,9 @@
                             @endforeach
                             </tbody>
                         </table>
-                        {!! $stocks->links() !!}
+                        @if(config('app.dont_show_all_product'))
+                            {!! $stocks->links() !!}
+                        @endif
                     </div>
                 </section>
             </div>
@@ -76,11 +80,11 @@
 
 
 @push('js')
-<script    src="{{ asset('bower_components/datatables.net/js/jquery.dataTables.min.js') }}"></script>
-<script    src="{{ asset('bower_components/datatables-tabletools/js/dataTables.tableTools.js') }}"></script>
-<script    src="{{ asset('bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js') }}"></script>
-<script    src="{{ asset('bower_components/datatables-colvis/js/dataTables.colVis.js') }}"></script>
-<script    src="{{ asset('bower_components/datatables-responsive/js/dataTables.responsive.js') }}"></script>
-<script    src="{{ asset('bower_components/datatables-scroller/js/dataTables.scroller.js') }}"></script>
-<script src="{{ asset('assets/js/init-datatables.js') }}"></script>
+    <script    src="{{ asset('bower_components/datatables.net/js/jquery.dataTables.min.js') }}"></script>
+    <script    src="{{ asset('bower_components/datatables-tabletools/js/dataTables.tableTools.js') }}"></script>
+    <script    src="{{ asset('bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js') }}"></script>
+    <script    src="{{ asset('bower_components/datatables-colvis/js/dataTables.colVis.js') }}"></script>
+    <script    src="{{ asset('bower_components/datatables-responsive/js/dataTables.responsive.js') }}"></script>
+    <script    src="{{ asset('bower_components/datatables-scroller/js/dataTables.scroller.js') }}"></script>
+    <script src="{{ asset('assets/js/init-datatables.js') }}"></script>
 @endpush

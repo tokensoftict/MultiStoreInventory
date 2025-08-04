@@ -24,8 +24,10 @@
                         @elseif(session('error'))
                             {!! alert_error(session('error')) !!}
                         @endif
+                        @if(config('app.dont_show_all_product'))
                             <x-search-component placeholder="Search for available products.."/>
-                            <table class="table table-bordered table-responsive table-striped" style="font-size: 12px">
+                        @endif
+                        <table class="table table-bordered table-responsive  @if(config('app.convert-data-table')) convert-data-table  @endif table-striped" style="font-size: 12px">
                             <thead>
                             <tr>
                                 <th>#</th>
@@ -62,11 +64,11 @@
                                                     <li><a href="{{ route('stock.edit',$stock->id) }}">Edit</a></li>
                                                 @endif
                                                 @if(userCanView('stock.toggle'))
-                                                        <li><a href="{{ route('stock.toggle',$stock->id) }}">{{ $stock->status == 0 ? 'Enabled' : 'Disabled' }}</a></li>
+                                                    <li><a href="{{ route('stock.toggle',$stock->id) }}">{{ $stock->status == 0 ? 'Enabled' : 'Disabled' }}</a></li>
                                                 @endif
-                                                    @if(userCanView('stock.stock_report'))
-                                                        <li><a href="{{ route('stock.stock_report',$stock->id) }}">Product Report</a></li>
-                                                    @endif
+                                                @if(userCanView('stock.stock_report'))
+                                                    <li><a href="{{ route('stock.stock_report',$stock->id) }}">Product Report</a></li>
+                                                @endif
                                             </ul>
                                         </div>
                                     </td>
@@ -74,8 +76,9 @@
                             @endforeach
                             </tbody>
                         </table>
+                        @if(config('app.dont_show_all_product'))
                             {!! $stocks->appends(request()->input())->links() !!}
-
+                        @endif
                     </div>
                 </section>
             </div>

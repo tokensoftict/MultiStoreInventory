@@ -41,7 +41,11 @@ class StockController extends Controller
     public function index(){
 
         $data['title'] = "Stock List(s)";
-        $data['stocks'] = Stock::with(['manufacturer','product_category','user','last_updated'])->where('status',1)->filter()->paginate(20);
+        if(config('app.dont_show_all_product')) {
+            $data['stocks'] = Stock::with(['manufacturer', 'product_category', 'user', 'last_updated'])->where('status', 1)->filter()->paginate(20);
+        } else {
+            $data['stocks'] = Stock::with(['manufacturer', 'product_category', 'user', 'last_updated'])->where('status', 1)->get();
+        }
         return view("stock.list-stock",$data);
     }
 
@@ -175,8 +179,12 @@ class StockController extends Controller
             ->whereHas('stock',function($query){
                 $query->where('status',1)->filter();
             })
-            ->groupBy('stock_id')
-            ->paginate(20);;
+            ->groupBy('stock_id');
+        if(config('app.dont_show_all_product')) {
+            $available = $available->paginate(20);;
+        } else {
+            $available = $available->get();
+        }
 
 
         $data['batches'] = $available;
@@ -213,7 +221,11 @@ class StockController extends Controller
 
     public function disabled(){
         $data['title'] = "Disabled Stock List(s)";
-        $data['stocks'] = Stock::with(['manufacturer','product_category','user','last_updated'])->where('status',0)->filter()->paginate(20);
+        if(config('app.dont_show_all_product')) {
+            $data['stocks'] = Stock::with(['manufacturer', 'product_category', 'user', 'last_updated'])->where('status', 0)->filter()->paginate(20);
+        }else {
+            $data['stocks'] = Stock::with(['manufacturer', 'product_category', 'user', 'last_updated'])->where('status', 0)->get();
+        }
         return setPageContent("stock.list-stock-disabled",$data);
     }
 

@@ -260,4 +260,5 @@ return [
     'uses_edit_to_return_stocks' => env('USES_EDIT_TO_RETURN_STOCKS',false),
     'force_https' => env('FORCE_HTTPS',false),
     'go_to_list_product' => env('GO_TO_LIST_PRODUCT',false),
+    'dont_show_all_product' => env('DONT_SHOW_ALL_PRODUCT',true),
 ];
