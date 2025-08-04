@@ -156,7 +156,7 @@ class StockController extends Controller
 */
         $stock->update($stock_data);
 
-        return redirect()->route('stock.index')->with('success','Stock has been updated successful!');
+        return redirect()->route('stock.available')->with('success','Stock has been updated successful!');
 
     }
 
