@@ -116,11 +116,15 @@
                 <th>Total Paid</th>
                 <th>{{ number_format($total,2) }}</th>
                 <th>@php
+                        $allTotal =0;
                         foreach ($totalPaymentMethod as $key => $value) {
                             if($value > 0) {
+                                $allTotal+=$value;
                             echo '<b>TOTAL '.$key.'</b> : '.money($value).'<br/>';
                             }
                         }
+                       echo ' <hr/ style="margin:0;padding:0;padding-top:2px;padding-bottom:2px;">';
+                        echo '<span style="color:red"><b>TOTAL</b> : '.money($allTotal).'</span><br/>';
                     @endphp</th>
                 <th></th>
                 <th></th>
