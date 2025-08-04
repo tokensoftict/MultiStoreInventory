@@ -59,7 +59,7 @@
                                 @php
                                     $total=0;
                                 @endphp
-                                    @foreach(\App\Models\PaymentMethodTable::where('payment_method_id',$payment_method->id)->where('payment_date',$date)->get() as $payment)
+                                    @foreach(\App\Models\PaymentMethodTable::where('payment_method_id',$payment_method->id)->where('warehousestore_id', getActiveStore()->id)->where('payment_date',$date)->get() as $payment)
                                         @php
                                             $total+=$payment->amount;
                                             $all_total+=$payment->amount;
