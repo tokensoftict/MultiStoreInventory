@@ -22,6 +22,10 @@
         @php
             $total = 0;
             $total_discount= 0;
+            $totalPaymentMethod = [];
+            foreach (\App\Models\PaymentMethod::all() as $paymentMthd) {
+                 $totalPaymentMethod[$paymentMthd->name] = 0;
+            }
         @endphp
         @foreach($lists as $invoice)
             @php
@@ -42,6 +46,14 @@
                     @if($invoice->status === "PAID" || $invoice->status === "COMPLETE")
                     @foreach($invoice->paymentMethodTable as $method)
                         <b>{{ $method->payment_method->name }}</b> : {{  money($method->amount) }}<br/>
+                        @php
+                            if(isset($totalPaymentMethod[$method->payment_method->name])) {
+                                $totalPaymentMethod[$method->payment_method->name] += $method->amount;
+                            } else {
+                                 $totalPaymentMethod[$method->payment_method->name] = 0;
+                                  $totalPaymentMethod[$method->payment_method->name] +=$method->amount;
+                            }
+                        @endphp
                     @endforeach
                     @endif
                 </td>
@@ -103,7 +115,13 @@
                 <th>{{ number_format($total_discount,2) }}</th>
                 <th>Total Paid</th>
                 <th>{{ number_format($total,2) }}</th>
-                <th></th>
+                <th>@php
+                        foreach ($totalPaymentMethod as $key => $value) {
+                            if($value > 0) {
+                            echo '<b>TOTAL '.$key.'</b> : '.money($value).'<br/>';
+                            }
+                        }
+                    @endphp</th>
                 <th></th>
                 <th></th>
                 <th></th>

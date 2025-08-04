@@ -90,13 +90,7 @@ class InvoiceController extends Controller
             $date = $request->date;
         }
         $data['date'] = $date;
-        $data['invoices'] = InvoiceItem::with(['invoice','invoice.created_user','invoice.customer'])
-            ->whereHas('invoice', function($q) use($date) {
-                $q->where('warehousestore_id', getActiveStore()->id)
-                    ->where('invoice_date', $date)
-                    ->where('status','COMPLETE');
-
-            })->orderBy("id", "DESC")->get();
+        $data['allInvoices'] = Invoice::with(['created_user','customer', 'paymentMethodTable', 'invoice_items'])->where('warehousestore_id', getActiveStore()->id)->where('status','COMPLETE')->where('invoice_date', $date)->orderBy("id", "DESC")->get();
 
         return view('invoice.paid-stock-invoice',$data);
     }
