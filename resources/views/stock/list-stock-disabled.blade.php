@@ -22,7 +22,7 @@
                         @if(config('app.dont_show_all_product'))
                             <x-search-component placeholder="Search for disabled products.."/>
                         @endif
-                        <table class="table table-bordered table-responsive table @if(config('app.convert-data-table')) convert-data-table  @endif table-striped" style="font-size: 12px">
+                        <table class="table table-bordered table-responsive table @if(config('app.dont_show_all_product') === FALSE) convert-data-table  @endif table-striped" style="font-size: 12px">
                             <thead>
                             <tr>
                                 <th>#</th>

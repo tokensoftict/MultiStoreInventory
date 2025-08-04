@@ -24,7 +24,7 @@
                             <x-search-component placeholder="Search for available products.."/>
                         @endif
 
-                        <table class="table table-bordered table-responsive table-striped @if(config('app.convert-data-table')) convert-data-table  @endif" style="font-size: 12px">
+                        <table class="table table-bordered table-responsive table-striped @if(config('app.dont_show_all_product') === FALSE) convert-data-table  @endif" style="font-size: 12px">
                             <thead>
                             <tr>
                                 <th>#</th>
@@ -49,17 +49,12 @@
                                     <td>{{ $batch->stock->type }}</td>
                                     <td>{{ $batch->stock->available_quantity }}</td>
                                     <td>{{ $batch->stock->available_yard_quantity }}</td>
-
                                     <td>{{ number_format($batch->stock->selling_price,2) }}</td>
                                     <td>{{ number_format($batch->stock->cost_price,2) }}</td>
-
                                     <td>{{ number_format($batch->stock->yard_selling_price,2) }}</td>
                                     <td>{{ number_format($batch->stock->yard_cost_price,2) }}</td>
-
                                     <td>{{ number_format(($batch->stock->cost_price * $batch->stock->available_quantity),2) }}</td>
                                     <td>{{ number_format(($batch->stock->selling_price * $batch->stock->available_quantity),2) }}</td>
-
-
                                     <td>
                                         <div class="btn-group">
                                             <button data-toggle="dropdown" class="btn btn-success dropdown-toggle btn-xs" type="button" aria-expanded="false">Action <span class="caret"></span></button>
@@ -107,9 +102,9 @@
 
 @endsection
 
-
 @push('js')
-
     <script type="text/javascript" src="{{ asset('table/datatables.js') }}"></script>
+
     <script src="{{ asset('assets/js/init-datatables.js') }}"></script>
 @endpush
+
