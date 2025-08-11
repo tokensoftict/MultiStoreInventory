@@ -25,7 +25,7 @@
                                     <label>Select Payment Method</label>
                                     <select class="form-control" name="payment_method">
                                         @foreach($methods as $method)
-                                            <option value="{{ $method->id }}">{{ $method->name }}</option>
+                                            <option {{ $payment_method == $method->id  ? "selected" : "" }} value="{{ $method->id }}">{{ $method->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
