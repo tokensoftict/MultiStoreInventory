@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\InvoiceItem;
 use App\Models\Customer;
 use App\Models\Invoice;
+use App\Models\PaymentMethod;
 use App\Models\ReturnLog;
 use App\Models\Stock;
 use App\Models\User;
@@ -185,6 +186,24 @@ class InvoiceReportController extends Controller
         $data['title'] = "Monthly Invoice Report By User";
         $data['invoices'] = Invoice::with(['created_user','customer'])->where("created_by",  $data['user_id'])->where('warehousestore_id',getActiveStore()->id)->where('status', "COMPLETE")->whereBetween('invoice_date', [$data['from'],$data['to']])->orderBy("id", "DESC")->get();
         return view('invoicereport.by_user',$data);
+    }
+
+
+
+    public function by_payment_method(Request $request)
+    {
+        if($request->get('date')){
+            $data['date'] = $request->get('date');
+        }else{
+            $data['date'] = date('Y-m-d');
+        }
+        $data['methods'] = PaymentMethod::all();
+        $data['payment_method'] = $request->get('payment_method', 1);
+        $data['title'] = "Invoice Report By Payment Method";
+        $data['invoices'] = Invoice::with(['created_user','customer', 'paymentMethodTable'])->whereHas('paymentMethodTable', function($query) use($data){
+            $query->where('payment_method_id',  $data['payment_method']);
+        })->where('warehousestore_id',getActiveStore()->id)->where('status', "COMPLETE")->whereBetween('invoice_date', [$data['date'],$data['date']])->orderBy("id", "DESC")->get();
+        return view('invoicereport.by_method',$data);
     }
 
 }
