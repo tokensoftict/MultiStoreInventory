@@ -89,6 +89,7 @@
                                         <td>
                                             @if($invoice->status === "PAID" || $invoice->status === "COMPLETE")
                                                 @foreach($invoice->paymentMethodTable as $method)
+                                                    @if($method == $payment_method)
                                                     <b>{{ $method->payment_method->name }}</b> : {{  money($method->amount) }}<br/>
                                                     @php
                                                         if(isset($totalPaymentMethod[$method->payment_method->name])) {
@@ -98,6 +99,7 @@
                                                               $totalPaymentMethod[$method->payment_method->name] +=$method->amount;
                                                         }
                                                     @endphp
+                                                   @endif
                                                 @endforeach
                                             @endif
                                         </td>
