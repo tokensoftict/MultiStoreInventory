@@ -120,7 +120,10 @@ class Customer extends Model
         if (!app()->runningInConsole()) {
             if (optional(app(Settings::class)->store())->allow_store_to_share_the_same_customer == "0") {
                 static::addGlobalScope("filter_customer", function (Builder $builder) {
-                    $builder->where("warehousestore_id", getActiveStore()->id);
+                    $builder->where(function ($query) {
+                        $query->orWhere("warehousestore_id", getActiveStore()->id)
+                            ->orWhereNull("warehousestore_id");
+                    });
                 });
             }
         }
