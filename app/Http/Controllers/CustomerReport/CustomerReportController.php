@@ -19,6 +19,10 @@ class CustomerReportController extends Controller
         }
 
         $history = CreditPaymentLog::where('amount','<',0)
+            ->whereHas('customer',function($query) use($data){
+                $query->orWhere("warehousestore_id", getActiveStore()->id)
+                    ->orWhereNull("warehousestore_id");
+            })
             ->whereBetween('payment_date',[$data['from'],$data['to']])->orderBy('id','DESC')->get();
 
         $data['title'] = "Customer Credit Report";
@@ -36,6 +40,10 @@ class CustomerReportController extends Controller
         }
 
         $history = CreditPaymentLog::where('amount','>',0)
+            ->whereHas('customer',function($query) use($data){
+                $query->orWhere("warehousestore_id", getActiveStore()->id)
+                    ->orWhereNull("warehousestore_id");
+            })
             ->whereBetween('payment_date',[$data['from'],$data['to']])->orderBy('id','DESC')->get();
 
         $data['title'] = "Customer Payment Report";
