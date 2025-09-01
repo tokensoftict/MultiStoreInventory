@@ -47,7 +47,7 @@
 
                             <div class="form-group">
                                 <label for="exampleInputEmail1">Amount Paid</label>
-                                <input type="number" required  placeholder="Amount Paid" class="form-control" name="amount"/>
+                                <input type="number" required min="0" placeholder="Amount Paid" class="form-control" name="amount"/>
                             </div>
 
                             <div class="form-group">
