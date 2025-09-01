@@ -241,7 +241,7 @@
                                                 <label for="exampleInputEmail1">Customer Name</label>
                                                 <select class="form-control  select-customer"  name="customer" id="customer_id">
                                                     @foreach($customers as $customer)
-                                                        <option value="{{ $customer->id }}">{{ $customer->firstname }} {{ $customer->lastname }}</option>
+                                                        <option {{ $customer->id == $c->id ? "selected" : "" }} value="{{ $customer->id }}">{{ $customer->firstname }} {{ $customer->lastname }}</option>
                                                     @endforeach
                                                 </select>
                                                 <a href="#" data-toggle="modal" data-target="#newCustomer" class="text-success" style="display: block;text-align: center">Add New Customer</a>
