@@ -47,6 +47,7 @@ class InvoiceController extends Controller
     public function new(){
         $data = [];
         $data['customers'] = Customer::query()->get();
+        $data['customer'] = Customer::query()->find(1);
         $data['payments'] = PaymentMethod::all();
         $data['banks'] = BankAccount::where('status',1)->get();
         $data['settings'] =  $this->settings;
