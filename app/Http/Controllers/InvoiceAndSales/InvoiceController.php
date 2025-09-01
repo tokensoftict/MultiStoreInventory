@@ -346,7 +346,7 @@ class InvoiceController extends Controller
 
     public function return_invoice(){
         $data = [];
-        $data['customers'] = Customer::all();
+        $data['customers'] = Customer::query()->get();
         $data['payments'] = PaymentMethod::all();
         $data['banks'] = BankAccount::where('status',1)->get();
         return setPageContent('invoice.new-return-invoice',$data);

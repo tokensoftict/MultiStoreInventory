@@ -181,7 +181,7 @@
                                             @endphp
                                             <tr>
                                                 <td>{{ $loop->iteration }}</td>
-                                                <td>{{ $payment->customer->firstname }} {{ $payment->customer->lastname }}</td>
+                                                <td>{{ optional($payment->customer)->firstname }} {{ optional($payment->customer)->lastname }}</td>
                                                 <td>{{ optional($payment->payment_method)->name }}</td>
                                                 <td>{{ $bank }} </td>
                                                 <td>{{ money($payment->amount) }}</td>
