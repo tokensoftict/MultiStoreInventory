@@ -46,7 +46,7 @@ class InvoiceController extends Controller
 
     public function new(){
         $data = [];
-        $data['customers'] = Customer::all();
+        $data['customers'] = Customer::query()->get();
         $data['payments'] = PaymentMethod::all();
         $data['banks'] = BankAccount::where('status',1)->get();
         $data['settings'] =  $this->settings;
@@ -279,7 +279,7 @@ class InvoiceController extends Controller
 
     public function edit($id){
         $data = [];
-        $data['customers'] = Customer::all();
+        $data['customers'] = Customer::query()->get();
         $data['payments'] = PaymentMethod::all();
         $data['invoice'] = Invoice::with(['created_by','customer','invoice_items','payment'])->findorfail($id);
         $data['banks'] = BankAccount::where('status',1)->get();
