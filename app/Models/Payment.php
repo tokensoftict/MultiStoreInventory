@@ -339,10 +339,13 @@ class Payment extends Model
 
         if($total_credit > 0) { // the user as money in his/her wallet
            $remaining = $total_credit - $total;
+
            if($remaining < 0) {
                $remaining = -$remaining;
                if($remaining > $credit_limit) {
                    return true;
+               } else {
+                   return false;
                }
            } else {
                return false;
