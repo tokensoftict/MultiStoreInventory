@@ -6,11 +6,9 @@ namespace App\Console\Commands;
 use App\Classes\Sql;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Str;
 
 class TaskGenerate extends Command
 {
@@ -67,7 +65,8 @@ class TaskGenerate extends Command
             'StockTransferReport' => 'Stock Transfer Report',
             'CashBookReport' => 'Cash Book Report',
             'CustomerReport' => 'Customer Report',
-            'Dashboard' => 'Dashboard Analysis'
+            'Dashboard' => 'Dashboard Analysis',
+            'IncentiveManager'=>"Incentive Manager",
         ];
 
         $taskList = DB::table('tasks')->pluck('route', 'id');

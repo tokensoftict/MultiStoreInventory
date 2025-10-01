@@ -69,8 +69,8 @@
                         <tfoot>
                             <tr>
                                 <td></td>
-                                <td></td>
-                                <td></td>
+                                <th>{{ number_format($totalCredit, 2) }}</th>
+                                <th>{{ number_format($totalPayment, 2) }}</th>
                                 <th>Total Balance</th>
                                 <th>{{ number_format($opening,2) }}</th>
                             </tr>

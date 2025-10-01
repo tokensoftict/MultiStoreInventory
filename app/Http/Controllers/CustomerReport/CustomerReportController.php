@@ -33,12 +33,21 @@ class CustomerReportController extends Controller
     }
 
     public function payment_report(Request $request){
+        $data['customers'] = Customer::where('id','>',1)->get();
+        $customer_id = 0;
         if($request->get('from') && $request->get('to')){
             $data['from'] = $request->get('from');
             $data['to'] = $request->get('to');
+            $data['customer_id'] = $request->get('customer_id');
         }else{
             $data['from'] = date('Y-m-01');
             $data['to'] = date('Y-m-t');
+            if($data['customers']->first()){
+                $customer_id = $data['customers']->first()->id;
+            }else{
+                $customer_id = 0;
+            }
+            $data['customer_id'] = $customer_id;
         }
 
         $history = CreditPaymentLog::where('amount','>',0)
@@ -48,6 +57,7 @@ class CustomerReportController extends Controller
                         ->orWhereNull("warehousestore_id");
                 });
             })
+            ->where('customer_id',$data['customer_id'])
             ->whereBetween('payment_date',[$data['from'],$data['to']])->orderBy('id','DESC')->get();
 
         $data['title'] = "Customer Payment Report";
@@ -78,6 +88,12 @@ class CustomerReportController extends Controller
         $data['opening'] = CreditPaymentLog::where('customer_id', $data['customer_id'])->where('payment_date','<', $data['from'])->sum('amount');
 
         $data['histories'] = CreditPaymentLog::where('customer_id', $data['customer_id'])->whereBetween('payment_date',[ $data['from'], $data['to']])->get();
+
+        $totalCredit = CreditPaymentLog::where('customer_id', $data['customer_id'])->where('amount','<',0)->sum('amount');
+        $totalPayment = CreditPaymentLog::where('customer_id', $data['customer_id'])->where('amount','>',0)->sum('amount');
+
+        $data['totalCredit'] = $totalCredit;
+        $data['totalPayment'] = $totalPayment;
 
         $data['title'] = "Balance Sheet";
 

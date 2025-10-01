@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Bank;
 use App\Models\BankAccount;
 use App\Models\Expense;
+use App\Models\Incentive;
+use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\PaymentMethod;
 use App\Models\PaymentMethodTable;
@@ -150,6 +152,23 @@ class PaymentReportController extends Controller
         $data['user_id'] = $request->get('user_id', auth()->user()->id);
         $data['users'] = User::where("status", "1")->get();
         return view('paymentreport.payment_analysis_by_user',$data);
+    }
+
+
+    public function income_analysis_by_profit(Request $request)
+    {
+        $data['from'] = $request->get('from', date('Y-m-d'));
+        $data['to'] = $request->get('to', date('Y-m-d'));
+
+        $data['expenses'] = Expense::with(['expenses_type','user'])->where('warehousestore_id', getActiveStore()->id)->whereBetween('expense_date',[ $data['from'], $data['to']])->orderBy('id','DESC')->get();
+        $data['invoices'] = Invoice::where('status', 'COMPLETE')->where('warehousestore_id',getActiveStore()->id)->whereBetween('invoice_date', [$data['from'],$data['to']])->orderBy('id','DESC')->get();
+        $data['incentives'] = Incentive::where(function ($query) {
+            $query->orWhere("warehousestore_id", getActiveStore()->id)
+                ->orWhereNull("warehousestore_id");
+        })  ->whereBetween('payment_date',[$data['from'],$data['to']])->orderBy('id','DESC')->get();
+
+        $data['title'] = "Income Analysis By Profit";
+        return view('paymentreport.income_analysis_by_profit',$data);
     }
 
 }
