@@ -63,10 +63,15 @@ class PurchaseOrder extends Controller
 
     public function returns(){
         $data['title'] = "List Today's Purchase Returns";
+        $date = date('Y-m-d');
+        if(isset($request->date)){
+            $date = $request->date;
+        }
         $data['purchase_orders'] = Po::with(['supplier','purchase_order_items','user','created_user'])->where('type', 'RETURN')->where('date_created',date('Y-m-d'))->orderBy('id','DESC');
         //if(app(\App\Classes\Settings::class)->store()->allow_store_to_share_the_same_product == "0") {
             $data['purchase_orders'] = $data['purchase_orders']->where('warehousestore_id', getActiveStore()->id);
         //}
+        $data['date'] = $date;
         $data['purchase_orders'] = $data['purchase_orders']->get();
         return view('purchaseorder.list', $data);
     }
