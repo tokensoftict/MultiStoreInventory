@@ -14,6 +14,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use PDF;
 use Reliese\Meta\MySql\Schema;
 
 class CustomerController extends Controller
@@ -168,7 +169,7 @@ class CustomerController extends Controller
 
                 $pmethod->update();
 
-                return redirect()->route('reports.customerReport.payment_report')->with('success','Payment has been added successfully!');
+                return redirect()->back()->with('success','Payment has been added successfully!');
             });
 
         }
@@ -189,7 +190,7 @@ class CustomerController extends Controller
             $payment->delete();
             CreditPaymentLog::where('payment_id',$payment->id)->delete();
             DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-            return redirect()->route('reports.customerReport.payment_report')->with('success','Payment has been deleted successfully!');
+            return redirect()->back()->with('success','Payment has been deleted successfully!');
         });
     }
 
@@ -269,7 +270,7 @@ class CustomerController extends Controller
 
                 $pmethod->update();
                 DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-                return redirect()->route('reports.customerReport.payment_report')->with('success','Payment has been updated successfully!');
+                return redirect()->route('customer.list_payment')->with('success','Payment has been updated successfully!');
             });
         }
 
@@ -281,4 +282,68 @@ class CustomerController extends Controller
         return view('customermanager.edit_payment',$data);
     }
 
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\View\View
+     */
+    public function list_payment(Request $request)
+    {
+        $data['title'] = "List Today's Credit Payment";
+        $history = CreditPaymentLog::where('amount','>',0)
+            ->whereHas('customer',function($query) use($data){
+                $query->where(function($q){
+                    $q->orWhere("warehousestore_id", getActiveStore()->id)
+                        ->orWhereNull("warehousestore_id");
+                });
+            })
+            ->where('payment_date', today()->format('Y-m-d'))->orderBy('id','DESC')->get();
+
+        $data['histories'] = $history;
+        return view('customermanager.list_today_payment',$data);
+    }
+
+    /**
+     * @param CreditPaymentLog $creditPaymentLog
+     * @param Request $request
+     * @return mixed
+     */
+    public function print_a4_payment(CreditPaymentLog  $creditPaymentLog, Request $request)
+    {
+        $data = [];
+        $creditPaymentLog->load('customer')->load('payment')->load('user');
+        $data['creditPaymentLog'] = $creditPaymentLog;
+        $pdf = PDF::loadView("print.pos_afive_credit_payment", $data,[],[
+            'format' => [148,210],
+            'display_mode'         => 'fullpage',
+            'orientation'          => 'P',
+        ]);
+        return $pdf->stream();
+    }
+
+
+
+    public function print_thermal_payment(CreditPaymentLog  $creditPaymentLog, Request $request)
+    {
+        $data = [];
+        $creditPaymentLog->load('customer')->load('payment')->load('user');
+        $data['creditPaymentLog'] = $creditPaymentLog;
+        $page_size = $creditPaymentLog->payment->payment_method_tables->count() * 15;
+        $page_size += 180;
+        $pdf = PDF::loadView('print.pos_credit_payment', $data,[],[
+            'format' => [80,$page_size],
+            'margin_left'          => 0,
+            'margin_right'         => 0,
+            'margin_top'           => 0,
+            'margin_bottom'        => 0,
+            'margin_header'        => 0,
+            'margin_footer'        => 0,
+            'orientation'          => 'P',
+            'display_mode'         => 'fullpage',
+            'custom_font_dir'      => '',
+            'custom_font_data' 	   => [],
+            'default_font_size'    => '12',
+        ]);
+        return $pdf->stream();
+    }
 }

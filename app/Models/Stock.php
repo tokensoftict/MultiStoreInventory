@@ -41,6 +41,8 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property Manufacturer|null $manufacturer
  * @property ProductCategory|null $product_category
  * @property Collection|Stockbatch[] $stockbatches
+ * @property Collection|PurchaseOrderItem[] $purchase_order_items
+ * @property Collection|InvoiceItem[] $invoice_items
  *
  * @package App\Models
  */
@@ -212,6 +214,11 @@ class Stock extends Model
     public function invoice_items()
     {
         return $this->hasMany(InvoiceItem::class);
+    }
+
+    public function purchase_order_items()
+    {
+        return $this->hasMany(PurchaseOrderItem::class);
     }
 
     public function getCustomPackedStockQuantity($store_id)

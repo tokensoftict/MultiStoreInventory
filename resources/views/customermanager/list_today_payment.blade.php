@@ -17,30 +17,6 @@
                 <section class="panel">
                     <header class="panel-heading">
                         {{ $title }}
-                        <form action=""  class="tools pull-right" style="margin-right: 80px" method="post">
-                            {{ csrf_field() }}
-                            <div class="row">
-                                <div class="col-sm-3">
-                                    <label>From</label>
-                                    <input type="text" class="form-control datepicker js-datepicker" data-min-view="2" data-date-format="yyyy-mm-dd" style="background-color: #FFF; color: #000;"  value="{{ $from }}" name="from" placeholder="From"/>
-                                </div>
-                                <div class="col-sm-3">
-                                    <label>To</label>
-                                    <input type="text" class="form-control datepicker js-datepicker" data-min-view="2" data-date-format="yyyy-mm-dd" style="background-color: #FFF; color: #000;"  value="{{ $to }}" name="to" placeholder="TO"/>
-                                </div>
-                                <div class="col-sm-3">
-                                    <label>Customer</label>
-                                    <select class="form-control select-customer" name="customer_id">
-                                        @foreach($customers as $customer)
-                                            <option {{ $customer_id == $customer->id ? "selected" : "" }} value="{{ $customer->id }}">{{ $customer->firstname }} {{ $customer->lastname }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="col-sm-3"><br/>
-                                    <button type="submit" style="margin-top: 5px;" class="btn btn-primary">Submit</button>
-                                </div>
-                            </div>
-                        </form>
                     </header>
                     <div class="panel-body">
                         @if(session('success'))
