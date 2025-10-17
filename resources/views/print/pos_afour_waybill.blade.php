@@ -71,7 +71,7 @@
             </p>
         </td>
         <td valign="top" width="35%">
-            <img style="max-height:100px;float: right;" src="{{ public_path("img/". $store->logo) }}" alt='Logo'>
+            <img style="max-height:100px;float: right;margin-top: -20px;" src="{{ public_path("img/". $store->logo) }}" alt='Logo'>
         </td>
     </tr>
 </table>

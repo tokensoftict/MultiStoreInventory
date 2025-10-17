@@ -72,7 +72,7 @@
             </td>
         </tr>
         <td valign="top" width="35%" class="text-left" align="right">
-            <img style="max-height:100px;float: right;" src="{{ public_path("img/". $creditPaymentLog->payment->warehousestore->logo) }}" alt='Logo'>
+            <img style="max-height:100px;float: right;margin-top: -20px;" src="{{ public_path("img/". $creditPaymentLog->payment->warehousestore->logo) }}" alt='Logo'>
         </td>
     </table>
 
