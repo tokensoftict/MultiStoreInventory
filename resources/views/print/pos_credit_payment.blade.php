@@ -49,7 +49,7 @@
     </style>
 </head>
 <body>
-<h3 id="logo" class="text-center"><br><img style="max-height:30px;" src="{{ public_path("img/". $store->logo) }}" alt='Logo'></h3>
+<h3 id="logo" class="text-center"><br><img style="max-height:30px;" src="{{ public_path("img/". $creditPaymentLog->payment->warehousestore->logo) }}" alt='Logo'></h3>
 <div id="printbox">
     <h2 style="margin-top:0" class="text-center">{{ $creditPaymentLog->payment->warehousestore->name}}</h2>
     <p align="center">
