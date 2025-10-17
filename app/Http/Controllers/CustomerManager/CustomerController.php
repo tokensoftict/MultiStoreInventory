@@ -96,10 +96,18 @@ class CustomerController extends Controller
 
 
 
-    public function add_payment(Request $request){
+    public function add_payment(Request $request)
+    {
 
         if($request->getMethod() == "POST"){
+            $request->validate([
+                'customer_id' => 'required',
+                'amount' => 'required',
+                'payment_date' => 'required',
 
+                'payment_method' => 'required|integer',
+                'bank' => 'required_if:payment_method,2,3|string',
+            ]);
             return DB::transaction(function() use ($request){
 
                 $payment = Payment::create([

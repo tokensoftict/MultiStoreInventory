@@ -54,12 +54,14 @@
                         </thead>
                         <tbody>
                         @foreach($histories as $history)
+
                             @php
                                 $opening =  ($opening+$history->amount)
+                            //
                             @endphp
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
-                                <td>{{ $history->amount < 0  ? number_format($history->amount,2) : "" }}</td>
+                                <td>{!!  $history->amount < 0  ? (number_format($history->amount,2). (!is_null($history->invoice_id) ? "   (<a onclick='open_window(this); return false' href='".route("invoiceandsales.view", $history->invoice_id)."'>Invoice Number : ".$history->invoice_number."</a>)" : "" ) )  : "" !!}</td>
                                 <td>{{ $history->amount > 0  ? number_format($history->amount,2) : "" }}{{  ($history->amount > 0 ?  "(".($history->payment_method_table->payment_method->name ?? "").")"  : "") }}</td>
                                 <td>{{ convert_date2($history->payment_date) }}</td>
                                 <td>{{ number_format(($opening),2) }}</td>

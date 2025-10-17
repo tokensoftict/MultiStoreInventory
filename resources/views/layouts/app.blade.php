@@ -90,6 +90,13 @@
         }
         return false;
     }
+
+    function open_window(elem){
+        var href = $(elem).attr('href');
+        var win = window.open(href, "MsgWindow", "width=1200,height=800");
+        return false;
+    }
+
     function formatMoney(amount, decimalCount = 2, decimal = ".", thousands = ",") {
         try {
             decimalCount = Math.abs(decimalCount);

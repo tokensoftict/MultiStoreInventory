@@ -3,9 +3,7 @@
 @push('css')
     <link rel="stylesheet" href="{{ asset('bower_components/select2/dist/css/select2.min.css') }}">
     <link rel="stylesheet" href="{{ asset('bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css') }}">
-
-        <link rel="stylesheet" href="{{ asset('table/datatables.css') }}">
-
+    <link rel="stylesheet" href="{{ asset('table/datatables.css') }}">
 @endpush
 
 @section('content')
@@ -29,9 +27,10 @@
                                 <select class="form-control select-customer" required name="customer_id">
                                     <option value="">Select Customer</option>
                                     @foreach($customers as $customer)
-                                        <option value="{{ $customer->id }}">{{ $customer->firstname }} {{ $customer->lastname }}</option>
+                                        <option {{ old('customer_id') == $customer->id ? 'selected' : '' }} value="{{ $customer->id }}">{{ $customer->firstname }} {{ $customer->lastname }}</option>
                                     @endforeach
                                 </select>
+                                @error('customer_id') <span class="text-danger">{{ $message }}</span>  @enderror
                             </div>
 
                             <div class="form-group">
@@ -39,25 +38,28 @@
                                 <select class="form-control" required name="payment_method" id="payment_method">
                                     <option value="">Select Payment Method</option>
                                     @foreach($payments as $payment)
-                                        <option  data-label="{{ strtolower( $payment->name) }}"  value="{{  $payment->id }}">{{  $payment->name }}</option>
+                                        <option {{ old('payment_method') == $payment->id ? 'selected' : '' }}  data-label="{{ strtolower( $payment->name) }}"  value="{{  $payment->id }}">{{  $payment->name }}</option>
                                     @endforeach
                                     <!--<option data-label="split_method" value="split_method">Multiple Payment Method</option>-->
                                 </select>
+                                @error('payment_method')  <span class="text-danger">{{ $message }}</span>  @enderror
                             </div>
 
                             <div class="form-group">
                                 <label for="exampleInputEmail1">Amount Paid</label>
-                                <input type="number" required min="0" placeholder="Amount Paid" class="form-control" name="amount"/>
+                                <input type="number" value="{{ old('amount') }}" required min="0" placeholder="Amount Paid" class="form-control" name="amount"/>
+                                @error('amount')  <span class="text-danger">{{ $message }}</span>  @enderror
                             </div>
 
                             <div class="form-group">
                                 <label>Payment Date</label>
-                                <input type="text"  required class="form-control datepicker js-datepicker" value="{{ date('Y-m-d',strtotime(date('Y-m-d'))) }}" data-min-view="2" data-date-format="yyyy-mm-dd" style="background-color: #FFF; color: #000;"   name="payment_date" placeholder="Payment Date"/>
+                                <input type="text"  required   class="form-control datepicker js-datepicker"  value="{{ old('payment_date', date('Y-m-d',strtotime(date('Y-m-d')))) }}"  data-min-view="2" data-date-format="yyyy-mm-dd"   name="payment_date" placeholder="Payment Date"/>
+                                @error('payment_date')  <span class="text-danger">{{ $message }}</span>  @enderror
                             </div>
 
                             <div class="form-group">
                                 <label>Description</label>
-                                <textarea class="form-control" style="height: 300px" placeholder="Payment description or product description" name="description"></textarea>
+                                <textarea class="form-control"  style="height: 300px" placeholder="Payment description or product description" name="description">{{ old("description") }}</textarea>
                             </div>
 
                             <div id="more_info_appender">
@@ -84,7 +86,7 @@
                     var selected = $("#payment_method option:selected").attr("data-label");
                     selected = selected.toLowerCase();
                     if (selected === "transfer") {
-                        $("#more_info_appender").html('<div id="transfer"><div class="form-group"> <label>Bank</label> <select class="form-control" required id="bank" name="bank"><option value="">-Select Bank-</option> @foreach($banks as $bank)<option value="{{ $bank->id }}">{{ $bank->account_number }} - {{ $bank->bank->name }}</option> @endforeach </select></div></div>')
+                        $("#more_info_appender").html('<div id="transfer"><div class="form-group"> <label>Bank</label> <select class="form-control" required id="bank" name="bank"><option value="">-Select Bank-</option> @foreach($banks as $bank)<option value="{{ $bank->id }}">{{ $bank->account_number }} - {{ $bank->bank->name }}</option> @endforeach </select> @error('bank')<span class="text-danger">{{ $message }}</span>@enderror</div></div>')
                     } else if (selected === "cash") {
                         $("#more_info_appender").html('<div id="cash"> <br/><div class="form-group"> <label>Cash Tendered</label> <input class="form-control" type="number" step="0.00001" id="cash_tendered" name="cash_tendered" required placeholder="Cash Tendered"/></div><div class="form-group well"><center>Customer Change</center><h1 align="center" style="font-size: 55px; margin: 0; padding: 0 font-weight: bold;" id="customer_change">0.00</h1></div></div>')
                         handle_cash();
@@ -133,7 +135,7 @@
 
             }
 
-
+            $("#payment_method").trigger("change");
         });
     </script>
 @endpush
@@ -143,9 +145,5 @@
     <script   src="{{ asset('bower_components/select2/dist/js/select2.min.js') }}"></script>
     <script   src="{{ asset('assets/js/init-select2.js') }}"></script>
     <script   src="{{ asset('bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js') }}"></script>
-
-
-    <script type="text/javascript" src="{{ asset('table/datatables.js') }}"></script>
- <script src="{{ asset('assets/js/init-datatables.js') }}"></script>
     <script  src="{{ asset('assets/js/init-datepicker.js') }}"></script>
 @endpush
