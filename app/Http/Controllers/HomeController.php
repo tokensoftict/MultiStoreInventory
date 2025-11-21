@@ -101,7 +101,7 @@ class HomeController extends Controller
     public function select_store()
     {
         $data = [];
-        $data['stores'] = \request()->user()->userstoremappers;
+        $data['stores'] = \request()->user()->activeuserstoremappers;
         return view('select_store',$data);
     }
 

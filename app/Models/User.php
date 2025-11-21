@@ -51,7 +51,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property Collection|Stock[] $stocks
  * @property Collection|SupplierCreditPaymentHistory[] $supplier_credit_payment_histories
  * @property Collection|Userstoremapper[] $userstoremappers
- *
+ * @property Collection|Userstoremapper[] $activeuserstoremappers
  * @package App\Models
  */
 
@@ -210,6 +210,13 @@ class User extends Authenticatable
     public function userstoremappers()
     {
         return $this->hasMany(Userstoremapper::class);
+    }
+
+    public function activeuserstoremappers()
+    {
+        return $this->hasMany(Userstoremapper::class)->whereHas('warehousestore', function ($query) {
+            $query->where('status', 1);
+        });
     }
 
     protected static function boot()

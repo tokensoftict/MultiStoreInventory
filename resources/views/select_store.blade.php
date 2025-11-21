@@ -39,6 +39,13 @@
     <div id="content" class="ui-content ui-content-aside-overlay">
         <div class="ui-content-body">
             <div class="container">
+                @if(session()->has('message'))
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <h2 class="text-danger text-center">{{ session()->get('message') }}</h2>
+                        </div>
+                    </div>
+                @endif
                 <div class="row w-states">
                     @foreach($stores as $store)
                         <div class="col-md-3 col-sm-6">
