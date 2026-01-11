@@ -289,7 +289,7 @@ class InvoiceController extends Controller
     }
 
 
-    public function destroy($id){
+    public function destroy($id) {
         $invoice = Invoice::find($id);
         $status = $invoice->status;
         if($invoice->sub_total > -1) {

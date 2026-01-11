@@ -259,7 +259,6 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
             });
         });
         Route::prefix('invoiceandsales')->namespace('InvoiceAndSales')->group(function () {
-
             Route::prefix('invoiceandsales')->as('invoiceandsales.')->group(function () {
                 Route::get('', ['as' => 'new', 'uses' => 'InvoiceController@new', 'visible' => true]);
                 Route::post('create', ['as' => 'create', 'uses' => 'InvoiceController@create']);
@@ -287,7 +286,23 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
                 Route::get('allow_user_to_change_invoice_date', ['as' => 'allow_user_to_change_invoice_date', 'uses' => 'InvoiceController@allow_user_to_change_invoice_date','custom_label'=>'Allow user to change invoice date']);
                 Route::get('checkoutScan', ['as' => 'checkoutScan', 'uses' => 'InvoiceController@checkoutScan','custom_label'=>'Scan Invoice for Product Checkout', 'visible' => true]);
             });
-
+        });
+        Route::prefix('deposit')->namespace('Deposit')->group(function () {
+            Route::prefix('deposit')->as('deposit.')->group(function () {
+                Route::get('', ['as' => 'new', 'uses' => 'DepositController@new', 'visible' => true]);
+                Route::post('create', ['as' => 'create', 'uses' => 'DepositController@create']);
+                Route::get('allow_user_to_change_deposit_date', ['as' => 'allow_user_to_change_deposit_date', 'uses' => 'DepositController@allow_user_to_change_deposit_date','custom_label'=>'Allow user to change deposit date']);
+                Route::get('{id}/view', ['as' => 'view', 'uses' => 'DepositController@view']);
+                Route::get('{id}/edit', ['as' => 'edit', 'uses' => 'DepositController@edit']);
+                Route::get('{id}/destroy', ['as' => 'destroy', 'uses' => 'DepositController@destroy']);
+                Route::put('{id}/update', ['as' => 'update', 'uses' => 'DepositController@update']);
+                Route::get('list_deposit', ['as' => 'list_deposit', 'uses' => 'DepositController@index','custom_label'=>'List Today Deposit', 'visible' => true]);
+                Route::get('{id}/pos_print', ['as' => 'pos_print', 'uses' => 'DepositController@print_pos' ]);
+                Route::get('{id}/print_afour', ['as' => 'print_afour', 'uses' => 'DepositController@print_afour']);
+                Route::get('{id}/print_afive', ['as' => 'print_afive', 'uses' => 'DepositController@print_afive']);
+                Route::get('{id}/print_way_bill', ['as' => 'print_way_bill', 'uses' => 'DepositController@print_way_bill']);
+                Route::get('{id}/add_depsoit_payment', ['as' => 'add_depsoit_payment', 'uses' => 'DepositController@add_depsoit_payment', 'custom_label'=>'Add Deposit Payment']);
+            });
         });
         Route::prefix('cashbook')->namespace('CashBook')->group(function () {
             Route::prefix('cashbook')->as('cashbook.')->group(function () {

@@ -53,6 +53,7 @@ class TaskGenerate extends Command
             'StockManager'=>"Stock Manager",
             'StockTransfer'=>"Stock Transfer",
             'InvoiceAndSales'=>"Invoice & Sales",
+            'Deposit'=>"Deposits",
             'PurchaseOrders'=>"Purchase Orders",
             'Expenses'=>"Expenses Manager",
             'PurchaseReport'=>"Supplier & Purchase Order Reports",

@@ -536,6 +536,10 @@ function invoice_status($status){
         return label(ucwords($status),"danger");
     }else if($status == "DISCOUNT-APPLIED"){
         return label(ucwords($status),"success");
+    }else if($status == "PENDING"){
+        return label(ucwords($status),"warning");
+    }else if($status == "IN_PROGRESS"){
+        return label(ucwords($status),"primary");
     }
 }
 
