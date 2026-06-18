@@ -47,7 +47,34 @@
                             @foreach($stocks as $stock)
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
-                                    <td>{{ $stock->name }}</td>
+                                    <td>
+                                        {{ $stock->name }}
+                                        @if(!empty($active_price_categories) && count($active_price_categories) > 0)
+                                            <div style="margin-top: 5px;">
+                                                @foreach($active_price_categories as $price_category)
+                                                    @php
+                                                        $stockPrice = $stock->stockPrices->firstWhere('price_category_id', $price_category->id);
+                                                        $priceVal = $stockPrice ? $stockPrice->price : 0;
+                                                    @endphp
+                                                    @if(userCanView('stock.edit'))
+                                                        <span class="label label-info price-category-badge" 
+                                                              style="cursor: pointer; display: inline-block; margin-bottom: 2px;" 
+                                                              data-stock-id="{{ $stock->id }}"
+                                                              data-price-category-id="{{ $price_category->id }}"
+                                                              data-price-category-name="{{ $price_category->name }}"
+                                                              data-price="{{ $priceVal }}">
+                                                            {{ $price_category->name }}: {{ number_format($priceVal, 2) }}
+                                                        </span>
+                                                    @else
+                                                        <span class="label label-info" 
+                                                              style="display: inline-block; margin-bottom: 2px;">
+                                                            {{ $price_category->name }}: {{ number_format($priceVal, 2) }}
+                                                        </span>
+                                                    @endif
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                    </td>
                                     <td>{{ array_search($stock->type,config('stock_type_name.'.config('app.store'))) }}</td>
                                     <td>{{ $stock->product_category ?  $stock->product_category->name : "No Category" }}</td>
                                     <td>{{ $stock->manufacturer ?  $stock->manufacturer->name : "No Manufacturer" }}</td>
@@ -85,6 +112,30 @@
         </div>
     </div>
 
+    <div class="modal fade" id="updatePriceModal" tabindex="-1" role="dialog" aria-labelledby="updatePriceModalLabel">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="updatePriceModalLabel">Update Price</h4>
+                </div>
+                <form id="updatePriceForm">
+                    <div class="modal-body">
+                        <input type="hidden" id="modal_stock_id">
+                        <input type="hidden" id="modal_price_category_id">
+                        <div class="form-group">
+                            <label for="modal_price" id="modal_price_label">Price</label>
+                            <input type="number" step="0.00000001" class="form-control" id="modal_price" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection
 
 
@@ -92,4 +143,62 @@
     <script type="text/javascript" src="{{ asset('table/datatables.js') }}"></script>
 
     <script src="{{ asset('assets/js/init-datatables.js') }}"></script>
+    <script>
+        $(document).ready(function() {
+            $(document).on('click', '.price-category-badge', function() {
+                var badge = $(this);
+                var stockId = badge.data('stock-id');
+                var categoryId = badge.data('price-category-id');
+                var categoryName = badge.data('price-category-name');
+                var currentPrice = badge.data('price');
+                
+                $('#modal_stock_id').val(stockId);
+                $('#modal_price_category_id').val(categoryId);
+                $('#modal_price_label').text("Enter price for " + categoryName);
+                $('#modal_price').val(currentPrice);
+                $('#updatePriceModal').modal('show');
+            });
+
+            $('#updatePriceForm').on('submit', function(e) {
+                e.preventDefault();
+                var submitBtn = $(this).find('button[type="submit"]');
+                submitBtn.attr('disabled', 'disabled');
+                
+                var stockId = $('#modal_stock_id').val();
+                var categoryId = $('#modal_price_category_id').val();
+                var newPrice = $('#modal_price').val();
+                
+                $.ajax({
+                    url: "{{ route('update_price_category_price') }}",
+                    method: "POST",
+                    data: {
+                        _token: "{{ csrf_token() }}",
+                        stock_id: stockId,
+                        price_category_id: categoryId,
+                        price: parseFloat(newPrice)
+                    },
+                    success: function(response) {
+                        if (response.status) {
+                            var badge = $('.price-category-badge[data-stock-id="' + stockId + '"][data-price-category-id="' + categoryId + '"]');
+                            badge.data('price', newPrice);
+                            badge.text(badge.data('price-category-name') + ": " + parseFloat(newPrice).toFixed(2));
+                            $('#updatePriceModal').modal('hide');
+                        } else {
+                            alert(response.message || "Failed to update price");
+                        }
+                    },
+                    error: function() {
+                        alert("An error occurred. Please try again.");
+                    },
+                    complete: function() {
+                        submitBtn.removeAttr('disabled');
+                    }
+                });
+            });
+
+            $('#updatePriceModal').on('hidden.bs.modal', function () {
+                $(this).find('button[type="submit"]').removeAttr('disabled');
+            });
+        });
+    </script>
 @endpush

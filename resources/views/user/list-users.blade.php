@@ -21,29 +21,31 @@
                         <div class="table-responsive">
                             <table class="table table-bordered table-striped" id="user-list">
                                 <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Full Name</th>
-                                    <th>Email</th>
-                                    <th>Store(s)</th>
-                                    <th>Username</th>
-                                    <th>Group</th>
-                                    <th>Status</th>
-                                    <th>Details</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                @php
-                                    $num = 1;
-                                @endphp
-                                @foreach($users as $user)
-                                        <tr>
-                                            <td>{{ $num }}</td>
-                                            <td>{{ $user->name }}</td>
-                                            <td>{{ $user->email }}</td>
-                                            <td>{{ implode(",", $user->getStores()) }}</td>
-                                            <td>{{ $user->username }}</td>
-                                            <td>{{ $user->group->name }}</td>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Full Name</th>
+                                        <th>Email</th>
+                                        <th>Store(s)</th>
+                                        <th>Price Category(ies)</th>
+                                        <th>Username</th>
+                                        <th>Group</th>
+                                        <th>Status</th>
+                                        <th>Details</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    @php
+                                        $num = 1;
+                                    @endphp
+                                    @foreach($users as $user)
+                                            <tr>
+                                                <td>{{ $num }}</td>
+                                                <td>{{ $user->name }}</td>
+                                                <td>{{ $user->email }}</td>
+                                                <td>{{ implode(",", $user->getStores()) }}</td>
+                                                <td>{{ implode(",", $user->getPriceCategoriesList()) }}</td>
+                                                <td>{{ $user->username }}</td>
+                                                <td>{{ $user->group->name }}</td>
                                             <td>{!! $user->status == 1 ? label("Active","success") : label("Inactive","danger") !!}</td>
                                             <td>
                                                 @if (userCanView('user.edit'))

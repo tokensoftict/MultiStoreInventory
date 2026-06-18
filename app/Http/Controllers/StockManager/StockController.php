@@ -41,10 +41,15 @@ class StockController extends Controller
     public function index(){
 
         $data['title'] = "Stock List(s)";
+        $settings = app(\App\Classes\Settings::class);
+        $data['active_price_categories'] = [];
+        if ($settings->store()->allow_dynamic_pricing ?? false) {
+            $data['active_price_categories'] = \App\Models\PriceCategory::where('status', 1)->get();
+        }
         if(config('app.dont_show_all_product')) {
-            $data['stocks'] = Stock::with(['manufacturer', 'product_category', 'user', 'last_updated'])->where('status', 1)->filter()->paginate(20);
+            $data['stocks'] = Stock::with(['manufacturer', 'product_category', 'user', 'last_updated', 'stockPrices.priceCategory'])->where('status', 1)->filter()->paginate(20);
         } else {
-            $data['stocks'] = Stock::with(['manufacturer', 'product_category', 'user', 'last_updated'])->where('status', 1)->get();
+            $data['stocks'] = Stock::with(['manufacturer', 'product_category', 'user', 'last_updated', 'stockPrices.priceCategory'])->where('status', 1)->get();
         }
         return view("stock.list-stock",$data);
     }
@@ -213,7 +218,7 @@ class StockController extends Controller
             'stock_id',
             DB::raw($sql)
         )
-            ->with(['stock'])
+            ->with(['stock.stockPrices.priceCategory'])
             ->whereHas('stock',function($query){
                 $query->where('status',1)->filter();
             })
@@ -229,6 +234,12 @@ class StockController extends Controller
         $data['title'] = "Available Stock";
         $data['store'] = $store;
         $data['stocks'] = $available ;
+
+        $settings = app(\App\Classes\Settings::class);
+        $data['active_price_categories'] = [];
+        if ($settings->store()->allow_dynamic_pricing ?? false) {
+            $data['active_price_categories'] = \App\Models\PriceCategory::where('status', 1)->get();
+        }
 
         $sqlTotal = "SUM(stockbatches.$store->packed_column * stocks.selling_price) as total_selling_worth,";
         $sqlTotal .= "SUM(stockbatches.$store->packed_column * stocks.cost_price) as total_cost_worth,";
@@ -259,10 +270,15 @@ class StockController extends Controller
 
     public function disabled(){
         $data['title'] = "Disabled Stock List(s)";
+        $settings = app(\App\Classes\Settings::class);
+        $data['active_price_categories'] = [];
+        if ($settings->store()->allow_dynamic_pricing ?? false) {
+            $data['active_price_categories'] = \App\Models\PriceCategory::where('status', 1)->get();
+        }
         if(config('app.dont_show_all_product')) {
-            $data['stocks'] = Stock::with(['manufacturer', 'product_category', 'user', 'last_updated'])->where('status', 0)->filter()->paginate(20);
+            $data['stocks'] = Stock::with(['manufacturer', 'product_category', 'user', 'last_updated', 'stockPrices.priceCategory'])->where('status', 0)->filter()->paginate(20);
         }else {
-            $data['stocks'] = Stock::with(['manufacturer', 'product_category', 'user', 'last_updated'])->where('status', 0)->get();
+            $data['stocks'] = Stock::with(['manufacturer', 'product_category', 'user', 'last_updated', 'stockPrices.priceCategory'])->where('status', 0)->get();
         }
         return setPageContent("stock.list-stock-disabled",$data);
     }

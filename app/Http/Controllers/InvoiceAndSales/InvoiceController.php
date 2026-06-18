@@ -53,7 +53,12 @@ class InvoiceController extends Controller
         $data['settings'] =  $this->settings;
         $data['active_price_categories'] = [];
         if ($this->settings->store()->allow_dynamic_pricing ?? false) {
-            $data['active_price_categories'] = \App\Models\PriceCategory::where('status', 1)->get();
+            $user = auth()->user();
+            if ($user && $user->price_categories()->exists()) {
+                $data['active_price_categories'] = $user->price_categories()->where('status', 1)->get();
+            } else {
+                $data['active_price_categories'] = [];
+            }
         }
         $data['invoice_number'] = "";
         if(config('app.generate_invoice_number')) {
@@ -298,7 +303,12 @@ class InvoiceController extends Controller
         $data['settings'] =  $this->settings;
         $data['active_price_categories'] = [];
         if ($this->settings->store()->allow_dynamic_pricing ?? false) {
-            $data['active_price_categories'] = \App\Models\PriceCategory::where('status', 1)->get();
+            $user = auth()->user();
+            if ($user && $user->price_categories()->exists()) {
+                $data['active_price_categories'] = $user->price_categories()->where('status', 1)->get();
+            } else {
+                $data['active_price_categories'] = [];
+            }
         }
         return view('invoice.update-invoice',$data);
     }

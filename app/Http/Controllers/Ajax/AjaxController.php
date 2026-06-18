@@ -35,11 +35,16 @@ class AjaxController extends Controller
 
         $query =  explode(' ', $query);
 
+        $user = auth()->user();
+        $assignedCategoryIds = $user ? $user->price_categories()->pluck('price_categories.id')->toArray() : [];
+
         $available = Stockbatch::select(
             'stock_id',
             'stock_id as id',
             'stocks.name as text',
-        )->join('stocks', 'stocks.id','=','stockbatches.stock_id')->with(['stock.stockPrices'])->where(function($query) use (&$warehouses){
+        )->join('stocks', 'stocks.id','=','stockbatches.stock_id')->with(['stock.stockPrices' => function($q) use ($assignedCategoryIds) {
+            $q->whereIn('price_category_id', $assignedCategoryIds);
+        }])->where(function($query) use (&$warehouses){
             $query->orWhere(getActiveStore()->packed_column,'>',0);
             $query->orWhere(getActiveStore()->yard_column,'>',0);
         })->whereHas('stock',function($q) use (&$query){
@@ -254,6 +259,28 @@ class AjaxController extends Controller
         $invoice->update();
 
         return response()->json(['status'=>true]);
+    }
+
+    public function update_price_category_price(Request $request)
+    {
+        if (!userCanView('stock.edit')) {
+            return response()->json(['status' => false, 'message' => 'Unauthorized action. You do not have permission to edit stock prices.']);
+        }
+
+        $stockId = $request->get('stock_id');
+        $categoryId = $request->get('price_category_id');
+        $price = $request->get('price');
+
+        if (!$stockId || !$categoryId) {
+            return response()->json(['status' => false, 'message' => 'Missing required data']);
+        }
+
+        \App\Models\StockPrice::updateOrCreate(
+            ['stock_id' => $stockId, 'price_category_id' => $categoryId],
+            ['price' => $price]
+        );
+
+        return response()->json(['status' => true, 'message' => 'Price updated successfully']);
     }
 
 }

@@ -23,4 +23,9 @@ class PriceCategory extends Model
     {
         return $this->hasMany(StockPrice::class, 'price_category_id');
     }
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'user_price_category_mappers', 'price_category_id', 'user_id')->withTimestamps();
+    }
 }

@@ -296,21 +296,7 @@
 
                                         </div>
                                     </div>
-                                    @if(!empty($active_price_categories) && count($active_price_categories) > 0)
-                                    <div class="row">
-                                        <div class="col-sm-12">
-                                            <div class="form-group">
-                                                <label for="price_category_id">Default Price Category</label>
-                                                <select class="form-control" name="price_category_id" id="price_category_id">
-                                                    <option value="">Default (Standard Price)</option>
-                                                    @foreach($active_price_categories as $price_category)
-                                                        <option value="{{ $price_category->id }}" {{ $invoice->price_category_id == $price_category->id ? "selected" : "" }}>{{ $price_category->name }} ({{ ucfirst($price_category->price_type) }})</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    @endif
+                                    <input type="hidden" name="price_category_id" id="price_category_id" value="{{ $invoice->price_category_id }}">
                                     <div class="row">
                                         <div class="col-sm-6">
                                             <img id="imageThumb" src="{{ asset('assets/products.jpg') }}" class="img-thumbnail">

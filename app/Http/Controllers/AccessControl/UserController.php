@@ -17,9 +17,9 @@ class UserController extends Controller
     public function index()
     {
         if(auth()->user()->group_id == 1) {
-            $users = User::all();
+            $users = User::with(['price_categories', 'userstoremappers'])->get();
         }else{
-            $users = User::where('group_id', '>', 1)->get();
+            $users = User::with(['price_categories', 'userstoremappers'])->where('group_id', '>', 1)->get();
         }
         $data['title'] = "System Users";
         $data['users'] = $users;
@@ -34,6 +34,14 @@ class UserController extends Controller
         $data['user'] = new User();
         $data['stores'] = Warehousestore::where('status', 1)->get();
         $data['mystores'] = \request()->user()->userstoremappers->pluck('warehousestore_id')->toArray();
+        
+        $settings = app(\App\Classes\Settings::class);
+        $data['active_price_categories'] = [];
+        if ($settings->store()->allow_dynamic_pricing ?? false) {
+            $data['active_price_categories'] = \App\Models\PriceCategory::where('status', 1)->get();
+        }
+        $data['my_price_categories'] = [];
+
         return view('user.add-user', $data);
     }
 
@@ -68,10 +76,11 @@ class UserController extends Controller
 
         DB::transaction(function () use ($data, $userdata, &$res, &$request){
             $new_user = new User();
-            unset($userdata['store'],$userdata['undefined']);
+            unset($userdata['store'],$userdata['undefined'],$userdata['price_categories']);
 
             $new_user = $new_user->updateOrCreate($userdata);
 
+            $id = $new_user->id;
             $userStore = $request->get('store', []);
 
             $userStore = collect($userStore)->map(function($store) use(&$id){
@@ -85,6 +94,12 @@ class UserController extends Controller
 
             $new_user->userstoremappers()->createMany($userStore);
 
+            $priceCategories = $request->get('price_categories', []);
+            $new_user->price_categories()->sync($priceCategories);
+
+            $res['status'] = true;
+            $res['msgtype'] = 'success';
+            $res['msg'] = "User created successfully";
         });
 
         if ($request->ajax()) {
@@ -98,12 +113,20 @@ class UserController extends Controller
 
     public function edit($id)
     {
-        $user = User::with(['userstoremappers'])->findorfail($id);
+        $user = User::with(['userstoremappers', 'price_categories'])->findorfail($id);
         $data['title'] = "Edit System User";
         $data['groups'] = Group::where('status', '1')->get(['id', 'name']);
         $data['user'] = $user;
         $data['stores'] = Warehousestore::where('status', 1)->get();
         $data['mystores'] = $user->userstoremappers->pluck('warehousestore_id')->toArray();
+        
+        $settings = app(\App\Classes\Settings::class);
+        $data['active_price_categories'] = [];
+        if ($settings->store()->allow_dynamic_pricing ?? false) {
+            $data['active_price_categories'] = \App\Models\PriceCategory::where('status', 1)->get();
+        }
+        $data['my_price_categories'] = $user->price_categories->pluck('id')->toArray();
+
         return view('user.add-user', $data);
     }
 
@@ -134,7 +157,7 @@ class UserController extends Controller
 
         $userStore = $request->get('store', []);
 
-        unset($userdata['store']);
+        unset($userdata['store'], $userdata['price_categories']);
 
         if(empty($request->password)){
             unset($userdata['password']);
@@ -143,9 +166,8 @@ class UserController extends Controller
         }
 
 
-        DB::transaction(function () use ($data, $id,$userdata, &$res, &$userStore) {
+        DB::transaction(function () use ($data, $id,$userdata, &$res, &$userStore, &$request) {
             $new_user = User::find($id);
-            unset($userdata['store']);
             $new_user->update($userdata);
 
             $userStore = collect($userStore)->map(function($store) use(&$id){
@@ -158,6 +180,13 @@ class UserController extends Controller
             $new_user->userstoremappers()->delete();
 
             $new_user->userstoremappers()->createMany($userStore);
+
+            $priceCategories = $request->get('price_categories', []);
+            $new_user->price_categories()->sync($priceCategories);
+
+            $res['status'] = true;
+            $res['msgtype'] = 'success';
+            $res['msg'] = "User updated successfully";
         });
 
         if ($request->ajax()) {

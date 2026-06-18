@@ -56,6 +56,20 @@
 
                                                 </div>
 
+                                                @if(!empty($active_price_categories) && count($active_price_categories) > 0)
+                                                <div class="form-group">
+                                                    <label class="col-md-3 col-xs-12 control-label">Price Category Assignment:</label>
+                                                    <div class="col-md-9 col-xs-12">
+                                                        <select class="form-control select-store" name="price_categories[]" multiple>
+                                                            @foreach($active_price_categories as $price_category)
+                                                                <option {{ in_array($price_category->id, $my_price_categories ?? []) ? 'selected' : '' }} value="{{ $price_category->id }}">{{ $price_category->name }} ({{ ucfirst($price_category->price_type) }})</option>
+                                                            @endforeach
+                                                        </select>
+                                                        <br/>  <br/>
+                                                    </div>
+                                                </div>
+                                                @endif
+
                                                 <div class="form-group">
                                                     <label class="col-md-3 col-xs-12 control-label">Username<span class="star">*</span>:</label>
                                                     <div class="col-md-9 col-xs-12">

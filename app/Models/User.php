@@ -212,6 +212,11 @@ class User extends Authenticatable
         return $this->hasMany(Userstoremapper::class);
     }
 
+    public function price_categories()
+    {
+        return $this->belongsToMany(PriceCategory::class, 'user_price_category_mappers', 'user_id', 'price_category_id')->withTimestamps();
+    }
+
     public function activeuserstoremappers()
     {
         return $this->hasMany(Userstoremapper::class)->whereHas('warehousestore', function ($query) {
@@ -235,6 +240,13 @@ class User extends Authenticatable
                 'name' => $store->warehousestore->name
             ];
         })->pluck('name')->toArray();
+    }
+
+    public function getPriceCategoriesList()
+    {
+        if($this->price_categories->count() == 0) return [];
+
+        return $this->price_categories->pluck('name')->toArray();
     }
 
 }

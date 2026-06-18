@@ -60,12 +60,23 @@
 <script    src="{{ asset('bower_components/jquery/dist/jquery.min.js') }}"></script>
 <script   src="{{ asset('bower_components/jquery/dist/jquery-ui.min.js') }}"></script>
 <script    src="{{ asset('bower_components/bootstrap/dist/js/bootstrap.min.js') }}"></script>
+<script>window.bootstrapJQuery = window.jQuery;</script>
 <script    src="{{ asset('bower_components/jquery.nicescroll/dist/jquery.nicescroll.min.js') }}"></script>
 <script    src="{{ asset('bower_components/autosize/dist/autosize.min.js') }}"></script>
 <script    src="{{ asset('assets/js/bootstrap-submenu/js/bootstrap-submenu.js') }}"></script>
 <script    src="{{ asset('assets/js/bootstrap-hover-dropdown.js') }}"></script>
 
 @stack('js')
+
+<script>
+    if (window.bootstrapJQuery && window.jQuery && window.jQuery !== window.bootstrapJQuery) {
+        for (var prop in window.bootstrapJQuery.fn) {
+            if (window.bootstrapJQuery.fn.hasOwnProperty(prop) && !window.jQuery.fn[prop]) {
+                window.jQuery.fn[prop] = window.bootstrapJQuery.fn[prop];
+            }
+        }
+    }
+</script>
 
 <!-- Common Script   -->
 <script    src="{{ asset('dist/js/main.js') }}"></script>

@@ -46,6 +46,7 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
         Route::get('/findimage', ['as' => 'findimage', 'uses' => 'AjaxController@findimage']);
         Route::get('/findpurchaseorderstock', ['as' => 'findpurchaseorderstock', 'uses' => 'AjaxController@findpurchaseorderstock']);
         Route::get('/processScaninvoice', ['as' => 'processScaninvoice', 'uses' => 'AjaxController@processScaninvoice']);
+        Route::post('/update_price_category_price', ['as' => 'update_price_category_price', 'uses' => 'AjaxController@update_price_category_price']);
     });
 
     Route::middleware(['permit.task'])->group(function () {
