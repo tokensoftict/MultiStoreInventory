@@ -51,6 +51,10 @@ class InvoiceController extends Controller
         $data['payments'] = PaymentMethod::all();
         $data['banks'] = BankAccount::where('status',1)->get();
         $data['settings'] =  $this->settings;
+        $data['active_price_categories'] = [];
+        if ($this->settings->store()->allow_dynamic_pricing ?? false) {
+            $data['active_price_categories'] = \App\Models\PriceCategory::where('status', 1)->get();
+        }
         $data['invoice_number'] = "";
         if(config('app.generate_invoice_number')) {
             $data['invoice_number'] = generateRandomString(10);
@@ -122,6 +126,13 @@ class InvoiceController extends Controller
             $creditStatus = Payment::validateCreditLimit(['payment_info' => $request->get('payment'), "type" => "Invoice"], $reports);
 
             if ($creditStatus === true) {
+                // Restore the stock batches back to their original state before returning the error response
+                foreach ($invoice->invoice_item_batches()->get() as $invoice_batch) {
+                    $batch = $invoice_batch->stockbatch;
+                    $batch->{$invoice_batch->store} -= $invoice_batch->quantity;
+                    $batch->update();
+                }
+
                 return response()->json(['status' => false, 'error' => "Customer has reached the credit limit, transaction can not continue"]);
             }
         }
@@ -285,6 +296,10 @@ class InvoiceController extends Controller
         $data['invoice'] = Invoice::with(['created_by','customer','invoice_items','payment'])->findorfail($id);
         $data['banks'] = BankAccount::where('status',1)->get();
         $data['settings'] =  $this->settings;
+        $data['active_price_categories'] = [];
+        if ($this->settings->store()->allow_dynamic_pricing ?? false) {
+            $data['active_price_categories'] = \App\Models\PriceCategory::where('status', 1)->get();
+        }
         return view('invoice.update-invoice',$data);
     }
 

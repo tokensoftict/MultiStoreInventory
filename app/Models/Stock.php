@@ -221,6 +221,11 @@ class Stock extends Model
         return $this->hasMany(PurchaseOrderItem::class);
     }
 
+    public function stockPrices()
+    {
+        return $this->hasMany(StockPrice::class, 'stock_id');
+    }
+
     public function getCustomPackedStockQuantity($store_id)
     {
         if(!$this->stockBatches()->exists()) return 0;

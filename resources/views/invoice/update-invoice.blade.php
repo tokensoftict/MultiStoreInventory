@@ -159,6 +159,9 @@
                                             <th style="width: 35%;">Name</th>
                                             <th>Quantity</th>
                                             <th style="width: 15%;">Type</th>
+                                            @if(!empty($active_price_categories) && count($active_price_categories) > 0)
+                                            <th style="width: 15%;">Price Category</th>
+                                            @endif
                                             <th>Price</th>
                                             <th>Total</th>
                                             <th>Action</th>
@@ -166,35 +169,45 @@
                                         </thead>
                                         <tbody id="appender">
                                         @foreach($invoice->invoice_items as $items)
-                                            <tr style="cursor: pointer" id="product_{{  $items->stock->id }}">
-                                                <th  class="text-center"><input data-image="{{ $items->stock->image }}" name="picture" class="picture" value="1" type="radio"></th>
-                                                <th>{{ $items->stock->name }}<div id="error_{{ $items->stock->id }}" class="errors alert alert-danger" style="display:none;"></div></th>
-                                                <td><div class="col-md-4"><div class="input-group"> <span class="input-group-btn input-group-sm"> <button  data-field="quant[1]" type="button" class="btn btn-danger btn-number minus" data-type="minus"> <i class="fa fa-minus"></i></button></span><input class="form-control text-center input-number" data-invoice-item-id="{{ $items->id }}"  data-id="{{ $items->stock->id }}" data-cost-price="{{  $items->cost_price }}" data-price="{{ $items->selling_price }}" style="width:100px;display: block;" required="" max="{{ $items->store == "quantity" ? $items->stock->available_quantity + $items->quantity  :  $items->stock->available_yard_quantity+ $items->quantity }}" min="1" type="number" value="{{ $items->quantity }}"> <span class="input-group-btn"> <button type="button" class="btn btn-primary btn-number plus" data-type="plus"><i class="fa fa-plus"></i> </button> </span></div></div>
-                                                <td>
-                                                    <select class="form-control product_type {{ $items->stock->type }}">
-                                                        @if($items->stock->type == "PACKED")
-                                                            @if($items->store == getActiveStore()->packed_column)
-                                                                <option value="{{ getActiveStore()->packed_column }}" {{ $items->store == getActiveStore()->packed_column ? "selected" : "" }} data-cost-price="{{  $items->stock->cost_price }}" data-price="{{ $items->stock->selling_price }}" data-av-qty="{{ $items->stock->available_quantity+ $items->quantity }}">Packed</option>
-                                                                <option value="{{ getActiveStore()->yard_column }}" {{ $items->store == getActiveStore()->yard_column ? "selected" : "" }} data-cost-price="{{  $items->stock->yard_cost_price }}" data-price="{{ $items->stock->yard_selling_price }}" data-av-qty="{{ $items->stock->available_yard_quantity }}">Pieces / Yards</option>
-                                                            @else
-                                                                <option value="{{ getActiveStore()->packed_column }}" data-cost-price="{{  $items->stock->cost_price }}" data-price="{{ $items->stock->selling_price }}" data-av-qty="{{ $items->stock->available_quantity }}">Packed</option>
-                                                                <option value="{{ getActiveStore()->yard_column }}" data-cost-price="{{  $items->stock->yard_cost_price }}" selected data-price="{{ $items->stock->yard_selling_price }}" data-av-qty="{{ $items->stock->available_yard_quantity+ $items->quantity }}">Pieces / Yards</option>
-                                                            @endif
-                                                        @else
-                                                            <option value="{{ getActiveStore()->packed_column }}" {{ $items->store == getActiveStore()->packed_column ? "selected" : "" }} data-cost-price="{{  $items->stock->cost_price }}" data-price="{{ $items->stock->selling_price }}" data-av-qty="{{ $items->stock->available_quantity+ $items->quantity }}">Packed</option>
-                                                        @endif
-                                                    </select>
-                                                </td>
-                                                <th class="text-right item_price">
-                                                    @if($settings['allow_edit_price'] == "Yes")
-                                                        <input type="text" step="0.00000001" class="item_text_price form-control"  value="{{ $items->selling_price }}">
-                                                    @else
-                                                        <span type="text" step="0.00000001" class="item_text_price form-control"  value="{{ $items->selling_price }}">{{ money($items->selling_price) }}</span>
-                                                    @endif
-                                                </th>
-                                                <th class="text-right item_total">{{ number_format($items->total_selling_price,2) }}</th>
-                                                <td class="text-right"> <a href="#" onclick="return removeItem(this);" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i></a></td>
-                                            </tr>
+                                             <tr style="cursor: pointer" id="product_{{  $items->stock->id }}">
+                                                 <th  class="text-center"><input data-image="{{ $items->stock->image }}" name="picture" class="picture" value="1" type="radio"></th>
+                                                 <th>{{ $items->stock->name }}<div id="error_{{ $items->stock->id }}" class="errors alert alert-danger" style="display:none;"></div></th>
+                                                 <td><div class="col-md-4"><div class="input-group"> <span class="input-group-btn input-group-sm"> <button  data-field="quant[1]" type="button" class="btn btn-danger btn-number minus" data-type="minus"> <i class="fa fa-minus"></i></button></span><input class="form-control text-center input-number" data-invoice-item-id="{{ $items->id }}"  data-id="{{ $items->stock->id }}" data-packed-price="{{ $items->stock->selling_price }}" data-yard-price="{{ $items->stock->yard_selling_price }}" data-stock-prices="{{ json_encode($items->stock->stockPrices) }}" data-cost-price="{{  $items->cost_price }}" data-price="{{ $items->selling_price }}" style="width:100px;display: block;" required="" max="{{ $items->store == "quantity" ? $items->stock->available_quantity + $items->quantity  :  $items->stock->available_yard_quantity+ $items->quantity }}" min="1" type="number" value="{{ $items->quantity }}"> <span class="input-group-btn"> <button type="button" class="btn btn-primary btn-number plus" data-type="plus"><i class="fa fa-plus"></i> </button> </span></div></div>
+                                                 <td>
+                                                     <select class="form-control product_type {{ $items->stock->type }}">
+                                                         @if($items->stock->type == "PACKED")
+                                                             @if($items->store == getActiveStore()->packed_column)
+                                                                 <option value="{{ getActiveStore()->packed_column }}" {{ $items->store == getActiveStore()->packed_column ? "selected" : "" }} data-cost-price="{{  $items->stock->cost_price }}" data-price="{{ $items->stock->selling_price }}" data-av-qty="{{ $items->stock->available_quantity+ $items->quantity }}">Packed</option>
+                                                                 <option value="{{ getActiveStore()->yard_column }}" {{ $items->store == getActiveStore()->yard_column ? "selected" : "" }} data-cost-price="{{  $items->stock->yard_cost_price }}" data-price="{{ $items->stock->yard_selling_price }}" data-av-qty="{{ $items->stock->available_yard_quantity }}">Pieces / Yards</option>
+                                                             @else
+                                                                 <option value="{{ getActiveStore()->packed_column }}" data-cost-price="{{  $items->stock->cost_price }}" data-price="{{ $items->stock->selling_price }}" data-av-qty="{{ $items->stock->available_quantity }}">Packed</option>
+                                                                 <option value="{{ getActiveStore()->yard_column }}" data-cost-price="{{  $items->stock->yard_cost_price }}" selected data-price="{{ $items->stock->yard_selling_price }}" data-av-qty="{{ $items->stock->available_yard_quantity+ $items->quantity }}">Pieces / Yards</option>
+                                                             @endif
+                                                         @else
+                                                             <option value="{{ getActiveStore()->packed_column }}" {{ $items->store == getActiveStore()->packed_column ? "selected" : "" }} data-cost-price="{{  $items->stock->cost_price }}" data-price="{{ $items->stock->selling_price }}" data-av-qty="{{ $items->stock->available_quantity+ $items->quantity }}">Packed</option>
+                                                         @endif
+                                                     </select>
+                                                 </td>
+                                                 @if(!empty($active_price_categories) && count($active_price_categories) > 0)
+                                                 <td>
+                                                     <select class="form-control item_price_category">
+                                                         <option value="default">Default</option>
+                                                         @foreach($active_price_categories as $pc)
+                                                             <option value="{{ $pc->id }}" {{ $items->price_category_id == $pc->id ? "selected" : "" }}>{{ $pc->name }}</option>
+                                                         @endforeach
+                                                     </select>
+                                                 </td>
+                                                 @endif
+                                                 <th class="text-right item_price">
+                                                     @if($settings['allow_edit_price'] == "Yes")
+                                                          <input type="text" step="0.00000001" class="item_text_price form-control"  value="{{ number_format($items->selling_price, 2) }}">
+                                                     @else
+                                                         <span type="text" step="0.00000001" class="item_text_price form-control"  value="{{ $items->selling_price }}">{{ money($items->selling_price) }}</span>
+                                                     @endif
+                                                 </th>
+                                                 <th class="text-right item_total">{{ number_format($items->total_selling_price,2) }}</th>
+                                                 <td class="text-right"> <a href="#" onclick="return removeItem(this);" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i></a></td>
+                                             </tr>
                                         @endforeach
                                         </tbody>
                                         <tfoot>
@@ -203,6 +216,9 @@
                                             <th class="text-left"></th>
                                             <th class="text-left"></th>
                                             <th class="text-center"></th>
+                                            @if(!empty($active_price_categories) && count($active_price_categories) > 0)
+                                            <th class="text-left"></th>
+                                            @endif
                                             <th class="text-right" colspan="2">Sub Total</th>
                                             <th class="text-right"  colspan="2" id="sub_total">{{ number_format($invoice->sub_total,2) }}</th>
                                             <th class="text-right"></th>
@@ -212,6 +228,9 @@
                                             <th class="text-left"></th>
                                             <th class="text-center" ></th>
                                             <th class="text-center" ></th>
+                                            @if(!empty($active_price_categories) && count($active_price_categories) > 0)
+                                            <th class="text-left"></th>
+                                            @endif
                                             <th class="text-right" colspan="2">Total</th>
                                             <th class="text-right total_invoice" colspan="2" style="font-size: 15px;">{{ number_format($invoice->sub_total,2) }}</th>
                                             <th class="text-right"></th>
@@ -277,6 +296,21 @@
 
                                         </div>
                                     </div>
+                                    @if(!empty($active_price_categories) && count($active_price_categories) > 0)
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <div class="form-group">
+                                                <label for="price_category_id">Default Price Category</label>
+                                                <select class="form-control" name="price_category_id" id="price_category_id">
+                                                    <option value="">Default (Standard Price)</option>
+                                                    @foreach($active_price_categories as $price_category)
+                                                        <option value="{{ $price_category->id }}" {{ $invoice->price_category_id == $price_category->id ? "selected" : "" }}>{{ $price_category->name }} ({{ ucfirst($price_category->price_type) }})</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @endif
                                     <div class="row">
                                         <div class="col-sm-6">
                                             <img id="imageThumb" src="{{ asset('assets/products.jpg') }}" class="img-thumbnail">
@@ -397,19 +431,80 @@
         }
 
         function appendToTable(data){
-            // if(!document.getElementById('product_'+data.stock.id)) {
-            $('#appender').prepend(cartTemplate(data));
-            $('.picture').prop('checked',false);
-            $('#'+'product_'+data.stock.id).find('.picture').prop('checked', true);
-            $('#imageThumb').attr('src', $('#'+'product_'+data.stock.id).find('.picture').attr('data-image'));
-            bindIncrement();
-            bindAllTr();
-            bindproductType();
-            calculateTotal();
-            // }else{
-            //     alert(data.stock.name+' already exist in cart')
-            // }
+            let defaultType = "{{ getActiveStore()->packed_column }}";
+            if(data.stock.type != "Normal" && parseInt(data.stock.available_quantity) == 0 && parseInt(data.stock.available_yard_quantity) > 0){
+                defaultType = "{{ getActiveStore()->yard_column }}";
+            }
 
+            // Check if there is already a row for this product with the defaultType
+            var existingInput = $('#appender').find('.input-number[data-id="' + data.stock.id + '"]').filter(function() {
+                return $(this).closest('tr').find('.product_type').val() === defaultType;
+            });
+
+            if (existingInput.length > 0) {
+                var currentVal = parseInt(existingInput.val());
+                var maxVal = parseInt(existingInput.attr('max'));
+                if (currentVal < maxVal) {
+                    existingInput.val(currentVal + 1).change();
+                } else {
+                    alert('Not enough quantity to add more of ' + data.stock.name);
+                }
+            } else {
+                $('#appender').prepend(cartTemplate(data));
+                $('.picture').prop('checked',false);
+                var trId = 'product_' + data.stock.id + '_' + defaultType;
+                $('#appender').find('tr').first().attr('id', trId);
+                $('#'+trId).find('.picture').prop('checked', true);
+                $('#imageThumb').attr('src', $('#'+trId).find('.picture').attr('data-image'));
+                bindIncrement();
+                bindAllTr();
+                bindproductType();
+                calculateTotal();
+            }
+        }
+
+
+        function updateRowPrice(tr) {
+            let input = tr.find('.input-number');
+            let productType = tr.find('.product_type').val(); // packed_column or yard_column
+            let headerCategory = $('#price_category_id').val();
+            let itemCategory = tr.find('.item_price_category').val();
+            let selectedCategoryId = itemCategory === 'default' ? headerCategory : itemCategory;
+            
+            let price = 0;
+            let found = false;
+            
+            if (selectedCategoryId) {
+                let stockPrices = [];
+                try {
+                    stockPrices = JSON.parse(input.attr('data-stock-prices') || '[]');
+                } catch(e) {}
+                
+                let matched = stockPrices.find(function(sp) {
+                    return sp.price_category_id == selectedCategoryId;
+                });
+                
+                if (matched) {
+                    price = parseFloat(matched.price);
+                    found = true;
+                }
+            }
+            
+            if (!found) {
+                if (productType === "{{ getActiveStore()->yard_column }}") {
+                    price = parseFloat(input.attr('data-yard-price') || 0);
+                } else {
+                    price = parseFloat(input.attr('data-packed-price') || 0);
+                }
+            }
+            
+            input.attr('data-price', price);
+            let td_price = tr.find('.item_price');
+            @if($settings['allow_edit_price'] == "Yes")
+                td_price.html('<input type="text" step="0.00000001" class="item_text_price form-control" value="'+formatMoney(price)+'"/>');
+            @else
+                td_price.html('<span class="item_text_price form-control" value="'+price+'">'+formatMoney(price)+'</span>');
+            @endif
         }
 
 
@@ -418,11 +513,48 @@
             $('.product_type').on('change',function(){
                 const price = $(this).parent().parent().find('.input-number');
                 const td_price = $(this).parent().parent().find('.item_price');
+                const newType = $(this).val();
+                const stockId = price.attr('data-id');
+                const tr = $(this).closest('tr');
+
+                // Check if another row with same stockId and newType exists
+                var duplicateInput = $('#appender').find('.input-number[data-id="' + stockId + '"]').filter(function() {
+                    return $(this).closest('tr')[0] !== tr[0] && $(this).closest('tr').find('.product_type').val() === newType;
+                });
+
+                if (duplicateInput.length > 0) {
+                    // Merge quantities
+                    var currentVal = parseInt(price.val());
+                    var duplicateVal = parseInt(duplicateInput.val());
+                    var duplicateMax = parseInt(duplicateInput.attr('max'));
+                    if (duplicateVal + currentVal <= duplicateMax) {
+                        duplicateInput.val(duplicateVal + currentVal).change();
+                        tr.remove();
+                        calculateTotal();
+                        return;
+                    } else {
+                        alert('Merging would exceed the available stock limit for this type. Cannot change type.');
+                        // revert dropdown selection
+                        $(this).val(newType === "{{ getActiveStore()->packed_column }}" ? "{{ getActiveStore()->yard_column }}" : "{{ getActiveStore()->packed_column }}");
+                        return;
+                    }
+                }
+
                 price.attr('max',$('option:selected', this).attr('data-av-qty'));
-                price.attr('data-price',$('option:selected', this).attr('data-price'));
                 price.attr('data-cost-price',$('option:selected', this).attr('data-cost-price'));
-                td_price.html('<input type="text" step="0.00000001" class="item_text_price form-control" value="'+parseFloat($('option:selected', this).attr('data-price')).toFixed(1)+'"/>')
+                updateRowPrice(tr);
+                tr.attr('id', 'product_' + stockId + '_' + newType);
+
                 bindproductType();
+                bindIncrement();
+                calculateTotal();
+            });
+
+            $('.item_price_category').off('change');
+            $('.item_price_category').on('change', function() {
+                let tr = $(this).closest('tr');
+                updateRowPrice(tr);
+                calculateTotal();
             });
         }
 
@@ -432,8 +564,18 @@
             $('.item_text_price').off('keyup');
             $('.item_text_price').on('keyup',function(){
                 const textb = $(this).parent().parent().find('.input-number');
-                textb.attr('data-price',$(this).val());
+                let val = $(this).val().replace(/,/g, '');
+                textb.attr('data-price', val);
                 calculateTotal();
+            });
+
+            $('.item_text_price').off('blur');
+            $('.item_text_price').on('blur', function(){
+                let val = $(this).val().replace(/,/g, '');
+                if(isNaN(val) || val === '') {
+                    val = 0;
+                }
+                $(this).val(formatMoney(val));
             });
             $('.btn-number').off("click");
             $('.btn-number').click(function(e){
@@ -518,6 +660,11 @@
             let error_status = false;
             $('.input-number').each(function(index, elem){
                 const type = $(this).parent().parent().parent().parent().find('.product_type');
+                const tr = $(this).closest('tr');
+                const headerCategory = $('#price_category_id').val();
+                const itemCategory = tr.find('.item_price_category').val();
+                const selectedCategory = itemCategory === 'default' ? headerCategory : itemCategory;
+
                 product.push(
                     {
                         id: $(this).attr('data-id'),
@@ -525,7 +672,8 @@
                         type: type.val(),
                         price : $(this).attr('data-price'),
                         invoice_item_id : $(this).attr('data-invoice-item-id'),
-                        cost_price : $(this).attr('data-cost-price')
+                        cost_price : $(this).attr('data-cost-price'),
+                        price_category_id : selectedCategory || null
                     }
                 );
                 if(parseInt($(elem).val()) > parseInt($(elem).attr('max'))){
@@ -582,10 +730,31 @@
                 data.stock.selling_price = data.stock.yard_selling_price
             }
 
+            let price_category_select = "";
+            @if(!empty($active_price_categories) && count($active_price_categories) > 0)
+                price_category_select += '<td><select class="form-control item_price_category">';
+                price_category_select += '<option value="default">Default</option>';
+                @foreach($active_price_categories as $pc)
+                    price_category_select += '<option value="{{ $pc->id }}" data-price-type="{{ $pc->price_type }}">{{ $pc->name }}</option>';
+                @endforeach
+                price_category_select += '</select></td>';
+            @endif
+
+            let currentPrice = data.stock.selling_price;
+            let headerCategory = $('#price_category_id').val();
+            if (headerCategory) {
+                let matched = (data.stock.stock_prices || []).find(function(sp) {
+                    return sp.price_category_id == headerCategory;
+                });
+                if (matched) {
+                    currentPrice = matched.price;
+                }
+            }
+
             @if($settings['allow_edit_price'] == "Yes")
-                    {!! 'return `<tr style="cursor: pointer" id="product_`+data.stock.id+`"><th  class="text-center"><input data-image="`+data.stock.image+`" name="picture" class="picture" value="1" type="radio"></th><th>`+data.stock.name+`<div id="error_`+data.stock.id+`" class="errors alert alert-danger" `+(data[`error`] ? `` : `style="display:none;"`)+`>`+(data[`error`] ? data[`error`] : ``)+`</div>`+`</th><td><div class="col-md-4"><div class="input-group"> <span class="input-group-btn input-group-sm"> <button  data-field="quant[1]" type="button" class="btn btn-danger btn-number minus" data-type="minus"> <i class="fa fa-minus"></i></button></span><input class="form-control text-center input-number"  data-id="`+data.stock.id+`" data-price="`+data.stock.selling_price+`" data-cost-price="`+data.stock.cost_price+`" style="width:100px;display: block;" required="" max="`+data.stock.available_quantity+`" min="1" type="number" value="1"> <span class="input-group-btn"> <button type="button" class="btn btn-primary btn-number plus" data-type="plus"><i class="fa fa-plus"></i> </button> </span></div></div><td>`+type_select+`</td><th class="text-right item_price"><input type="text" step="0.00000001" class="item_text_price form-control" value="`+data.stock.selling_price+`"/></th><th class="text-right item_total">`+formatMoney(data.stock.selling_price)+`</th><td class="text-right"> <a href="#" onclick="return removeItem(this);" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i></a></td></tr>`;' !!}
+                    {!! 'return `<tr style="cursor: pointer" id="product_`+data.stock.id+`"><th  class="text-center"><input data-image="`+data.stock.image+`" name="picture" class="picture" value="1" type="radio"></th><th>`+data.stock.name+`<div id="error_`+data.stock.id+`" class="errors alert alert-danger" `+(data[`error`] ? `` : `style="display:none;"`)+`>`+(data[`error`] ? data[`error`] : ``)+`</div>`+`</th><td><div class="col-md-4"><div class="input-group"> <span class="input-group-btn input-group-sm"> <button  data-field="quant[1]" type="button" class="btn btn-danger btn-number minus" data-type="minus"> <i class="fa fa-minus"></i></button></span><input class="form-control text-center input-number"  data-id="`+data.stock.id+`" data-packed-price="`+data.stock.selling_price+`" data-yard-price="`+data.stock.yard_selling_price+`" data-stock-prices=\'`+JSON.stringify(data.stock.stock_prices || [])+`\' data-price="`+currentPrice+`" data-cost-price="`+data.stock.cost_price+`" style="width:100px;display: block;" required="" max="`+data.stock.available_quantity+`" min="1" type="number" value="1"> <span class="input-group-btn"> <button type="button" class="btn btn-primary btn-number plus" data-type="plus"><i class="fa fa-plus"></i> </button> </span></div></div><td>`+type_select+`</td>`+price_category_select+`<th class="text-right item_price"><input type="text" step="0.00000001" class="item_text_price form-control" value="`+formatMoney(currentPrice)+`"/></th><th class="text-right item_total">`+formatMoney(currentPrice)+`</th><td class="text-right"> <a href="#" onclick="return removeItem(this);" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i></a></td></tr>`;' !!}
                     @else
-                    {!! 'return `<tr style="cursor: pointer" id="product_`+data.stock.id+`"><th  class="text-center"><input data-image="`+data.stock.image+`" name="picture" class="picture" value="1" type="radio"></th><th>`+data.stock.name+`<div id="error_`+data.stock.id+`" class="errors alert alert-danger" `+(data[`error`] ? `` : `style="display:none;"`)+`>`+(data[`error`] ? data[`error`] : ``)+`</div>`+`</th><td><div class="col-md-4"><div class="input-group"> <span class="input-group-btn input-group-sm"> <button  data-field="quant[1]" type="button" class="btn btn-danger btn-number minus" data-type="minus"> <i class="fa fa-minus"></i></button></span><input class="form-control text-center input-number"  data-id="`+data.stock.id+`" data-price="`+data.stock.selling_price+`" data-cost-price="`+data.stock.cost_price+`" style="width:100px;display: block;" required="" max="`+data.stock.available_quantity+`" min="1" type="number" value="1"> <span class="input-group-btn"> <button type="button" class="btn btn-primary btn-number plus" data-type="plus"><i class="fa fa-plus"></i> </button> </span></div></div><td>`+type_select+`</td><th class="text-right item_price"><span class="item_text_price form-control" value="`+data.stock.selling_price+`">`+formatMoney(data.stock.selling_price)+`</span></th><th class="text-right item_total">`+formatMoney(data.stock.selling_price)+`</th><td class="text-right"> <a href="#" onclick="return removeItem(this);" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i></a></td></tr>`;' !!}
+                    {!! 'return `<tr style="cursor: pointer" id="product_`+data.stock.id+`"><th  class="text-center"><input data-image="`+data.stock.image+`" name="picture" class="picture" value="1" type="radio"></th><th>`+data.stock.name+`<div id="error_`+data.stock.id+`" class="errors alert alert-danger" `+(data[`error`] ? `` : `style="display:none;"`)+`>`+(data[`error`] ? data[`error`] : ``)+`</div>`+`</th><td><div class="col-md-4"><div class="input-group"> <span class="input-group-btn input-group-sm"> <button  data-field="quant[1]" type="button" class="btn btn-danger btn-number minus" data-type="minus"> <i class="fa fa-minus"></i></button></span><input class="form-control text-center input-number"  data-id="`+data.stock.id+`" data-packed-price="`+data.stock.selling_price+`" data-yard-price="`+data.stock.yard_selling_price+`" data-stock-prices=\'`+JSON.stringify(data.stock.stock_prices || [])+`\' data-price="`+currentPrice+`" data-cost-price="`+data.stock.cost_price+`" style="width:100px;display: block;" required="" max="`+data.stock.available_quantity+`" min="1" type="number" value="1"> <span class="input-group-btn"> <button type="button" class="btn btn-primary btn-number plus" data-type="plus"><i class="fa fa-plus"></i> </button> </span></div></div><td>`+type_select+`</td>`+price_category_select+`<th class="text-right item_price"><span class="item_text_price form-control" value="`+currentPrice+`">`+formatMoney(currentPrice)+`</span></th><th class="text-right item_total">`+formatMoney(currentPrice)+`</th><td class="text-right"> <a href="#" onclick="return removeItem(this);" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i></a></td></tr>`;' !!}
                     @endif
 
         }
@@ -640,7 +809,8 @@
                     'customer_id' :$('#customer_id').val(),
                     'date':$('#invoice_date').val(),
                     'invoice_paper_number' : $('#invoice_paper_number').val(),
-                    'payment' : payment_payment
+                    'payment' : payment_payment,
+                    'price_category_id': $('#price_category_id').val()
                 },
                 success: function(returnData){
                     hideMask();
@@ -832,6 +1002,13 @@
             bindAllTr();
             bindproductType();
             calculateTotal();
+
+            $('#price_category_id').on('change', function() {
+                $('#appender tr').each(function() {
+                    updateRowPrice($(this));
+                });
+                calculateTotal();
+            });
 
             $("#payment_method").on("change",function () {
                 if($(this).val() !=="") {

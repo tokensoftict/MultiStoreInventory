@@ -56,6 +56,13 @@
                                     <option value="1" {{ @$store->allow_store_to_share_the_same_customer == "1" ? "selected" : "" }}>Yes</option>
                                 </select>
                             </div>
+                            <div class="form-group">
+                                <label>Allow Dynamic Pricing Categories</label>
+                                <select class="form-control" name="allow_dynamic_pricing">
+                                    <option value="0" {{ @$store->allow_dynamic_pricing == "0" ? "selected" : "" }} >No</option>
+                                    <option value="1" {{ @$store->allow_dynamic_pricing == "1" ? "selected" : "" }}>Yes</option>
+                                </select>
+                            </div>
                             <!--
                             <div class="form-group">
                                 <label>Branch Name</label>

@@ -311,7 +311,7 @@ class Payment extends Model
 
             foreach($paymentInformation['payment_info']['split_method'] as $pmthod=>$amount)
             {
-                if(is_numeric($amount)) {
+                if(is_numeric($amount) && $pmthod != 4) {
                     $total_amount_paid += $amount;
                 }
             }

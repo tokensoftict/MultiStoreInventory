@@ -56,6 +56,12 @@ class StockController extends Controller
         $data['manufactures'] = Manufacturer::where('status',1)->get();
         $data['categories'] = ProductCategory::where('status',1)->get();
         $data['suppliers'] = Supplier::where('status',1)->get();
+        
+        $data['active_price_categories'] = [];
+        if ($this->settings->store()->allow_dynamic_pricing ?? false) {
+            $data['active_price_categories'] = \App\Models\PriceCategory::where('status', 1)->get();
+        }
+        $data['stock_prices'] = [];
         return view("stock.form",$data);
     }
 
@@ -63,27 +69,9 @@ class StockController extends Controller
 
         $validate = Stock::$validation;
 
-        /*
-        $file = $request->file('image');
-
-        if($file){
-            $validate['image'] = 'mimes:jpeg,jpg,png,gif|required|max:10000';
-        }
-        */
         $request->validate($validate);
 
         $stock_data = $request->only(Stock::$field);
-        /*
-        if ($file) {
-            $imageName = time().'.'. $request->image->getClientOriginalExtension();
-
-            $request->logo->move(public_path('img'), $imageName);
-
-            $stock_data['image'] = $imageName;
-
-        }
-        */
-        //validate image
 
         if(empty($stock_data['yard_selling_price'])){
             $stock_data['yard_selling_price'] = 0;
@@ -91,7 +79,6 @@ class StockController extends Controller
         if(empty($stock_data['yard_cost_price'])){
             $stock_data['yard_cost_price'] = 0;
         }
-
 
         DB::transaction(function() use ($stock_data, $request){
             $stock = Stock::create( $stock_data);
@@ -106,6 +93,27 @@ class StockController extends Controller
                 $batch[$store->packed_column] = $quantity;
                 $stock->stockbatches()->create($batch);
             }
+
+            // Save dynamic prices
+            if (($this->settings->store()->allow_dynamic_pricing ?? false) && $request->has('dynamic_prices')) {
+                foreach ($request->get('dynamic_prices') as $categoryId => $price) {
+                    if ($price !== null && $price !== '') {
+                        $stock->stockPrices()->create([
+                            'price_category_id' => $categoryId,
+                            'price' => $price
+                        ]);
+
+                        // Record history
+                        \App\Models\PriceCategoriesHistory::create([
+                            'price_category_id' => $categoryId,
+                            'stock_id' => $stock->id,
+                            'old_price' => null,
+                            'new_price' => $price,
+                            'updated_by' => auth()->id()
+                        ]);
+                    }
+                }
+            }
         });
 
         return redirect()->route('stock.create')->with('success','Stock has been created successful!');
@@ -117,44 +125,74 @@ class StockController extends Controller
     }
 
     public function edit($id){
-        $data['title'] = "New Stock";
-        $data['stock'] =  Stock::find($id);
+        $data['title'] = "Update Stock";
+        $stock = Stock::with('stockPrices')->findOrFail($id);
+        $data['stock'] =  $stock;
         $data['manufactures'] = Manufacturer::where('status',1)->get();
         $data['categories'] = ProductCategory::where('status',1)->get();
         $data['suppliers'] = Supplier::where('status',1)->get();
+
+        $data['active_price_categories'] = [];
+        if ($this->settings->store()->allow_dynamic_pricing ?? false) {
+            $data['active_price_categories'] = \App\Models\PriceCategory::where('status', 1)->get();
+        }
+        $data['stock_prices'] = $stock->stockPrices->pluck('price', 'price_category_id')->all();
+
         return setPageContent("stock.form",$data);
     }
 
     public function update(Request $request,$id){
 
-        $stock = Stock::findorfail($id);
+        $stock = Stock::findOrFail($id);
 
         $validate = Stock::$validation;
-    /*
-        $file = $request->file('image');
 
-        if($file){
-            $validate['image'] = 'mimes:jpeg,jpg,png,gif|required|max:10000';
-        }
-    */
         $request->validate($validate);
 
         $stock_data = $request->only(Stock::$field);
-    /*
-        if ($file) {
-            $imageName = time().'.'. $request->image->getClientOriginalExtension();
 
-            $request->logo->move(public_path('img'), $imageName);
-
-            $stock_data['image'] = $imageName;
-
-        }
-
-        if(!empty( $stock->image)) {
-            @unlink(public_path('img/' . $stock->image));
-        }
-*/
         $stock->update($stock_data);
+
+        // Update dynamic prices
+        if (($this->settings->store()->allow_dynamic_pricing ?? false) && $request->has('dynamic_prices')) {
+            foreach ($request->get('dynamic_prices') as $categoryId => $price) {
+                if ($price !== null && $price !== '') {
+                    $existing = $stock->stockPrices()->where('price_category_id', $categoryId)->first();
+                    $oldPrice = $existing ? $existing->price : null;
+
+                    if (!$existing || $existing->price != $price) {
+                        $stock->stockPrices()->updateOrCreate(
+                            ['price_category_id' => $categoryId],
+                            ['price' => $price]
+                        );
+
+                        // Record history
+                        \App\Models\PriceCategoriesHistory::create([
+                            'price_category_id' => $categoryId,
+                            'stock_id' => $stock->id,
+                            'old_price' => $oldPrice,
+                            'new_price' => $price,
+                            'updated_by' => auth()->id()
+                        ]);
+                    }
+                } else {
+                    $existing = $stock->stockPrices()->where('price_category_id', $categoryId)->first();
+                    if ($existing) {
+                        $oldPrice = $existing->price;
+                        $existing->delete();
+
+                        // Record history
+                        \App\Models\PriceCategoriesHistory::create([
+                            'price_category_id' => $categoryId,
+                            'stock_id' => $stock->id,
+                            'old_price' => $oldPrice,
+                            'new_price' => 0,
+                            'updated_by' => auth()->id()
+                        ]);
+                    }
+                }
+            }
+        }
 
         return redirect()->route('stock.available')->with('success','Stock has been updated successful!');
 

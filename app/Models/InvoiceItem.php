@@ -62,7 +62,8 @@ class InvoiceItem extends Model
 		'total_cost_price' => 'float',
 		'total_selling_price' => 'float',
 		'total_profit' => 'float',
-		'discount_amount' => 'float'
+		'discount_amount' => 'float',
+		'price_category_id' => 'int'
 	];
 
 	protected $dates = [
@@ -89,7 +90,8 @@ class InvoiceItem extends Model
 		'total_selling_price',
 		'total_profit',
 		'discount_type',
-		'discount_amount'
+		'discount_amount',
+		'price_category_id'
 	];
 
     public function warehousestore()
@@ -115,5 +117,10 @@ class InvoiceItem extends Model
 	public function invoice_item_batches()
 	{
 		return $this->hasMany(InvoiceItemBatch::class);
+	}
+
+	public function priceCategory()
+	{
+		return $this->belongsTo(PriceCategory::class, 'price_category_id');
 	}
 }

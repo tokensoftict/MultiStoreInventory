@@ -61,6 +61,7 @@ class Invoice extends Model
         'warehousestore_id' => 'int',
         'discount_amount' => 'float',
         'sub_total' => 'float',
+        'price_category_id' => 'int',
         'total_amount_paid' => 'float',
         'total_profit' => 'float',
         'total_cost' => 'float',
@@ -108,7 +109,8 @@ class Invoice extends Model
         'void_time',
         'scan_user_id',
         'scan_date',
-        'scan_time'
+        'scan_time',
+        'price_category_id'
     ];
 
     public function created_by()
@@ -180,6 +182,11 @@ class Invoice extends Model
         return $this->morphMany(PaymentMethodTable::class,'invoice');
     }
 
+    public function priceCategory()
+    {
+        return $this->belongsTo(PriceCategory::class, 'price_category_id');
+    }
+
 
     public static function updateInvoice($request, $reports, $invoice) {
         if($invoice!=false){
@@ -234,6 +241,7 @@ class Invoice extends Model
         $invoice->total_profit = $totals['total_invoice_total_profit'];
         $invoice->total_cost = $totals['total_invoice_total_cost'];
         $invoice->last_updated_by = auth()->id();
+        $invoice->price_category_id = $request->get('price_category_id');
 
         $invoice->update();
 
@@ -353,45 +361,49 @@ class Invoice extends Model
         $errors = [];
         $prods = [];
 
-        $product_ids =  array_column($products,'id');
-
         foreach ($products as $product){
-            $prods[$product['id']] = $product;
+            $key = $product['id'] . '-' . $product['type'];
+            $prods[$key] = $product;
         }
 
-        $stocks = Stock::whereIn('id',$product_ids)->get();
+        $product_ids =  array_column($products,'id');
+        $stocks = Stock::whereIn('id',$product_ids)->get()->keyBy('id');
 
-        foreach ($stocks as $stock){
-            $batches = $stock->getSaleableBatches($prods[$stock->id]['type'],$prods[$stock->id]['qty']);
+        foreach ($prods as $key => $prod){
+            if (!isset($stocks[$prod['id']])) {
+                continue;
+            }
+            $stock = $stocks[$prod['id']];
+            $batches = $stock->getSaleableBatches($prod['type'],$prod['qty']);
             if($batches == false){
                 $status = true;
-                $errors[$stock->id] = "Not enough quantity to process ".$stock->name;
+                $errors[$prod['id']] = "Not enough quantity to process ".$stock->name;
             }
-            $report[$stock->id]['batches'] =  $batches;
-            $report[$stock->id]['stock'] = $stock;
-            $report[$stock->id]['prods'] = $prods[$stock->id];
+            $report[$key]['batches'] =  $batches;
+            $report[$key]['stock'] = $stock;
+            $report[$key]['prods'] = $prod;
 
-            if($prods[$stock->id]['type'] === "yard_quantity"){
-                if(app(Settings::class)->get('allow_selling_below_cost_price') == "0" and (float)$stock->yard_cost_price >= (float)$prods[$stock->id]['price']){
+            if($prod['type'] === "yard_quantity"){
+                if(app(Settings::class)->get('allow_selling_below_cost_price') == "0" and (float)$stock->yard_cost_price >= (float)$prod['price']){
                     $status = true;
-                    $errors[$stock->id] = $stock->name."can not be sell under cost price ".number_format($stock->yard_cost_price,2 );
+                    $errors[$prod['id']] = $stock->name."can not be sell under cost price ".number_format($stock->yard_cost_price,2 );
                 }
             }
 
-            if(app(Settings::class)->get('allow_selling_below_cost_price') == "0" and $prods[$stock->id]['type'] === "quantity"){
-                if((float)$stock->cost_price >= (float)$prods[$stock->id]['price']){
+            if(app(Settings::class)->get('allow_selling_below_cost_price') == "0" and $prod['type'] === "quantity"){
+                if((float)$stock->cost_price >= (float)$prod['price']){
                     $status = true;
-                    $errors[$stock->id] = $stock->name."can not be sell under cost price ".number_format($stock->cost_price,2 );
+                    $errors[$prod['id']] = $stock->name."can not be sell under cost price ".number_format($stock->cost_price,2 );
                 }
             }
 
 
-            if($prods[$stock->id]['type'] === "quantity"){
+            if($prod['type'] === "quantity"){
                 if(!is_null($stock->stock_limit) && $stock->stock_limit > 0) {
-                    $quantity = $stock->available_quantity - $prods[$stock->id]['qty'];
+                    $quantity = $stock->available_quantity - $prod['qty'];
                     if($quantity <= $stock->stock_limit){
                         $status = true;
-                        $errors[$stock->id] = $stock->name." limit is ".$stock->stock_limit." transaction can not proceed!";
+                        $errors[$prod['id']] = $stock->name." limit is ".$stock->stock_limit." transaction can not proceed!";
                     }
                 }
             }
@@ -446,6 +458,7 @@ class Invoice extends Model
             'last_updated_by' =>auth()->id(),
             'invoice_date' =>  $request->get('date'),
             'sales_time' =>Carbon::now()->toTimeString(),
+            'price_category_id' => $request->get('price_category_id'),
         ];
 
         $invoice = Invoice::create($invoice_data);
@@ -490,47 +503,51 @@ class Invoice extends Model
         $errors = [];
         $prods = [];
 
-        $product_ids =  array_column($products,'id');
-
         foreach ($products as $product){
-            $prods[$product['id']] = $product;
+            $key = $product['id'] . '-' . $product['type'];
+            $prods[$key] = $product;
         }
 
-        $stocks = Stock::whereIn('id',$product_ids)->get();
+        $product_ids =  array_column($products,'id');
+        $stocks = Stock::whereIn('id',$product_ids)->get()->keyBy('id');
 
-        foreach ($stocks as $stock){
-            $batches = $stock->getSaleableBatches($prods[$stock->id]['type'],$prods[$stock->id]['qty']);
+        foreach ($prods as $key => $prod){
+            if (!isset($stocks[$prod['id']])) {
+                continue;
+            }
+            $stock = $stocks[$prod['id']];
+            $batches = $stock->getSaleableBatches($prod['type'],$prod['qty']);
             if($batches == false){
                 $status = true;
-                $errors[$stock->id] = "Not enough quantity to process ".$stock->name;
+                $errors[$prod['id']] = "Not enough quantity to process ".$stock->name;
             }
-            $report[$stock->id]['batches'] =  $batches;
-            $report[$stock->id]['stock'] = $stock;
-            $report[$stock->id]['prods'] = $prods[$stock->id];
+            $report[$key]['batches'] =  $batches;
+            $report[$key]['stock'] = $stock;
+            $report[$key]['prods'] = $prod;
 
 
 
-            if($prods[$stock->id]['type'] === "yard_quantity"){
-                if(app(Settings::class)->get('allow_selling_below_cost_price') == "0" and (float)$stock->yard_cost_price >= (float)$prods[$stock->id]['price']){
+            if($prod['type'] === "yard_quantity"){
+                if(app(Settings::class)->get('allow_selling_below_cost_price') == "0" and (float)$stock->yard_cost_price >= (float)$prod['price']){
                     $status = true;
-                    $errors[$stock->id] = $stock->name." can not be sell under cost price ".number_format($stock->yard_cost_price,2 );
+                    $errors[$prod['id']] = $stock->name." can not be sell under cost price ".number_format($stock->yard_cost_price,2 );
                 }
             }
 
-            if($prods[$stock->id]['type'] === "quantity"){
-                if(app(Settings::class)->get('allow_selling_below_cost_price') == "0" and (float)$stock->cost_price >= (float)$prods[$stock->id]['price']){
+            if($prod['type'] === "quantity"){
+                if(app(Settings::class)->get('allow_selling_below_cost_price') == "0" and (float)$stock->cost_price >= (float)$prod['price']){
                     $status = true;
-                    $errors[$stock->id] = $stock->name." can not be sell under cost price ".number_format($stock->cost_price,2 );
+                    $errors[$prod['id']] = $stock->name." can not be sell under cost price ".number_format($stock->cost_price,2 );
                 }
             }
 
 
-            if($prods[$stock->id]['type'] === "quantity"){
+            if($prod['type'] === "quantity"){
                 if(!is_null($stock->stock_limit) && $stock->stock_limit > 0) {
-                    $quantity = $stock->available_quantity - $prods[$stock->id]['qty'];
+                    $quantity = $stock->available_quantity - $prod['qty'];
                     if($quantity <= $stock->stock_limit){
                         $status = true;
-                        $errors[$stock->id] = $stock->name." limit is ".$stock->stock_limit." transaction can not proceed!";
+                        $errors[$prod['id']] = $stock->name." limit is ".$stock->stock_limit." transaction can not proceed!";
                     }
                 }
             }
@@ -591,7 +608,7 @@ class Invoice extends Model
 
             $invoiceItems[$key] =  new InvoiceItem([
                 'invoice_id'=> $invoice->id,
-                'stock_id'=>$key,
+                'stock_id'=>$stock['stock']->id,
                 'quantity'=>$stock['prods']['qty'],
                 'customer_id'=>$customer_id,
                 'department'=> auth()->user()->department,
@@ -609,6 +626,7 @@ class Invoice extends Model
                 'total_profit'=>($invoice->sub_total < 0 ? -$total_profit : $total_profit),
                 'discount_type'=>'none',
                 'discount_amount'=>0,
+                'price_category_id' => $stock['prods']['price_category_id'] ?? null,
             ]);
 
 
@@ -666,7 +684,7 @@ class Invoice extends Model
 
                 $invoiceItemBatches[$key][] =  new InvoiceItemBatch( [
                     'invoice_id'=> $invoice->id,
-                    'stock_id' => $key,
+                    'stock_id' => $stock['stock']->id,
                     'stockbatch_id'=>$batch['id'],
                     'cost_price'=> $invoice->sub_total < 0 ? -($stock['prods']['cost_price']) : $stock['prods']['cost_price'],
                     'selling_price'=> $invoice->sub_total < 0 ? -($stock['prods']['price']) : $stock['prods']['price'],

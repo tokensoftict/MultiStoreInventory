@@ -108,6 +108,15 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
                 Route::delete('{id}', ['as' => 'destroy', 'uses' => 'CategoryController@destroy']);
             });
 
+            Route::prefix('price-category')->as('price-category.')->group(function () {
+                Route::get('', ['as' => 'index', 'uses' => 'PriceCategoryController@index', 'visible' => true, 'custom_label'=>'List Price Category']);
+                Route::get('create', ['as' => 'create', 'uses' => 'PriceCategoryController@create']);
+                Route::post('', ['as' => 'store', 'uses' => 'PriceCategoryController@store']);
+                Route::get('{id}/edit', ['as' => 'edit', 'uses' => 'PriceCategoryController@edit']);
+                Route::get('{id}/toggle', ['as' => 'toggle', 'uses' => 'PriceCategoryController@toggle']);
+                Route::put('{id}', ['as' => 'update', 'uses' => 'PriceCategoryController@update']);
+            });
+
 
             Route::prefix('manufacturer')->as('manufacturer.')->group(function () {
                 Route::get('', ['as' => 'index', 'uses' => 'ManufacturerController@index', 'visible' => true]);

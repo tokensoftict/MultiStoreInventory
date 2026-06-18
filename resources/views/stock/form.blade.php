@@ -128,7 +128,16 @@
                                             <label>Yard / Pieces Cost Price</label>
                                             <input type="number" step="0.00001" value="{{ old('cost_price',$stock->yard_cost_price) }}" required  class="form-control" name="yard_cost_price" placeholder="Yard Cost Price"/>
                                         </div>
-
+                                        @if(!empty($active_price_categories))
+                                            <hr/>
+                                            <h5><strong>Dynamic Price Categories</strong></h5>
+                                            @foreach($active_price_categories as $price_category)
+                                                <div class="form-group">
+                                                    <label>{{ $price_category->name }} Price ({{ ucfirst($price_category->price_type) }})</label>
+                                                    <input type="number" step="0.00001" value="{{ old('dynamic_prices.' . $price_category->id, $stock_prices[$price_category->id] ?? '') }}" class="form-control" name="dynamic_prices[{{ $price_category->id }}]" placeholder="{{ $price_category->name }} Price"/>
+                                                </div>
+                                            @endforeach
+                                        @endif
                                     </div>
                                 </section>
                                 @if(!isset($stock->id))

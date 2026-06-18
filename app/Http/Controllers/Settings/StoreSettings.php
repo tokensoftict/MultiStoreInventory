@@ -25,7 +25,7 @@ class StoreSettings extends Controller
 
     public function update(Request $request){
 
-        $store = $this->settings->all();
+        $store = $this->settings->store();
 
         $file = $request->file('logo');
 

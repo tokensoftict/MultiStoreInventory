@@ -39,7 +39,7 @@ class AjaxController extends Controller
             'stock_id',
             'stock_id as id',
             'stocks.name as text',
-        )->join('stocks', 'stocks.id','=','stockbatches.stock_id')->with(['stock'])->where(function($query) use (&$warehouses){
+        )->join('stocks', 'stocks.id','=','stockbatches.stock_id')->with(['stock.stockPrices'])->where(function($query) use (&$warehouses){
             $query->orWhere(getActiveStore()->packed_column,'>',0);
             $query->orWhere(getActiveStore()->yard_column,'>',0);
         })->whereHas('stock',function($q) use (&$query){
