@@ -47,6 +47,9 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
         Route::get('/findpurchaseorderstock', ['as' => 'findpurchaseorderstock', 'uses' => 'AjaxController@findpurchaseorderstock']);
         Route::get('/processScaninvoice', ['as' => 'processScaninvoice', 'uses' => 'AjaxController@processScaninvoice']);
         Route::post('/update_price_category_price', ['as' => 'update_price_category_price', 'uses' => 'AjaxController@update_price_category_price']);
+        // Barcode generation & printing — no permission gate needed
+        Route::post('/stock/{id}/generate_barcode', ['as' => 'generate_barcode', 'uses' => '\App\Http\Controllers\StockManager\StockController@generateBarcode']);
+        Route::get('/stock/{id}/print_barcode', ['as' => 'print_barcode', 'uses' => '\App\Http\Controllers\StockManager\StockController@printBarcode']);
     });
 
     Route::middleware(['permit.task'])->group(function () {

@@ -597,4 +597,119 @@ class StockController extends Controller
 
         return Excel::download(new StockValuationReport($excelRows),  "Stock-Valuation-Report".date('Y-m-d').'.xlsx');
     }
+
+
+    /**
+     * Generate and return a print-ready barcode page for a stock item.
+     *
+     * Query params:
+     *   size   – paper size key (e.g. "50x25mm", "a4")  default: "50x30mm"
+     *   copies – number of label copies                  default: 1
+     *   type   – barcode type: code128|code39|ean13|qr   default: "code128"
+     */
+    public function printBarcode(Request $request, $id)
+    {
+        $stock = Stock::findOrFail($id);
+
+        // Only use the actual barcode field — no silent fallback
+        $barcodeValue = trim((string) ($stock->barcode ?? ''));
+
+        $type      = strtolower($request->get('type', 'code128'));
+        $copies    = max(1, (int) $request->get('copies', 1));
+        $size      = $request->get('size', '50x30mm');
+        $isPreview = (bool) $request->get('preview', false); // suppress auto-print in iframe
+
+        // Predefined label paper sizes [width_mm, height_mm]
+        $paperSizes = [
+            '38x25mm'   => ['w' => 38,  'h' => 25,  'label' => '38 × 25 mm'],
+            '50x25mm'   => ['w' => 50,  'h' => 25,  'label' => '50 × 25 mm'],
+            '50x30mm'   => ['w' => 50,  'h' => 30,  'label' => '50 × 30 mm'],
+            '57x32mm'   => ['w' => 57,  'h' => 32,  'label' => '57 × 32 mm (Dymo)'],
+            '62x29mm'   => ['w' => 62,  'h' => 29,  'label' => '62 × 29 mm (Brother DK)'],
+            '76x51mm'   => ['w' => 76,  'h' => 51,  'label' => '76 × 51 mm'],
+            '100x50mm'  => ['w' => 100, 'h' => 50,  'label' => '100 × 50 mm'],
+            '100x75mm'  => ['w' => 100, 'h' => 75,  'label' => '100 × 75 mm'],
+            '100x150mm' => ['w' => 100, 'h' => 150, 'label' => '100 × 150 mm'],
+            'a4'        => ['w' => 210, 'h' => 297, 'label' => 'A4 (210 × 297 mm)'],
+            'letter'    => ['w' => 216, 'h' => 279, 'label' => 'Letter (216 × 279 mm)'],
+        ];
+
+        $selectedSize = $paperSizes[$size] ?? $paperSizes['50x30mm'];
+
+        // Generate barcode SVG using milon/barcode
+        $barcodeSvg = '';
+        try {
+            $generator = new \Milon\Barcode\DNS1D();
+            switch ($type) {
+                case 'code39':
+                    $barcodeSvg = $generator->getBarcodeHTML($barcodeValue, 'C39', 1.2, 50);
+                    break;
+                case 'ean13':
+                    // EAN-13 requires exactly 12 digits; pad/trim as needed
+                    $eanValue   = str_pad(preg_replace('/\D/', '', $barcodeValue), 12, '0', STR_PAD_LEFT);
+                    $eanValue   = substr($eanValue, -12);
+                    $barcodeSvg = $generator->getBarcodeHTML($eanValue, 'EAN13', 1.2, 50);
+                    break;
+                case 'qr':
+                    $qrGenerator = new \Milon\Barcode\DNS2D();
+                    $barcodeSvg  = $qrGenerator->getBarcodeHTML($barcodeValue, 'QRCODE', 4, 4);
+                    break;
+                case 'code128':
+                default:
+                    $barcodeSvg = $generator->getBarcodeHTML($barcodeValue, 'C128', 1.2, 50);
+                    break;
+            }
+        } catch (\Exception $e) {
+            $barcodeSvg = '<p style="color:red;">Unable to generate barcode: ' . e($e->getMessage()) . '</p>';
+        }
+
+        return view('print.print_barcode', compact(
+            'stock',
+            'barcodeValue',
+            'barcodeSvg',
+            'copies',
+            'selectedSize',
+            'size',
+            'type',
+            'paperSizes',
+            'isPreview'
+        ));
+    }
+
+
+    /**
+     * Auto-generate and save a unique barcode for a stock item (AJAX).
+     *
+     * Generates a 12-digit numeric code: YYYYMMDD + zero-padded stock ID.
+     * Returns JSON: { success, barcode }
+     */
+    public function generateBarcode(Request $request, $id)
+    {
+        $stock = Stock::findOrFail($id);
+
+        // If it already has a barcode, just return it
+        if (!empty($stock->barcode)) {
+            return response()->json([
+                'success' => true,
+                'barcode' => $stock->barcode,
+                'message' => 'Existing barcode returned.',
+            ]);
+        }
+
+        // Build a unique CODE128-safe string: STK + store-id + stock-id + timestamp
+        $storeId     = getActiveStore()->id ?? 1;
+        $generated   = 'STK' . str_pad($storeId, 2, '0', STR_PAD_LEFT)
+                             . str_pad($stock->id, 6, '0', STR_PAD_LEFT)
+                             . substr(time(), -4);
+
+        $stock->barcode = $generated;
+        $stock->save();
+
+        return response()->json([
+            'success' => true,
+            'barcode' => $generated,
+            'message' => 'Barcode generated successfully!',
+        ]);
+    }
 }
+
