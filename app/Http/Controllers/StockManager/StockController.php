@@ -636,6 +636,11 @@ class StockController extends Controller
 
         $selectedSize = $paperSizes[$size] ?? $paperSizes['50x30mm'];
 
+        // Swap width and height as requested (width becomes height, height becomes width)
+        $tempW = $selectedSize['w'];
+        $selectedSize['w'] = $selectedSize['h'];
+        $selectedSize['h'] = $tempW;
+
         // Generate barcode SVG using milon/barcode
         $barcodeSvg = '';
         try {
