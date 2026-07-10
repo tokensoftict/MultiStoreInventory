@@ -715,11 +715,8 @@ class StockController extends Controller
             ]);
         }
 
-        // Build a unique CODE128-safe string: STK + store-id + stock-id + timestamp
-        $storeId = getActiveStore()->id ?? 1;
-        $generated = 'STK' . str_pad($storeId, 2, '0', STR_PAD_LEFT)
-            . str_pad($stock->id, 6, '0', STR_PAD_LEFT)
-            . substr(time(), -4);
+        // Build a 4-digit code based on stock ID
+        $generated = str_pad($stock->id, 4, '0', STR_PAD_LEFT);
 
         $stock->barcode = $generated;
         $stock->save();
