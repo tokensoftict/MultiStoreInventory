@@ -630,7 +630,7 @@ class StockController extends Controller
 
         $type = strtolower($request->get('type', 'code128'));
         $copies = max(1, (int) $request->get('copies', 1));
-        $size = $request->get('size', '50x30mm');
+        $size = $request->get('size', '50x25mm');
         $isPreview = (bool) $request->get('preview', false); // suppress auto-print in iframe
 
         // Predefined label paper sizes [width_mm, height_mm]
@@ -648,7 +648,7 @@ class StockController extends Controller
             'letter' => ['w' => 216, 'h' => 279, 'label' => 'Letter (216 × 279 mm)'],
         ];
 
-        $selectedSize = $paperSizes[$size] ?? $paperSizes['50x30mm'];
+        $selectedSize = $paperSizes[$size] ?? $paperSizes['50x25mm'];
 
         // Swap width and height as requested (width becomes height, height becomes width)
         $tempW = $selectedSize['w'];

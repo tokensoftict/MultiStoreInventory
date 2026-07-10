@@ -344,8 +344,8 @@
                                     <select id="pbl-size" class="form-control">
                                         <optgroup label="Small Labels">
                                             <option value="38x25mm">38 &times; 25 mm</option>
-                                            <option value="50x25mm">50 &times; 25 mm</option>
-                                            <option value="50x30mm" selected>50 &times; 30 mm (Default)</option>
+                                            <option value="50x25mm" selected>50 &times; 25 mm (Default)</option>
+                                            <option value="50x30mm">50 &times; 30 mm</option>
                                             <option value="57x32mm">57 &times; 32 mm (Dymo)</option>
                                             <option value="62x29mm">62 &times; 29 mm (Brother DK)</option>
                                         </optgroup>
