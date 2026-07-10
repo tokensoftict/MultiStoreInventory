@@ -8,9 +8,9 @@
     <style>
         @page {
             size:
-                {{ $selectedSize['w'] }}
-                mm
                 {{ $selectedSize['h'] }}
+                mm
+                {{ $selectedSize['w'] }}
                 mm;
             margin: 2mm;
         }
@@ -24,7 +24,7 @@
         html,
         body {
             width:
-                {{ $selectedSize['w'] }}
+                {{ $selectedSize['h'] }}
                 mm;
             background: #fff;
             font-family: Arial, sans-serif;
@@ -80,7 +80,7 @@
                 mm;
             display: flex;
             flex-direction: column;
-            align-items: center;
+            align-items: flex-start;
             justify-content: center;
             padding: 2mm;
             page-break-after: always;
@@ -90,6 +90,12 @@
 
         .label-page:last-child {
             page-break-after: avoid;
+        }
+
+        .label-content-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .label-product-name {
@@ -161,7 +167,7 @@
             html,
             body {
                 width:
-                    {{ $selectedSize['w'] }}
+                    {{ $selectedSize['h'] }}
                     mm;
                 height: auto;
             }
@@ -200,9 +206,11 @@
     @else
         @for ($i = 0; $i < $copies; $i++)
             <div class="label-page">
-                <div class="label-product-name">{{ $stock->name }}</div>
-                <div class="label-barcode-wrap">{!! $barcodeSvg !!}</div>
-                <div class="label-barcode-text">{{ $barcodeValue }}</div>
+                <div class="label-content-wrap">
+                    <div class="label-product-name">{{ $stock->name }}</div>
+                    <div class="label-barcode-wrap">{!! $barcodeSvg !!}</div>
+                    <div class="label-barcode-text">{{ $barcodeValue }}</div>
+                </div>
             </div>
         @endfor
     @endif
