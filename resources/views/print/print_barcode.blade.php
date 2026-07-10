@@ -73,10 +73,10 @@
         /* Label */
         .label-page {
             width:
-                {{ $selectedSize['w'] }}
+                {{ $selectedSize['h'] }}
                 mm;
             min-height:
-                {{ $selectedSize['h'] }}
+                {{ $selectedSize['w'] }}
                 mm;
             display: flex;
             flex-direction: column;

@@ -675,7 +675,7 @@ class StockController extends Controller
                     break;
                 case 'code128':
                 default:
-                    $barcodeSvg = $generator->getBarcodeHTML($barcodeValue, 'C128', 1.2, 50);
+                    $barcodeSvg = $generator->getBarcodeHTML($barcodeValue, 'C128', 2, 70, 'black', false);
                     break;
             }
         } catch (\Exception $e) {
