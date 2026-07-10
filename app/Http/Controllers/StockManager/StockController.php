@@ -661,21 +661,21 @@ class StockController extends Controller
             $generator = new \Milon\Barcode\DNS1D();
             switch ($type) {
                 case 'code39':
-                    $barcodeSvg = $generator->getBarcodeHTML($barcodeValue, 'C39', 1.2, 50);
+                    $barcodeSvg = $generator->getBarcodeHTML($barcodeValue, 'C39', 2.5, 50);
                     break;
                 case 'ean13':
                     // EAN-13 requires exactly 12 digits; pad/trim as needed
                     $eanValue = str_pad(preg_replace('/\D/', '', $barcodeValue), 12, '0', STR_PAD_LEFT);
                     $eanValue = substr($eanValue, -12);
-                    $barcodeSvg = $generator->getBarcodeHTML($eanValue, 'EAN13', 1.2, 50);
+                    $barcodeSvg = $generator->getBarcodeHTML($eanValue, 'EAN13', 2.5, 50);
                     break;
                 case 'qr':
                     $qrGenerator = new \Milon\Barcode\DNS2D();
-                    $barcodeSvg = $qrGenerator->getBarcodeHTML($barcodeValue, 'QRCODE', 4, 4);
+                    $barcodeSvg = $qrGenerator->getBarcodeHTML($barcodeValue, 'QRCODE', 6, 6);
                     break;
                 case 'code128':
                 default:
-                    $barcodeSvg = $generator->getBarcodeHTML($barcodeValue, 'C128', 2, 70, 'black', false);
+                    $barcodeSvg = $generator->getBarcodeHTML($barcodeValue, 'C128', 2.5, 50);
                     break;
             }
         } catch (\Exception $e) {

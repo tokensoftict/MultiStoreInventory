@@ -96,6 +96,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            width: 100%;
         }
 
         .label-product-name {
@@ -116,6 +117,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            width: 100%;
             max-width: 100%;
             overflow: hidden;
             transform: rotate(180deg);
@@ -124,6 +126,7 @@
         .label-barcode-wrap>div,
         .label-barcode-wrap svg {
             max-width: 100%;
+            width: 100% !important;
         }
 
         .label-barcode-text {
