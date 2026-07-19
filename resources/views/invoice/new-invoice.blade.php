@@ -201,76 +201,10 @@
                             </section>
                         </div>
                         <div class="col-sm-4">
-                            @if(userCanView('invoiceandsales.create'))
-                                <section class="panel">
-                                    <section class="panel-body panel-border text-center">
-                                        <div class="col-sm-10 col-lg-offset-1">
-                                            <div class="row mtop-10">
-                                                <div class="col-sm-12">
-                                                    @if(userCanView('invoiceandsales.request_for_discount'))
-                                                        <button type="button"  data-status="DISCOUNT" class="btn  btn-dark btn-lg" onclick="return ProcessInvoice(this);">Request For Discount</button>
-                                                        <br/><br/>
-                                                    @endif
-                                                </div>
-                                                <div class="col-sm-6">
-                                                    @if(userCanView('invoiceandsales.draft_invoice'))
-                                                        <button type="button"  data-status="DRAFT" class="btn btn-block btn-success btn-lg" onclick="return ProcessInvoice(this);">Save Draft</button>
-                                                    @endif
-                                                </div>
-                                                <div class="col-sm-6">
-                                                    @if(userCanView('invoiceandsales.complete_invoice'))
-                                                        <button type="button"  data-status="COMPLETE" class="btn btn-block btn-primary btn-lg" onclick="return ProcessInvoice(this);">Complete</button>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </section>
-                                </section>
-                            @endif
                             <section class="panel">
                                 <header class="panel-heading panel-border total_invoice text-center" style="font-size: 25px">0.00</header>
                             </section>
-                            <section class="panel">
-                                <header class="panel-heading panel-border">Invoice Info.</header>
-                                <section class="panel-body">
-                                    <div class="row">
-                                        <div class="col-sm-6">
-                                            <div class="form-group">
-                                                <label for="invoice_date">Invoice / Sales date</label>
-                                                @if(userCanView('invoiceandsales.allow_user_to_change_invoice_date'))
-                                                    <input value="{{ date('Y-m-d') }}" data-min-view="2" data-date-format="yyyy-mm-dd" class="form-control datepicker js-datepicker" id="invoice_date" placeholder="Invoice / Sales date" type="text">
-                                                @else
-                                                    <input type="hidden" value="{{ date('Y-m-d') }}"   id="invoice_date">
-                                                    <span class="form-control">{{ date('Y-m-d') }}</span>
-                                                @endif
-                                            </div>
-                                        </div>
-                                        <div class="col-sm-6">
-                                            <div class="form-group">
-                                                <label for="exampleInputEmail1">Customer Name</label>
-                                                <select class="form-control  select-customer"  name="customer" id="customer_id">
-                                                    @foreach($customers as $customer)
-                                                        <option {{ $customer->id == $c->id ? "selected" : "" }} value="{{ $customer->id }}">{{ $customer->firstname }} {{ $customer->lastname }}</option>
-                                                    @endforeach
-                                                </select>
-                                                <a href="#" data-toggle="modal" data-target="#newCustomer" class="text-success" style="display: block;text-align: center">Add New Customer</a>
-                                            </div>
 
-                                    </div>
-                                    <input type="hidden" name="price_category_id" id="price_category_id" value="">
-                                    <div class="row">
-                                        <div class="col-sm-6" style="margin-top: 0px">
-                                            <img id="imageThumb" src="{{ asset('assets/products.jpg') }}" class="img-thumbnail">
-                                        </div>
-                                        <div class="col-sm-6">
-                                            <div class="form-group">
-                                                <label for="exampleInputEmail1">Invoice / Receipt No</label>
-                                                <input class="form-control" value="{{ $invoice_number }}" id="invoice_paper_number"  placeholder="Invoice / Receipt No" type="text">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </section>
-                            </section>
                             <section class="panel">
                                 <header class="panel-heading panel-border">Payment Info.</header>
                                 <section class="panel-body">
@@ -286,6 +220,70 @@
                                     </div>
                                     <div id="more_info_appender">
                                     </div>
+                                </section>
+                            </section>
+
+                            <section class="panel">
+                                <header class="panel-heading panel-border" style="padding: 8px 15px;">Invoice Info.</header>
+                                <section class="panel-body" style="padding: 10px 15px;">
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <div class="form-group" style="margin-bottom: 5px;">
+                                                <label for="invoice_date" style="font-size: 11px; margin-bottom: 2px;">Invoice / Sales date</label>
+                                                @if(userCanView('invoiceandsales.allow_user_to_change_invoice_date'))
+                                                    <input value="{{ date('Y-m-d') }}" data-min-view="2" data-date-format="yyyy-mm-dd" class="form-control datepicker js-datepicker" id="invoice_date" placeholder="Invoice / Sales date" type="text" style="height: 30px; font-size: 11px;">
+                                                @else
+                                                    <input type="hidden" value="{{ date('Y-m-d') }}"   id="invoice_date">
+                                                    <span class="form-control" style="height: 30px; font-size: 11px; line-height: 20px;">{{ date('Y-m-d') }}</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group" style="margin-bottom: 5px;">
+                                                <label for="exampleInputEmail1" style="font-size: 11px; margin-bottom: 2px;">Customer Name</label>
+                                                <select class="form-control  select-customer"  name="customer" id="customer_id" style="height: 30px; font-size: 11px; padding: 2px 6px;">
+                                                    @foreach($customers as $customer)
+                                                        <option {{ $customer->id == $c->id ? "selected" : "" }} value="{{ $customer->id }}">{{ $customer->firstname }} {{ $customer->lastname }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <a href="#" data-toggle="modal" data-target="#newCustomer" class="text-success" style="display: block; text-align: center; font-size: 10px; margin-top: 2px;">Add New Customer</a>
+                                            </div>
+
+                                    </div>
+                                    <input type="hidden" name="price_category_id" id="price_category_id" value="">
+                                    <div class="row" style="margin-top: 5px;">
+                                        <div class="col-sm-6" style="margin-top: 0px; text-align: center;">
+                                            <img id="imageThumb" src="{{ asset('assets/products.jpg') }}" class="img-thumbnail" style="max-height: 50px; max-width: 100px; object-fit: contain;">
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group" style="margin-bottom: 5px;">
+                                                <label for="exampleInputEmail1" style="font-size: 11px; margin-bottom: 2px;">Invoice / Receipt No</label>
+                                                <input class="form-control" value="{{ $invoice_number }}" id="invoice_paper_number"  placeholder="Invoice / Receipt No" type="text" style="height: 30px; font-size: 11px;">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    @if(userCanView('invoiceandsales.create'))
+                                        <div style="margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px;">
+                                            <div class="row">
+                                                <div class="col-sm-12" style="margin-bottom: 5px;">
+                                                    @if(userCanView('invoiceandsales.request_for_discount'))
+                                                        <button type="button" data-status="DISCOUNT" class="btn btn-dark btn-sm btn-block" onclick="return ProcessInvoice(this);">Request For Discount</button>
+                                                    @endif
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    @if(userCanView('invoiceandsales.draft_invoice'))
+                                                        <button type="button" data-status="DRAFT" class="btn btn-success btn-sm btn-block" onclick="return ProcessInvoice(this);">Save Draft</button>
+                                                    @endif
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    @if(userCanView('invoiceandsales.complete_invoice'))
+                                                        <button type="button" data-status="COMPLETE" class="btn btn-primary btn-sm btn-block" onclick="return ProcessInvoice(this);">Complete</button>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
                                 </section>
                             </section>
                         </div>

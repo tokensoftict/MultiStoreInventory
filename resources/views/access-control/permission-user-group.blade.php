@@ -4,9 +4,35 @@
 
 @endsection
 
-@section('js')
+@push('js')
+    <script>
+        $(document).ready(function() {
+            // When 'Select All' is toggled, toggle all tasks within its panel
+            $('.check-all-module').on('change', function() {
+                var isChecked = $(this).is(':checked');
+                var $panel = $(this).closest('.panel-default');
+                $panel.find('.task-checkbox').prop('checked', isChecked).trigger('change');
+            });
 
-@endsection
+            // Update the 'Select All' state based on the individual task checkboxes
+            $('.panel-default').each(function() {
+                var $panel = $(this);
+                var $checkAll = $panel.find('.check-all-module');
+                var $tasks = $panel.find('.task-checkbox');
+
+                if ($tasks.length > 0) {
+                    var updateCheckAll = function() {
+                        var allChecked = $tasks.length === $tasks.filter(':checked').length;
+                        $checkAll.prop('checked', allChecked);
+                    };
+                    
+                    $tasks.on('change', updateCheckAll);
+                    updateCheckAll(); // Set initial state
+                }
+            });
+        });
+    </script>
+@endpush
 
 @section('content')
     <div class="ui-container">
@@ -34,8 +60,13 @@
                                         <div class="col-md-6">
                                             <div class="panel panel-default">
                                                 <div class="panel-heading">
-                                                    <h3 class="panel-title"><span
-                                                                class="{{ $module->icon }}"></span> {{ $module->label }}</h3>
+                                                    <h3 class="panel-title" style="display: inline-block;">
+                                                        <span class="{{ $module->icon }}"></span> {{ $module->label }}
+                                                    </h3>
+                                                    <label class="i-checks pull-right" style="margin: 0;">
+                                                        <input type="checkbox" class="check-all-module">
+                                                        <i></i> Select All
+                                                    </label>
                                                 </div>
                                                 <div class="panel-body" style="height: 150px; overflow: auto">
                                                     <div id="mCSB_4" class=""
@@ -49,7 +80,7 @@
                                                                         <div class="col-md-6">
                                                                             <div class="checkbox">
                                                                                 <label class="i-checks">
-                                                                                    <input  {{ count($task->permissions)  ? "checked" : ''  }} name="privileges[{{ $task->id }}]" value="" type="checkbox">
+                                                                                    <input  {{ count($task->permissions)  ? "checked" : ''  }} name="privileges[{{ $task->id }}]" value="" type="checkbox" class="task-checkbox">
                                                                                     <i></i>
                                                                                     {{ $task->name }}
                                                                                 </label>
