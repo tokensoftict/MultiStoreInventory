@@ -15,9 +15,9 @@ class CustomerSeeder extends Seeder
     public function run()
     {
         DB::table('customers')->insert([
-            'firstname'=>'Generic',
-            'lastname'=> 'Customer',
-            'warehousestore_id' => 1
+            'firstname' => 'Walking',
+            'lastname' => 'Customer',
+            'warehousestore_id' => NULL
         ]);
     }
 }
