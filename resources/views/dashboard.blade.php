@@ -67,6 +67,63 @@
 @section('content')
     <div class="ui-content-body">
         <div class="container">
+            @php
+                $nearOSItems = $dashboard->getNearOutOfStockItems();
+            @endphp
+            @if($nearOSItems->count() > 0)
+                <div class="row" style="margin-bottom: 20px;">
+                    <div class="col-md-12">
+                        <div class="alert alert-warning alert-dismissible" role="alert" style="border-left: 5px solid #d9534f; background-color: #fcf8e3; color: #8a6d3b; margin-bottom: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 style="margin-top: 0; font-weight: 600; color: #c9302c; cursor: pointer; display: flex; justify-content: space-between; align-items: center;" data-toggle="collapse" data-target="#reorderStockList" aria-expanded="false" class="collapsed">
+                                <span>
+                                    <i class="fa fa-exclamation-triangle"></i> Stock Re-order Alert ({{ getActiveStore()->name }})
+                                    <span class="label label-danger" style="font-size: 11px; margin-left: 5px; vertical-align: middle;">{{ $nearOSItems->count() }} items need re-order</span>
+                                </span>
+                                <i class="fa fa-chevron-down toggle-icon" style="font-size: 12px; transition: transform 0.2s ease;"></i>
+                            </h4>
+                            <div id="reorderStockList" class="collapse">
+                                <p style="font-size: 13px; margin-bottom: 10px; margin-top: 10px;">The following stock items have reached or fallen below their reorder level. Please replenish them as soon as possible.</p>
+                                <div style="max-height: 180px; overflow-y: auto;">
+                                    <table class="table table-condensed" style="margin-bottom: 0; font-size: 12px; color: #8a6d3b;">
+                                        <thead>
+                                            <tr style="border-bottom: 2px solid #f5e79e;">
+                                                <th>Product Name</th>
+                                                <th class="text-center">Current Quantity</th>
+                                                <th class="text-center">Reorder Level</th>
+                                                <th class="text-center">Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($nearOSItems as $item)
+                                                <tr style="border-bottom: 1px solid #f5e79e;">
+                                                    <td style="font-weight: 600;">{{ $item->name }}</td>
+                                                    <td class="text-center" style="font-weight: bold; color: #c9302c;">{{ number_format($item->available_quantity) }}</td>
+                                                    <td class="text-center">{{ number_format($item->reorder_level) }}</td>
+                                                    <td class="text-center">
+                                                        <span class="label label-danger">Reorder</span>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @push('css')
+                <style>
+                    h4[data-toggle="collapse"] .toggle-icon {
+                        transform: rotate(0deg);
+                    }
+                    h4[data-toggle="collapse"]:not(.collapsed) .toggle-icon {
+                        transform: rotate(180deg);
+                    }
+                </style>
+                @endpush
+            @endif
+
             <div class="row">
                 @if(userCanView("reports.dashboard.todays_income"))
                     <div class="col-md-3 col-sm-6">

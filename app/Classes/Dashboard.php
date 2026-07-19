@@ -85,4 +85,22 @@ class Dashboard
 
         return $yearlyReports;
     }
+
+    /**
+     * Get stock items that are at or below their reorder level for the active store.
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public final function getNearOutOfStockItems()
+    {
+        $store = getActiveStore();
+        return \DB::table('stockbatches')->selectRaw(
+            "stocks.id as stock_id, stocks.name, SUM(stockbatches." . $store->packed_column . ") as available_quantity, COALESCE(stocks.reorder_level, 5) as reorder_level"
+            )
+            ->join('stocks', 'stockbatches.stock_id', '=', 'stocks.id')
+            ->where('stocks.status', 1)
+            ->whereRaw("(SELECT SUM(sb." . $store->packed_column . ") FROM stockbatches sb WHERE sb.stock_id=stocks.id) <= COALESCE(stocks.reorder_level, 5)")
+            ->groupBy('stocks.id', 'stocks.name', 'stocks.reorder_level')
+            ->get();
+    }
 }
