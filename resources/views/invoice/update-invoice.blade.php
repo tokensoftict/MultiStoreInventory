@@ -172,7 +172,7 @@
                                              <tr style="cursor: pointer" id="product_{{  $items->stock->id }}">
                                                  <th  class="text-center"><input data-image="{{ $items->stock->image }}" name="picture" class="picture" value="1" type="radio"></th>
                                                  <th>{{ $items->stock->name }}<div id="error_{{ $items->stock->id }}" class="errors alert alert-danger" style="display:none;"></div></th>
-                                                 <td><div class="col-md-4"><div class="input-group"> <span class="input-group-btn input-group-sm"> <button  data-field="quant[1]" type="button" class="btn btn-danger btn-number minus" data-type="minus"> <i class="fa fa-minus"></i></button></span><input class="form-control text-center input-number" data-invoice-item-id="{{ $items->id }}"  data-id="{{ $items->stock->id }}" data-packed-price="{{ $items->stock->selling_price }}" data-yard-price="{{ $items->stock->yard_selling_price }}" data-stock-prices="{{ json_encode($items->stock->stockPrices) }}" data-cost-price="{{  $items->cost_price }}" data-price="{{ $items->selling_price }}" style="width:100px;display: block;" required="" max="{{ $items->store == "quantity" ? $items->stock->available_quantity + $items->quantity  :  $items->stock->available_yard_quantity+ $items->quantity }}" min="1" type="number" value="{{ $items->quantity }}"> <span class="input-group-btn"> <button type="button" class="btn btn-primary btn-number plus" data-type="plus"><i class="fa fa-plus"></i> </button> </span></div></div>
+                                                 <td><div class="col-md-4"><div class="input-group"> <span class="input-group-btn input-group-sm"> <button  data-field="quant[1]" type="button" class="btn btn-danger btn-number minus" data-type="minus"> <i class="fa fa-minus"></i></button></span><input class="form-control text-center input-number" data-invoice-item-id="{{ $items->id }}"  data-id="{{ $items->stock->id }}" data-packed-price="{{ $items->stock->selling_price }}" data-yard-price="{{ $items->stock->yard_selling_price }}" data-stock-prices="{{ json_encode($items->stock->stockPrices) }}" data-cost-price="{{  $items->cost_price }}" data-price="{{ $items->selling_price }}" style="width:100px;display: block;" required="" max="{{ $items->store == "quantity" ? $items->stock->available_quantity + $items->quantity  :  $items->stock->available_yard_quantity+ $items->quantity }}" min="0.01" step="0.01" type="number" value="{{ $items->quantity }}"> <span class="input-group-btn"> <button type="button" class="btn btn-primary btn-number plus" data-type="plus"><i class="fa fa-plus"></i> </button> </span></div></div>
                                                  <td>
                                                      <select class="form-control product_type {{ $items->stock->type }}">
                                                          @if($items->stock->type == "PACKED")
@@ -429,8 +429,8 @@
             });
 
             if (existingInput.length > 0) {
-                var currentVal = parseInt(existingInput.val());
-                var maxVal = parseInt(existingInput.attr('max'));
+                var currentVal = parseFloat(existingInput.val());
+                var maxVal = parseFloat(existingInput.attr('max'));
                 if (currentVal < maxVal) {
                     existingInput.val(currentVal + 1).change();
                 } else {
@@ -511,9 +511,9 @@
 
                 if (duplicateInput.length > 0) {
                     // Merge quantities
-                    var currentVal = parseInt(price.val());
-                    var duplicateVal = parseInt(duplicateInput.val());
-                    var duplicateMax = parseInt(duplicateInput.attr('max'));
+                    var currentVal = parseFloat(price.val());
+                    var duplicateVal = parseFloat(duplicateInput.val());
+                    var duplicateMax = parseFloat(duplicateInput.attr('max'));
                     if (duplicateVal + currentVal <= duplicateMax) {
                         duplicateInput.val(duplicateVal + currentVal).change();
                         tr.remove();
@@ -570,30 +570,30 @@
                 fieldName = $(this).attr('data-field');
                 type      = $(this).attr('data-type');
                 var input = $(this).parent().parent().find('.form-control');
-                var currentVal = parseInt(input.val());
+                var currentVal = parseFloat(input.val());
                 if (!isNaN(currentVal)) {
                     if(type == 'minus') {
 
-                        if(currentVal > input.attr('min')) {
-                            input.val(currentVal - 1).change();
+                        if(currentVal > parseFloat(input.attr('min'))) {
+                            input.val(Math.max(parseFloat(input.attr('min')), parseFloat((currentVal - 1).toFixed(4)))).change();
                         }
-                        if(parseInt(input.val()) == input.attr('min')) {
+                        if(parseFloat(input.val()) <= parseFloat(input.attr('min'))) {
                             $(this).attr('disabled', true);
                         }
-                        if(parseInt(input.val()) < input.attr('max')){
+                        if(parseFloat(input.val()) < parseFloat(input.attr('max'))){
                             $(this).parent().parent().find('.plus').removeAttr('disabled')
                         }
 
                     } else if(type == 'plus') {
 
-                        if(currentVal < input.attr('max')) {
-                            input.val(currentVal + 1).change();
+                        if(currentVal < parseFloat(input.attr('max'))) {
+                            input.val(parseFloat((currentVal + 1).toFixed(4))).change();
                         }
-                        if(parseInt(input.val()) == input.attr('max')) {
+                        if(parseFloat(input.val()) >= parseFloat(input.attr('max'))) {
                             $(this).attr('disabled', true);
                         }
 
-                        if(parseInt(input.val()) > input.attr('min')){
+                        if(parseFloat(input.val()) > parseFloat(input.attr('min'))){
                             $(this).parent().parent().find('.minus').removeAttr('disabled')
                         }
 
@@ -606,14 +606,14 @@
 
             $('.input-number').off('keyup');
             $('.input-number').on('keyup',function () {
-                if(parseInt($(this).val()) < parseInt($(this).attr('max'))) {
+                if(parseFloat($(this).val()) < parseFloat($(this).attr('max'))) {
                     qty_before = $(this).val();
                 }
             })
 
             $('.input-number').off('change');
             $('.input-number').on('change',function(){
-                if(parseInt($(this).val()) > parseInt($(this).attr('max'))){
+                if(parseFloat($(this).val()) > parseFloat($(this).attr('max'))){
                     alert('Not enough quantity, Please add more quantity and re-add the product');
                     $(this).val(qty_before);
                 }
@@ -632,7 +632,7 @@
             $('.input-number').each(function(index, elem){
                 const total = $(this).parent().parent().parent().parent();
                 const total_td = total.find('.item_total');
-                const _total = (parseInt($(this).val()) * parseFloat($(this).attr('data-price')));
+                const _total = (parseFloat($(this).val()) * parseFloat($(this).attr('data-price')));
                 total_invoice +=_total;
                 total_td.html(formatMoney(_total));
             });
@@ -663,7 +663,7 @@
                         price_category_id : selectedCategory || null
                     }
                 );
-                if(parseInt($(elem).val()) > parseInt($(elem).attr('max'))){
+                if(parseFloat($(elem).val()) > parseFloat($(elem).attr('max'))){
                     error_status = true;
                 }
             });
@@ -739,9 +739,9 @@
             }
 
             @if($settings['allow_edit_price'] == "Yes")
-                    {!! 'return `<tr style="cursor: pointer" id="product_`+data.stock.id+`"><th  class="text-center"><input data-image="`+data.stock.image+`" name="picture" class="picture" value="1" type="radio"></th><th>`+data.stock.name+`<div id="error_`+data.stock.id+`" class="errors alert alert-danger" `+(data[`error`] ? `` : `style="display:none;"`)+`>`+(data[`error`] ? data[`error`] : ``)+`</div>`+`</th><td><div class="col-md-4"><div class="input-group"> <span class="input-group-btn input-group-sm"> <button  data-field="quant[1]" type="button" class="btn btn-danger btn-number minus" data-type="minus"> <i class="fa fa-minus"></i></button></span><input class="form-control text-center input-number"  data-id="`+data.stock.id+`" data-packed-price="`+data.stock.selling_price+`" data-yard-price="`+data.stock.yard_selling_price+`" data-stock-prices=\'`+JSON.stringify(data.stock.stock_prices || [])+`\' data-price="`+currentPrice+`" data-cost-price="`+data.stock.cost_price+`" style="width:100px;display: block;" required="" max="`+data.stock.available_quantity+`" min="1" type="number" value="1"> <span class="input-group-btn"> <button type="button" class="btn btn-primary btn-number plus" data-type="plus"><i class="fa fa-plus"></i> </button> </span></div></div><td>`+type_select+`</td>`+price_category_select+`<th class="text-right item_price"><input type="text" step="0.00000001" class="item_text_price form-control" value="`+formatMoney(currentPrice)+`"/></th><th class="text-right item_total">`+formatMoney(currentPrice)+`</th><td class="text-right"> <a href="#" onclick="return removeItem(this);" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i></a></td></tr>`;' !!}
+                    {!! 'return `<tr style="cursor: pointer" id="product_`+data.stock.id+`"><th  class="text-center"><input data-image="`+data.stock.image+`" name="picture" class="picture" value="1" type="radio"></th><th>`+data.stock.name+`<div id="error_`+data.stock.id+`" class="errors alert alert-danger" `+(data[`error`] ? `` : `style="display:none;"`)+`>`+(data[`error`] ? data[`error`] : ``)+`</div>`+`</th><td><div class="col-md-4"><div class="input-group"> <span class="input-group-btn input-group-sm"> <button  data-field="quant[1]" type="button" class="btn btn-danger btn-number minus" data-type="minus"> <i class="fa fa-minus"></i></button></span><input class="form-control text-center input-number"  data-id="`+data.stock.id+`" data-packed-price="`+data.stock.selling_price+`" data-yard-price="`+data.stock.yard_selling_price+`" data-stock-prices=\'`+JSON.stringify(data.stock.stock_prices || [])+`\' data-price="`+currentPrice+`" data-cost-price="`+data.stock.cost_price+`" style="width:100px;display: block;" required="" max="`+data.stock.available_quantity+`" min="0.01" step="0.01" type="number" value="1"> <span class="input-group-btn"> <button type="button" class="btn btn-primary btn-number plus" data-type="plus"><i class="fa fa-plus"></i> </button> </span></div></div><td>`+type_select+`</td>`+price_category_select+`<th class="text-right item_price"><input type="text" step="0.00000001" class="item_text_price form-control" value="`+formatMoney(currentPrice)+`"/></th><th class="text-right item_total">`+formatMoney(currentPrice)+`</th><td class="text-right"> <a href="#" onclick="return removeItem(this);" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i></a></td></tr>`;' !!}
                     @else
-                    {!! 'return `<tr style="cursor: pointer" id="product_`+data.stock.id+`"><th  class="text-center"><input data-image="`+data.stock.image+`" name="picture" class="picture" value="1" type="radio"></th><th>`+data.stock.name+`<div id="error_`+data.stock.id+`" class="errors alert alert-danger" `+(data[`error`] ? `` : `style="display:none;"`)+`>`+(data[`error`] ? data[`error`] : ``)+`</div>`+`</th><td><div class="col-md-4"><div class="input-group"> <span class="input-group-btn input-group-sm"> <button  data-field="quant[1]" type="button" class="btn btn-danger btn-number minus" data-type="minus"> <i class="fa fa-minus"></i></button></span><input class="form-control text-center input-number"  data-id="`+data.stock.id+`" data-packed-price="`+data.stock.selling_price+`" data-yard-price="`+data.stock.yard_selling_price+`" data-stock-prices=\'`+JSON.stringify(data.stock.stock_prices || [])+`\' data-price="`+currentPrice+`" data-cost-price="`+data.stock.cost_price+`" style="width:100px;display: block;" required="" max="`+data.stock.available_quantity+`" min="1" type="number" value="1"> <span class="input-group-btn"> <button type="button" class="btn btn-primary btn-number plus" data-type="plus"><i class="fa fa-plus"></i> </button> </span></div></div><td>`+type_select+`</td>`+price_category_select+`<th class="text-right item_price"><span class="item_text_price form-control" value="`+currentPrice+`">`+formatMoney(currentPrice)+`</span></th><th class="text-right item_total">`+formatMoney(currentPrice)+`</th><td class="text-right"> <a href="#" onclick="return removeItem(this);" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i></a></td></tr>`;' !!}
+                    {!! 'return `<tr style="cursor: pointer" id="product_`+data.stock.id+`"><th  class="text-center"><input data-image="`+data.stock.image+`" name="picture" class="picture" value="1" type="radio"></th><th>`+data.stock.name+`<div id="error_`+data.stock.id+`" class="errors alert alert-danger" `+(data[`error`] ? `` : `style="display:none;"`)+`>`+(data[`error`] ? data[`error`] : ``)+`</div>`+`</th><td><div class="col-md-4"><div class="input-group"> <span class="input-group-btn input-group-sm"> <button  data-field="quant[1]" type="button" class="btn btn-danger btn-number minus" data-type="minus"> <i class="fa fa-minus"></i></button></span><input class="form-control text-center input-number"  data-id="`+data.stock.id+`" data-packed-price="`+data.stock.selling_price+`" data-yard-price="`+data.stock.yard_selling_price+`" data-stock-prices=\'`+JSON.stringify(data.stock.stock_prices || [])+`\' data-price="`+currentPrice+`" data-cost-price="`+data.stock.cost_price+`" style="width:100px;display: block;" required="" max="`+data.stock.available_quantity+`" min="0.01" step="0.01" type="number" value="1"> <span class="input-group-btn"> <button type="button" class="btn btn-primary btn-number plus" data-type="plus"><i class="fa fa-plus"></i> </button> </span></div></div><td>`+type_select+`</td>`+price_category_select+`<th class="text-right item_price"><span class="item_text_price form-control" value="`+currentPrice+`">`+formatMoney(currentPrice)+`</span></th><th class="text-right item_total">`+formatMoney(currentPrice)+`</th><td class="text-right"> <a href="#" onclick="return removeItem(this);" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i></a></td></tr>`;' !!}
                     @endif
 
         }
