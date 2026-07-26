@@ -44,10 +44,16 @@ class AjaxController extends Controller
             'stocks.name as text',
         )->join('stocks', 'stocks.id','=','stockbatches.stock_id')->with(['stock.stockPrices' => function($q) use ($assignedCategoryIds) {
             $q->whereIn('price_category_id', $assignedCategoryIds);
-        }])->where(function($query) use (&$warehouses){
+        }])
+            /*
+             * ->where(function($query) use (&$warehouses){
             $query->orWhere(getActiveStore()->packed_column,'>',0);
             $query->orWhere(getActiveStore()->yard_column,'>',0);
-        })->whereHas('stock',function($q) use (&$query){
+        })
+             */
+
+
+            ->whereHas('stock',function($q) use (&$query){
             $q->where('status',1);
             $q->where('type','!=','NON-SALEABLE-ITEMS');
             $q->where(function($sub) use (&$query){
