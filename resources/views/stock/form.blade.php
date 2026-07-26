@@ -10,7 +10,7 @@
 
     <div class="ui-container">
         @if(isset($stock->id))
-            <form role="form"  action="{{ route('stock.update',$stock->id) }}" enctype="multipart/form-data" method="post">
+            <form role="form" id="updateForm" action="{{ route('stock.update',$stock->id) }}" enctype="multipart/form-data" method="post">
                 {{ method_field('PUT') }}
                 @else
                     <form role="form"  action="{{ route('stock.store') }}" enctype="multipart/form-data" method="post">
@@ -453,9 +453,18 @@
                 onComplete: function(barcode){
                     $('#barcode').html(barcode);
                     $('#text_barcode').val(barcode);
+                    @if(!isset($stock->id))
                     setTimeout(function(){
                         $('#myModal').modal('hide');
                     },1200)
+                    @else
+                        $('#myModal').modal("show");
+                        setTimeout(function(){
+                            $('#myModal').modal('hide');
+                            $('#updateForm').submit();
+                        },1200)
+                    @endif
+
                 }, // main callback function
                 scanButtonKeyCode: 116, // the hardware scan button acts as key 116 (F5)
                 scanButtonLongPressThreshold: 5, // assume a long press if 5 or more events come in sequence

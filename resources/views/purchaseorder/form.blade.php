@@ -201,6 +201,7 @@
     <script src="{{ asset('bower_components/select2/dist/js/select2.min.js') }}"></script>
     <script src="{{ asset('assets/js/init-select2.js') }}"></script>
     <script src="{{ asset('assets/js/init-datepicker.js') }}"></script>
+    <script type='text/javascript' src="{{asset('assets/js/barcode.js')}}"></script>
 
     <script>
         $(document).ready(function(e){
@@ -294,5 +295,126 @@
             }
             return true;
         }
+
+        /* ── Barcode Scanner ─────────────────────────────────────── */
+        var poFindUrl = "{{ route('findpurchaseorderstock') }}";
+
+        $(document).scannerDetection({
+            timeBeforeScanTest: 200,      // wait up to 200ms for next character
+            endChar: [13],                // scan complete on Enter (key 13)
+            avgTimeByChar: 40,            // not a barcode if char takes > 40ms
+            ignoreIfFocusOn: 'input',     // disable while an input has focus
+            startChar: [16],              // prefix character for cabled scanner (OPL6845R)
+            endChar: [40],
+            onComplete: function(barcode){
+                showMask('Looking up product...');
+                $.getJSON(poFindUrl + '?query=' + encodeURIComponent(barcode), function(data){
+                    hideMask();
+                    if (!data || data.length === 0) {
+                        showPoToast('Product not found for barcode: ' + barcode);
+                        return;
+                    }
+                    var item = data[0];
+                    var rowId = 'row_' + item.id;
+                    var existingRow = document.getElementById(rowId);
+
+                    if (existingRow) {
+                        // Product already in list — increment quantity
+                        var $row       = $(existingRow);
+                        var $qtyHidden = $row.find('input[name="qty[]"]');
+                        var $qtyCell   = $row.find('td.text-center').first(); // first() avoids matching the Action (delete) cell
+                        var $totalCell = $row.find('td.total_attr');
+                        var $cpHidden  = $row.find('input[name="cost_price[]"]');
+
+                        var newQty  = parseInt($qtyHidden.val()) + 1;
+                        var cp      = parseFloat($cpHidden.val());
+                        var newTotal = cp * newQty;
+
+                        $qtyHidden.val(newQty);
+                        $qtyCell.text(newQty);
+                        $totalCell.attr('data-value', newTotal).text(formatMoney(newTotal));
+                        total_po();
+                    } else {
+                        // New product — add row
+                        var qty   = 1;
+                        var cp    = parseFloat(item.cost_price)  || 0;
+                        var sp    = parseFloat(item.selling_price) || 0;
+                        var total = cp * qty;
+
+                        var html = "<tr id='" + rowId + "'>";
+                        html += '<input type="hidden" name="stock_id[]" value="' + item.id + '"/>';
+                        html += '<input type="hidden" name="qty[]" value="' + qty + '"/>';
+                        html += '<input type="hidden" name="cost_price[]" value="' + cp + '"/>';
+                        html += '<input type="hidden" name="selling_price[]" value="' + sp + '"/>';
+                        html += '<td>' + item.text + '</td>';
+                        html += '<td class="text-center">' + qty + '</td>';
+                        html += '<td class="text-right">' + formatMoney(sp) + '</td>';
+                        html += '<td class="text-right">' + formatMoney(cp) + '</td>';
+                        html += '<td class="total_attr text-right" data-value="' + total + '">' + formatMoney(total) + '</td>';
+                        html += '<td class="text-center"><button class="btn btn-xs btn-danger" onclick="remove_item(this)"><i class="fa fa-trash"></i></button></td>';
+                        html += '</tr>';
+
+                        $('#appender').append(html);
+                        total_po();
+                    }
+                }).fail(function(){
+                    hideMask();
+                    showPoToast('Product not found for barcode: ' + barcode);
+                });
+            },
+            scanButtonKeyCode: 116,              // F5 acts as scan button
+            scanButtonLongPressThreshold: 5,
+            onScanButtonLongPressed: function(){ alert('Scan button held'); },
+            onError: function(string){}
+        });
+        /* ── End Barcode Scanner ─────────────────────────────────── */
     </script>
+
+    {{-- Barcode error toast --}}
+    <style>
+        #po-barcode-toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 99999;
+            display: none;
+        }
+        #po-barcode-toast .po-toast-inner {
+            background: #d9534f;
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 260px;
+            animation: poToastSlide 0.3s ease;
+        }
+        @keyframes poToastSlide {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+
+    <div id="po-barcode-toast">
+        <div class="po-toast-inner">
+            <span style="font-size:18px;">&#10007;</span>
+            <span id="po-barcode-toast-msg"></span>
+        </div>
+    </div>
+
+    <script>
+        function showPoToast(msg) {
+            $('#po-barcode-toast-msg').text(msg);
+            $('#po-barcode-toast').stop(true, true).fadeIn(200);
+            clearTimeout(window._poToastTimer);
+            window._poToastTimer = setTimeout(function(){
+                $('#po-barcode-toast').fadeOut(400);
+            }, 3500);
+        }
+    </script>
+
 @endpush

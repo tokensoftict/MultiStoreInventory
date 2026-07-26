@@ -1105,9 +1105,84 @@
                 return false;
             });
 
+            $(document).scannerDetection({
+                timeBeforeScanTest: 200, // wait for the next character for upto 200ms
+                endChar: [13], // be sure the scan is complete if key 13 (enter) is detected
+                avgTimeByChar: 40, // it's not a barcode if a character takes longer than 40ms
+                ignoreIfFocusOn: 'input', // turn off scanner detection if an input has focus
+                startChar: [16], // Prefix character for the cabled scanner (OPL6845R)
+                endChar: [40],
+                onComplete: function(barcode){
+                    showMask('Looking up product...');
+                    $.getJSON(productfindurl+"?query=" + barcode, function (data) {
+                        hideMask();
+                        if (!data || data.length === 0 || !data[0]) {
+                            showBarcodeToast('Product not found for barcode: ' + barcode);
+                        } else {
+                            appendToTable(data[0]);
+                        }
+                    }).fail(function () {
+                        hideMask();
+                        showBarcodeToast('Product not found for barcode: ' + barcode);
+                    });
+                }, // main callback function
+                scanButtonKeyCode: 116, // the hardware scan button acts as key 116 (F5)
+                scanButtonLongPressThreshold: 5, // assume a long press if 5 or more events come in sequence
+                onScanButtonLongPressed: function(){
+                    alert('key pressed');
+                }, // callback for long pressing the scan button
+                onError: function(string){}
+            });
+
         });
 
     </script>
 
+    <style>
+        #barcode-toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 99999;
+            display: none;
+        }
+        #barcode-toast .barcode-toast-inner {
+            background: #d9534f;
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 260px;
+            animation: slideInToast 0.3s ease;
+        }
+        @keyframes slideInToast {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        #barcode-toast .barcode-toast-icon { font-size: 18px; }
+    </style>
+
+    <div id="barcode-toast">
+        <div class="barcode-toast-inner">
+            <span class="barcode-toast-icon">&#10007;</span>
+            <span id="barcode-toast-msg"></span>
+        </div>
+    </div>
+
+    <script>
+        function showBarcodeToast(msg) {
+            $('#barcode-toast-msg').text(msg);
+            $('#barcode-toast').stop(true, true).fadeIn(200);
+            clearTimeout(window._barcodeToastTimer);
+            window._barcodeToastTimer = setTimeout(function () {
+                $('#barcode-toast').fadeOut(400);
+            }, 3500);
+        }
+    </script>
 
 @endpush
