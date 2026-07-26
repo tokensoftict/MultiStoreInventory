@@ -418,6 +418,14 @@
         }
 
         function appendToTable(data){
+            // Out-of-stock guard: block if both packed qty and yard qty are 0
+            let packedQty = parseInt(data.stock.available_quantity) || 0;
+            let yardQty   = parseInt(data.stock.available_yard_quantity) || 0;
+            if (packedQty <= 0 && yardQty <= 0) {
+                alert('⚠️ Out of Stock: "' + data.stock.name + '" has no available quantity.');
+                return;
+            }
+
             let defaultType = "{{ getActiveStore()->packed_column }}";
             if(data.stock.type != "Normal" && parseInt(data.stock.available_quantity) == 0 && parseInt(data.stock.available_yard_quantity) > 0){
                 defaultType = "{{ getActiveStore()->yard_column }}";
