@@ -2,6 +2,7 @@
 
 @push('css')
     <link rel="stylesheet" href="{{ asset('bower_components/select2/dist/css/select2.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('bower_components/toastr/toastr.min.css') }}">
     <link rel="stylesheet"
         href="{{ asset('bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css') }}">
     <style>
@@ -409,6 +410,15 @@
     <script src="{{ asset('assets/js/init-datepicker.js') }}"></script>
     <script type='text/javascript' src="{{asset('assets/js/autocomplete.js?v=' . mt_rand())}}"></script>
     <script type='text/javascript' src="{{asset('assets/js/barcode.js')}}"></script>
+    <script src="{{ asset('bower_components/toastr/toastr.min.js') }}"></script>
+    <script>
+        toastr.options = {
+            closeButton: true,
+            progressBar: true,
+            positionClass: 'toast-top-center',
+            timeOut: 4000
+        };
+    </script>
 
     <script>
 
@@ -426,7 +436,7 @@
             let packedQty = parseInt(data.stock.available_quantity) || 0;
             let yardQty   = parseInt(data.stock.available_yard_quantity) || 0;
             if (packedQty <= 0 && yardQty <= 0) {
-                alert('⚠️ Out of Stock: "' + data.stock.name + '" has no available quantity.');
+                toastr.error('"' + data.stock.name + '" has no available quantity.', 'Out of Stock');
                 return;
             }
 
