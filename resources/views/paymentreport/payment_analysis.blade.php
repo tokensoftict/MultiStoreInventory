@@ -92,7 +92,7 @@
                                                 }
 
                                             @endphp
-                                            <td></td>
+
                                         @else
                                             <td></td>
                                         @endif
