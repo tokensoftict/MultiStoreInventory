@@ -83,7 +83,7 @@
                                             <td>{{ $loop->iteration }}</td>
                                             <td>{{ $invoice->invoice->invoice_paper_number }}</td>
                                             <td>{{ $invoice->customer->firstname }} {{ $invoice->customer->lastname }}</td>
-                                            <td>{{ $invoice->stock->name }}</td>
+                                            <td>{{ optional($invoice->stock)->name }}</td>
                                             <td>{{ $invoice->quantity }}</td>
                                             <td>{{ number_format($invoice->cost_price, 2) }}</td>
                                             <td>{{ number_format($invoice->selling_price, 2) }}</td>
