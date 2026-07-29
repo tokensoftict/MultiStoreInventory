@@ -52,6 +52,7 @@
                                     <th>Customer</th>
                                     <th>Store</th>
                                     <th>Method</th>
+                                    <th>Bank</th>
                                     <th>Invoice / Receipt Number</th>
                                     <th>Sub Total</th>
                                     <th>Total Paid</th>
@@ -72,12 +73,19 @@
                                         if($payment_method->id === 4){
                                             $totalCredit+=$payment->amount;
                                         }
+
+                                        if($payment_method->id == "3"){
+                                            $info = json_decode($payment->payment_info,true);
+                                            $bank = \App\Models\BankAccount::with('bank')->find($info['bank_id']);
+                                            $bank_name = optional($bank->bank)->name."(".$bank->account_number.")";
+                                        }
                                     @endphp
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $payment->customer->firstname }} {{ $payment->customer->lastname }}</td>
                                         <td>{{ $payment->warehousestore->name }}</td>
                                         <td>{{ $payment->payment_method->name }}</td>
+                                        <td>{{ $payment->payment_method_id == "3" :  }}</td>
                                         <td>{{ optional($payment->invoice)->invoice_paper_number }}</td>
                                         <td>{{ number_format($payment->amount,2) }}</td>
                                         <td>{{ number_format($payment->amount,2) }}</td>
