@@ -58,6 +58,7 @@
                                     <th>Invoice / Receipt Number</th>
                                     <th>Sub Total</th>
                                     <th>Total Paid</th>
+                                    <th>Bank</th>
                                     <th>Payment Time</th>
                                     <th>Payment Date</th>
                                     <th>User</th>
@@ -74,6 +75,13 @@
                                         if($payment_method->id === 4){
                                             $totalCredit+=$payment->amount;
                                         }
+
+                                           $bank_name = "-";
+                                        if($payment_method->id == "3"){
+                                            $info = json_decode($payment->payment_info,true);
+                                            $bank = \App\Models\BankAccount::with('bank')->find($info['bank_id']);
+                                            $bank_name = optional($bank->bank)->name."(".$bank->account_number.")";
+                                        }
                                     @endphp
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
@@ -83,6 +91,21 @@
                                         <td>{{ optional($payment->invoice)->invoice_paper_number }}</td>
                                         <td>{{ number_format($payment->amount,2) }}</td>
                                         <td>{{ number_format($payment->amount,2) }}</td>
+                                        @if($payment->payment_method_id == "2" || $payment->payment_method_id == "3")
+                                            @php
+                                                try {
+                                                    $bank = json_decode($payment->payment_info, true);
+                                                    $acount = \App\Models\BankAccount::find($bank['bank_id']);
+                                                    echo "<td>".$acount->bank->name."(".$acount->account_number.")</td>";
+                                                } catch (Exception $e) {
+                                                    echo "<td></td>";
+                                                }
+
+                                            @endphp
+                                            <td></td>
+                                        @else
+                                            <td></td>
+                                        @endif
                                         <td>{{ date("h:i a",strtotime($payment->created_at)) }}</td>
                                         <td>{{ convert_date($payment->payment_date) }}</td>
                                         <td>{{ $payment->user->name }}</td>
@@ -98,6 +121,7 @@
                                     <th></th>
                                     <th>Total</th>
                                     <th>{{ number_format($total,2) }}</th>
+                                    <th></th>
                                     <th></th>
                                     <th></th>
                                     <th></th>
