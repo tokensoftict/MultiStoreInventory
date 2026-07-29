@@ -54,15 +54,15 @@ class AjaxController extends Controller
 
 
             ->whereHas('stock',function($q) use (&$query){
-            $q->where('status',1);
-            $q->where('type','!=','NON-SALEABLE-ITEMS');
-            $q->where(function($sub) use (&$query){
-                foreach ($query as $char) {
-                    $sub->where('name', 'LIKE', "%{$char}%");
-                }
-            });
-            $q->orWhere('barcode', "=", $query);
-        })->groupBy('stock_id')->get();
+                $q->where('status',"1");
+                $q->where('type','!=','NON-SALEABLE-ITEMS');
+                $q->where(function($sub) use (&$query){
+                    foreach ($query as $char) {
+                        $sub->where('name', 'LIKE', "%{$char}%");
+                    }
+                });
+                $q->orWhere('barcode', "=", $query);
+            })->groupBy('stock_id')->get();
 
         return $available;
     }
@@ -90,15 +90,15 @@ class AjaxController extends Controller
             'stock_id'
         )->with(['stock'])
             ->whereHas('stock',function($q) use (&$query){
-            $q->where('status',1);
-            $q->where('type','!=','NON-SALEABLE-ITEMS');
-            $q->where(function($sub) use (&$query){
-                foreach ($query as $char) {
-                    $sub->where('name', 'LIKE', "%{$char}%");
-                }
-            });
-            $q->orWhere('barcode', "=", $query);
-        })->groupBy('stock_id')->get();
+                $q->where('status',1);
+                $q->where('type','!=','NON-SALEABLE-ITEMS');
+                $q->where(function($sub) use (&$query){
+                    foreach ($query as $char) {
+                        $sub->where('name', 'LIKE', "%{$char}%");
+                    }
+                });
+                $q->orWhere('barcode', "=", $query);
+            })->groupBy('stock_id')->get();
 
         return $available;
     }
@@ -247,17 +247,17 @@ class AjaxController extends Controller
     public function processScaninvoice(Request $request){
         $invoiceCode = $request->get('invoice_code');
 
-       $invoice =  Invoice::where(function($sub) use($invoiceCode){
+        $invoice =  Invoice::where(function($sub) use($invoiceCode){
             $sub->orWhere('id', $invoiceCode)->orWhere('invoice_number', $invoiceCode);
         })->first();
 
-       if(!$invoice){
-           return response()->json(['status'=>false, "message" => "Invoice not found, Please try again."]);
-       }
+        if(!$invoice){
+            return response()->json(['status'=>false, "message" => "Invoice not found, Please try again."]);
+        }
 
-       if(!is_null($invoice->scan_user_id)){
-           return response()->json(['status'=>false, "message" => "Invoice has already been scanned by ".$invoice->scan_by->name." this might be a duplicate receipt"]);
-       }
+        if(!is_null($invoice->scan_user_id)){
+            return response()->json(['status'=>false, "message" => "Invoice has already been scanned by ".$invoice->scan_by->name." this might be a duplicate receipt"]);
+        }
 
         $invoice->scan_user_id = \auth()->id();
         $invoice->scan_time = Carbon::now();
