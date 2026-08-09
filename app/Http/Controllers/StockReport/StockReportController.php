@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers\StockReport;
 
+use App\Classes\Settings;
 use App\Http\Controllers\Controller;
+use App\Models\Stockbatch;
 use App\Models\StockLogItem;
 use App\Models\StockQuantityAdjustment;
 use App\Models\Warehousestore;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -60,4 +63,51 @@ class StockReportController extends Controller
     }
 
 
+    public function stock_expiry_report(Request $request)
+    {
+        $data['title'] = "Stock Expiry Report";
+
+        $settings = app(Settings::class);
+        $nearExpiryDays = (int) ($settings->get('near_expiry_days', 20) ?: 20);
+        $data['near_expiry_days'] = $nearExpiryDays;
+
+        $today = Carbon::today();
+        $nearExpiryDate = $today->copy()->addDays($nearExpiryDays);
+
+        $packedColumn = getActiveStore()->packed_column;
+        $yardColumn = getActiveStore()->yard_column;
+
+        // Expired batches — expiry_date is set, stock has expiry enabled, date has passed, and qty > 0
+        $data['expired'] = Stockbatch::with('stock')
+            ->whereHas('stock', function ($q) {
+                $q->where('expiry', 1)->where('status', 1);
+            })
+            ->where(function ($q) use ($packedColumn, $yardColumn) {
+                $q->where($packedColumn, '>', 0)
+                  ->orWhere($yardColumn, '>', 0);
+            })
+            ->whereNotNull('expiry_date')
+            ->whereDate('expiry_date', '<', $today->toDateString())
+            ->orderBy('expiry_date', 'ASC')
+            ->get();
+
+        // About-to-expire batches — expiry within the configured window but not yet expired, and qty > 0
+        $data['near_expiry'] = Stockbatch::with('stock')
+            ->whereHas('stock', function ($q) {
+                $q->where('expiry', 1)->where('status', 1);
+            })
+            ->where(function ($q) use ($packedColumn, $yardColumn) {
+                $q->where($packedColumn, '>', 0)
+                  ->orWhere($yardColumn, '>', 0);
+            })
+            ->whereNotNull('expiry_date')
+            ->whereDate('expiry_date', '>=', $today->toDateString())
+            ->whereDate('expiry_date', '<=', $nearExpiryDate->toDateString())
+            ->orderBy('expiry_date', 'ASC')
+            ->get();
+
+        return view("stock.stocklog.stock_expiry_report", $data);
+    }
+
 }
+

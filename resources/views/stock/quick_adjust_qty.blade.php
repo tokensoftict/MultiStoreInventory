@@ -2,7 +2,8 @@
 
 @push('css')
     <link rel="stylesheet" href="{{ asset('bower_components/select2/dist/css/select2.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css') }}">
+    <link rel="stylesheet"
+        href="{{ asset('bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css') }}">
 @endpush
 
 
@@ -23,7 +24,7 @@
                                 <div class="col-md-10">
                                     <div class="form-group">
                                         <label for="exampleInputEmail1">Select Stock to Adjust</label>
-                                        <select class="form-control  select-stock"  name="select_stock" id="customer_id">
+                                        <select class="form-control  select-stock" name="select_stock" id="customer_id">
                                             @if(isset($stock))
                                                 <option value="{{ $stock->id }}">{{ $stock->name }}</option>
                                             @endif
@@ -31,8 +32,9 @@
                                     </div>
                                 </div>
                                 <div class="col-md-2">
-                                    <br/>
-                                    <input class="btn btn-info btn-sm" style="margin-top: 5px;" type="submit" name="save" value="Fetch Stock">
+                                    <br />
+                                    <input class="btn btn-info btn-sm" style="margin-top: 5px;" type="submit" name="save"
+                                        value="Fetch Stock">
                                 </div>
                             </div>
                         </div>
@@ -44,47 +46,65 @@
                 <div class="col-md-6 col-md-offset-1">
                     <form action="" method="post">
                         {{ csrf_field() }}
-                        <input type="hidden" name="stock_id" value="{{ $convert_stock->id }}"/>
+                        <input type="hidden" name="stock_id" value="{{ $convert_stock->id }}" />
                         <section class="panel">
                             <div class="panel-body">
                                 <div class="row">
                                     <div class="col-sm-6">
                                         <h4>Stock Information</h4>
                                         <div class="form-group">
-                                            <label style="font-size: 12px">Name</label><br/>
+                                            <label style="font-size: 12px">Name</label><br />
                                             <label style="font-size: 15px">{{ $convert_stock->name }}</label>
                                         </div>
                                         <div class="form-group">
-                                            <label style="font-size: 12px">Available Quantity</label><br/>
+                                            <label style="font-size: 12px">Available Quantity</label><br />
                                             <label style="font-size: 15px">{{ $convert_stock->available_quantity }}</label>
                                         </div>
                                         <div class="form-group">
-                                            <label style="font-size: 12px">Selling Price</label><br/>
-                                            <label style="font-size: 15px">{{ number_format($convert_stock->selling_price,2) }}</label>
+                                            <label style="font-size: 12px">Selling Price</label><br />
+                                            <label
+                                                style="font-size: 15px">{{ number_format($convert_stock->selling_price, 2) }}</label>
                                         </div>
                                         <div class="form-group">
-                                            <label style="font-size: 12px">Cost Price</label><br/>
-                                            <label style="font-size: 15px">{{ number_format($convert_stock->cost_price,2) }}</label>
+                                            <label style="font-size: 12px">Cost Price</label><br />
+                                            <label
+                                                style="font-size: 15px">{{ number_format($convert_stock->cost_price, 2) }}</label>
                                         </div>
                                         <div class="form-group">
-                                            <label style="font-size: 12px">Name</label><br/>
+                                            <label style="font-size: 12px">Name</label><br />
                                             <label style="font-size: 15px">{{ $convert_stock->name }}</label>
                                         </div>
                                         <div class="form-group">
-                                            <label style="font-size: 12px">Available Yards Quantity</label><br/>
-                                            <label style="font-size: 15px;">{{ $convert_stock->available_yard_quantity }}</label>
+                                            <label style="font-size: 12px">Available Yards Quantity</label><br />
+                                            <label
+                                                style="font-size: 15px;">{{ $convert_stock->available_yard_quantity }}</label>
                                         </div>
                                     </div>
                                     <div class="col-sm-6">
 
-                                        <div class="form-group" >
-                                            <label style="font-size: 12px">Enter New Packed Quantity</label><br/>
-                                            <input type="number" value="{{ $convert_stock->available_quantity }}"  class="form-control" name="packed_qty" placeholder="New Packed Quantity"/>
+                                        <div class="form-group">
+                                            <label style="font-size: 12px">Enter New Packed Quantity</label><br />
+                                            <input type="number" value="{{ $convert_stock->available_quantity }}"
+                                                class="form-control" name="packed_qty" placeholder="New Packed Quantity" />
                                         </div>
                                         <div class="form-group">
-                                            <label style="font-size: 12px"> Enter New Yard Quantity</label><br/>
-                                            <input type="number" value="{{ $convert_stock->available_yard_quantity }}"  class="form-control" name="yard_qty" placeholder="New Yard Quantity"/>
+                                            <label style="font-size: 12px"> Enter New Yard Quantity</label><br />
+                                            <input type="number" value="{{ $convert_stock->available_yard_quantity }}"
+                                                class="form-control" name="yard_qty" placeholder="New Yard Quantity" />
                                         </div>
+
+                                        @if($stock->expiry == "1")
+                                            <div class="form-group">
+                                                <label style="font-size: 12px">Expiry Date</label><br />
+                                                @php
+                                                    $recentBatch = $convert_stock->stockBatches()->orderBy('expiry_date', 'DESC')->first();
+                                                    $currentExpiry = $recentBatch && $recentBatch->expiry_date ? \Carbon\Carbon::parse($recentBatch->expiry_date)->format('d/m/Y') : '';
+                                                @endphp
+                                                <input type="text" id="expiry_date" name="expiry_date" value="{{ $currentExpiry }}"
+                                                    class="form-control datepicker-expiry" placeholder="dd/mm/yyyy"
+                                                    autocomplete="off" />
+                                            </div>
+                                        @endif
 
                                         <input class="btn btn-info btn-block btn-lg" type="submit" name="save" value="Adjust">
 
@@ -101,8 +121,9 @@
 @endsection
 
 @push('js')
-    <script   src="{{ asset('bower_components/select2/dist/js/select2.min.js') }}"></script>
-    <script  src="{{ asset('assets/js/init-select2.js') }}"></script>
+    <script src="{{ asset('bower_components/select2/dist/js/select2.min.js') }}"></script>
+    <script src="{{ asset('bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js') }}"></script>
+    <script src="{{ asset('assets/js/init-select2.js') }}"></script>
     <script>
         $(".select-stock").select2({
             placeholder: 'Search for product',
@@ -117,11 +138,19 @@
                 },
                 processResults: function (response) {
                     return {
-                        results:response
+                        results: response
                     };
                 },
             }
         });
+
+        // Initialise expiry date picker if present
+        if ($('.datepicker-expiry').length) {
+            $('.datepicker-expiry').datepicker({
+                format: 'dd/mm/yyyy',
+                autoclose: true,
+                todayHighlight: true
+            });
+        }
     </script>
 @endpush
-

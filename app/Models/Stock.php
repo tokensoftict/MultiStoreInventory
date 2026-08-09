@@ -409,6 +409,11 @@ class Stock extends Model
 
         $recentBatch->{ getActiveStore()->packed_column } = $request->packed_qty;
         $recentBatch->{ getActiveStore()->yard_column } = $request->yard_qty;
+
+        if ($stock->expiry == 1 && $request->filled('expiry_date')) {
+            $recentBatch->expiry_date = \Carbon\Carbon::createFromFormat('d/m/Y', $request->expiry_date)->format('Y-m-d');
+        }
+
         $recentBatch->update();
 
         foreach ($stockLogCreate as $create)

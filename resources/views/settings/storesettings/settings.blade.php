@@ -79,7 +79,7 @@
                             </div>
                             <div class="form-group">
                                 <label>Near Expiry Days</label>
-                                <input  type="number" value="{{ old('near_expiry_days',@$store->near_expiry_days) }}" required class="form-control" name="near_expiry_days" placeholder="Near Expiry Days"/>
+                                <input  type="number" value="{{ old('near_expiry_days', !empty(@$store->near_expiry_days) ? @$store->near_expiry_days : 20) }}" required class="form-control" name="near_expiry_days" placeholder="Near Expiry Days"/>
                                 @if ($errors->has('near_expiry_days'))
                                     <label for="name-error" class="error"
                                            style="display: inline-block;">{{ $errors->first('near_expiry_days') }}</label>

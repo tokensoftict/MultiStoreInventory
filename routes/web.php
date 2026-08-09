@@ -422,6 +422,7 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
                 Route::match(['post','get'],'usage_log_report', ['as' => 'usage_log_report', 'uses' => 'StockReportController@usage_log_report', 'visible'=>false,'custom_label'=>'Stock Log Report']);
                 Route::match(['post','get'],'near_out_of_stock', ['as' => 'near_out_of_stock', 'uses' => 'StockReportController@near_out_of_stock', 'visible'=>false,'custom_label'=>'Stock Re-order Level Report']);
                 Route::match(['post','get'],'quantity_adjustment_report', ['as' => 'quantity_adjustment_report', 'uses' => 'StockReportController@quantity_adjustment_report', 'visible'=>false,'custom_label'=>'Quantity Adjustment Report']);
+                Route::match(['post','get'],'stock_expiry_report', ['as' => 'stock_expiry_report', 'uses' => 'StockReportController@stock_expiry_report', 'visible'=>false,'custom_label'=>'Stock Expiry Report']);
             });
             Route::prefix('expensesReport')->as('ExpensesReport.')->namespace('ExpensesReport')->group(function(){
                 Route::match(['get','post'],'/monthly_expenses_report', ['as' => 'monthly_expenses_report', 'uses' => 'ExpensesReportController@monthly_expenses_report', 'visible' => false, "custom_label"=>"Monthly Expenses"]);
