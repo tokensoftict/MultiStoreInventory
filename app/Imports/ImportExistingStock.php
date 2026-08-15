@@ -21,6 +21,8 @@ class ImportExistingStock implements ToCollection,WithHeadingRow
 
             $stock = Stock::find($row['id']);
 
+            if(!$stock) continue;
+
             if(isset($row['name'])  && !empty($row['name']))
             {
                 $stock->name = $row['name'];
