@@ -92,7 +92,7 @@
                                             <td>{{ number_format((($invoice->quantity * $invoice->selling_price)-($invoice->quantity * $invoice->cost_price)),2) }}</td>
                                             <td>{!! invoice_status($invoice->status) !!}</td>
                                             <td>{{ convert_date2($invoice->invoice->invoice_date) }}</td>
-                                            <td>{{ $invoice->invoice->sales_time }}</td>
+                                            <td>{{ $invoice->sales_time->format('h:i a') }}</td>
                                             <td>{{ $invoice->invoice->created_user->name }}</td>
                                             <td>
                                                 <div class="btn-group">
