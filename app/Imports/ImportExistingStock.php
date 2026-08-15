@@ -20,7 +20,7 @@ class ImportExistingStock implements ToCollection,WithHeadingRow
             if(!isset($row['id'])) continue;
 
             $stock = Stock::find($row['id']);
-dd($stock);
+
             if(isset($row['name'])  && !empty($row['name']))
             {
                 $stock->name = $row['name'];
