@@ -242,7 +242,7 @@ class Invoice extends Model
         $invoice->total_cost = $totals['total_invoice_total_cost'];
         $invoice->last_updated_by = auth()->id();
         $invoice->price_category_id = $request->get('price_category_id');
-
+        $invoice->invoice_date = $request->get('date');
         $invoice->update();
 
 
