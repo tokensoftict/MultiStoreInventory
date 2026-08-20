@@ -454,9 +454,9 @@
                 var currentVal = parseFloat(existingInput.val());
                 var maxVal = parseFloat(existingInput.attr('max'));
                 if (currentVal < maxVal) {
-                    existingInput.val(currentVal + 1).change();
+                    //existingInput.val(currentVal + 1).change();
                 } else {
-                    alert('Not enough quantity to add more of ' + data.stock.name);
+                    //alert('Not enough quantity to add more of ' + data.stock.name);
                 }
             } else {
                 $('#appender').prepend(cartTemplate(data));
