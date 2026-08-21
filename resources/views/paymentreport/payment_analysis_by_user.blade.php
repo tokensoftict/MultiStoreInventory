@@ -95,8 +95,10 @@
                                             @php
                                                 try {
                                                     $bank = json_decode($payment->payment_info, true);
+                                                    if(isset($bank['bank_id'])) {
                                                     $acount = \App\Models\BankAccount::find($bank['bank_id']);
                                                     echo "<td>".$acount->bank->name."(".$acount->account_number.")</td>";
+                                                    }
                                                 } catch (Exception $e) {
                                                     echo "<td></td>";
                                                 }
