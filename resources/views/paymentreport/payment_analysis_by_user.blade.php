@@ -79,7 +79,7 @@
                                            $bank_name = "-";
                                         if($payment_method->id == "3"){
                                             $info = json_decode($payment->payment_info,true);
-                                            if(isset($bank['bank_id'])) {
+                                            if(isset($bank['bank_id']) and isset($info['bank_id']) ) {
                                                 $bank = \App\Models\BankAccount::with('bank')->find($info['bank_id']);
                                                 $bank_name = optional($bank->bank)->name."(".$bank->account_number.")";
                                             }
