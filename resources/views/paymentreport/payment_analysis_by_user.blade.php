@@ -82,6 +82,8 @@
                                             if(isset($bank['bank_id']) and isset($info['bank_id']) ) {
                                                 $bank = \App\Models\BankAccount::with('bank')->find($info['bank_id']);
                                                 $bank_name = optional($bank->bank)->name."(".$bank->account_number.")";
+                                            } else {
+                                                $bank_name = "";
                                             }
                                         }
                                     @endphp
@@ -100,7 +102,9 @@
                                                     if(isset($bank['bank_id'])) {
                                                     $acount = \App\Models\BankAccount::find($bank['bank_id']);
                                                     echo "<td>".$acount->bank->name."(".$acount->account_number.")</td>";
-                                                    }
+                                                    } else {
+                                                         echo  "<td></td>";
+                                                }
                                                 } catch (Exception $e) {
                                                     echo "<td></td>";
                                                 }
