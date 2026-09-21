@@ -132,7 +132,20 @@
                                         <th>
                                             @if($in->status === "PAID" || $in->status === "COMPLETE")
                                                 @foreach($in->paymentMethodTable as $method)
-                                                    <b>{{ $method->payment_method->name }}</b> : {{  money($method->amount) }}<br/>
+                                                    <b>{{ $method->payment_method->name }}</b> : {{  money($method->amount) }}
+                                                    @if($method->payment_method_id == "2" || $method->payment_method_id == "3")
+                                                        @php
+                                                            try {
+                                                                $bank = json_decode($method->payment_info, true);
+                                                                $acount = \App\Models\BankAccount::find($bank['bank_id']);
+                                                                echo $acount->bank->name."(".$acount->account_number.")";
+                                                            } catch (Exception $e) {
+                                                               // echo "<td></td>";
+                                                            }
+
+                                                        @endphp
+                                                    @endif
+                                                    <br/>
                                                     @php
                                                         if(isset($totalPaymentMethod[$method->payment_method->name])) {
                                                             $totalPaymentMethod[$method->payment_method->name] += $method->amount;

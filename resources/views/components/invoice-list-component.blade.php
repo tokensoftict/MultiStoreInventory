@@ -53,7 +53,7 @@
                                         $acount = \App\Models\BankAccount::find($bank['bank_id']);
                                         echo $acount->bank->name."(".$acount->account_number.")";
                                     } catch (Exception $e) {
-                                        echo "<td></td>";
+                                       // echo "<td></td>";
                                     }
 
                                 @endphp
