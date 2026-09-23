@@ -125,10 +125,11 @@
                 <th></th>
                 <th></th>
                 <th>Total Discount</th>
-                <th>{{ number_format($total_discount,2) }}</th>
+                <th>@if(userCanView('invoiceandsales.showinvoicetotal')) {{ number_format($total_discount,2) }}@endif</th>
                 <th>Total Paid</th>
-                <th>{{ number_format($total,2) }}</th>
+                <th>@if(userCanView('invoiceandsales.showinvoicetotal')) {{  number_format($total,2) }}@endif</th>
                 <th>@php
+                        if(userCanView('invoiceandsales.showinvoicetotal')) {
                         $allTotal =0;
                         foreach ($totalPaymentMethod as $key => $value) {
                             if($value > 0) {
@@ -138,6 +139,7 @@
                         }
                        echo ' <hr/ style="margin:0;padding:0;padding-top:2px;padding-bottom:2px;">';
                         echo '<span style="color:red"><b>TOTAL</b> : '.money($allTotal).'</span><br/>';
+                       }
                     @endphp</th>
                 <th></th>
                 <th></th>

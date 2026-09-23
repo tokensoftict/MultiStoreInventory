@@ -298,6 +298,8 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
                 Route::get('{id}/cancel_discount', ['as' => 'cancel_discount', 'uses' => 'InvoiceController@cancel_discount','custom_label'=>'Cancel Discount Request']);
                 Route::get('allow_user_to_change_invoice_date', ['as' => 'allow_user_to_change_invoice_date', 'uses' => 'InvoiceController@allow_user_to_change_invoice_date','custom_label'=>'Allow user to change invoice date']);
                 Route::get('checkoutScan', ['as' => 'checkoutScan', 'uses' => 'InvoiceController@checkoutScan','custom_label'=>'Scan Invoice for Product Checkout', 'visible' => true]);
+                Route::get('showqty', ['as' => 'showqty', 'uses' => 'InvoiceController@showqty','custom_label'=>'Show Quantity during search in invoice', 'visible' => false]);
+                Route::get('showinvoicetotal', ['as' => 'showinvoicetotal', 'uses' => 'InvoiceController@showinvoicetotal','custom_label'=>'Show Invoice Total in Invoice Report', 'visible' => false]);
             });
         });
         Route::prefix('deposit')->namespace('Deposit')->group(function () {

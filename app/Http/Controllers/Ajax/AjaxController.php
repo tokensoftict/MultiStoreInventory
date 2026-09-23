@@ -64,7 +64,14 @@ class AjaxController extends Controller
                 $q->orWhere('barcode', "=", $query);
             })->groupBy('stock_id')->get();
 
-        return $available;
+        $data = $available->map(function($stock) {
+            // Convert model to array and append the dynamic variable
+            $stockArray = $stock->toArray();
+            $stockArray['show_qty'] = userCanView('invoiceandsales.showqty');
+            return $stockArray;
+        });
+
+        return response()->json($data);
     }
 
 

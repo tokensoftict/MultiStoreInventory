@@ -80,10 +80,16 @@ $.widget("ui.autocomplete", $.ui.autocomplete, {
 
             .data('ui-autocomplete')._renderItem = function(ul, item) {
             console.log(item);
-            return $('<li></li>')
-                .data("item.autocomplete", item)
-                .append('<a>' + item['stock']['name'] + '</a>&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-size: 15px;color:blue">Price : &#x20A6; '+formatMoney(item.stock.selling_price)+'&nbsp;&nbsp;&nbsp;</span><span style="font-size: 15px;color:green">Yard Price : &#x20A6;'+formatMoney(item.stock.yard_selling_price)+'</span>&nbsp;&nbsp;&nbsp;<span  style="font-size: 15px;color:red">Ava. Qty :'+item.stock.available_quantity+'</span>&nbsp;&nbsp;&nbsp;<span  style="font-size: 15px;color:red">Ava. Yard Qty :'+item.stock.available_yard_quantity+'</span>')
-                .appendTo(ul);
+            const listUi = $('<li></li>')
+                .data("item.autocomplete", item);
+            if(item['show_qty']) {
+                listUi.append('<a>' + item['stock']['name'] + '</a>&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-size: 15px;color:blue">Price : &#x20A6; ' + formatMoney(item.stock.selling_price) + '&nbsp;&nbsp;&nbsp;</span><span style="font-size: 15px;color:green">Yard Price : &#x20A6;' + formatMoney(item.stock.yard_selling_price) + '</span>&nbsp;&nbsp;&nbsp;<span  style="font-size: 15px;color:red">Ava. Qty :' + item.stock.available_quantity + '</span>&nbsp;&nbsp;&nbsp;<span  style="font-size: 15px;color:red">Ava. Yard Qty :' + item.stock.available_yard_quantity + '</span>')
+            } else {
+                listUi.append('<a>' + item['stock']['name'] + '</a>&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-size: 15px;color:blue">Price : &#x20A6; ' + formatMoney(item.stock.selling_price) + '&nbsp;&nbsp;&nbsp;</span><span style="font-size: 15px;color:green">Yard Price : &#x20A6;' + formatMoney(item.stock.yard_selling_price))
+            }
+            listUi.appendTo(ul);
+
+            return listUi;
         };
         // end autocomplete
     });
