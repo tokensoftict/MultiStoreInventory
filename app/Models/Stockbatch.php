@@ -37,7 +37,7 @@ class Stockbatch extends Model
 
 
 	protected $casts = [
-		'quantity' => 'int',
+		'quantity' => 'float',
 		'supplier_id' => 'int',
 		'stock_id' => 'int'
 	];

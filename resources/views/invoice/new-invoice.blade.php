@@ -508,13 +508,15 @@
             }
 
             input.attr('data-price', price);
+            let qty = parseFloat(input.val()) || 1;
+            let displayPrice = (qty % 1 !== 0) ? (price * qty) : price;
             let td_price = tr.find('.item_price');
             @if($settings['allow_edit_price'] == "Yes")
-                td_price.html('<input type="text" step="0.00000001" class="item_text_price form-control" value="' + formatMoney(price) + '"/>');
+                td_price.html('<input type="text" step="0.00000001" class="item_text_price form-control" value="' + formatMoney(displayPrice) + '"/>');
             @else
-                td_price.html('<span class="item_text_price form-control" value="' + price + '">' + formatMoney(price) + '</span>');
+                td_price.html('<span class="item_text_price form-control" value="' + displayPrice + '">' + formatMoney(displayPrice) + '</span>');
             @endif
-            }
+        }
 
         function bindproductType() {
             $('.product_type').off('change');
@@ -569,21 +571,36 @@
         function bindIncrement() {
             let qty_before = 1;
 
-            $('.item_text_price').off('keyup');
-            $('.item_text_price').on('keyup', function () {
-                const textb = $(this).parent().parent().find('.input-number');
-                let val = $(this).val().replace(/,/g, '');
-                textb.attr('data-price', val);
-                calculateTotal();
+            $('.item_text_price').off('input keyup');
+            $('.item_text_price').on('input keyup', function () {
+                const tr = $(this).closest('tr');
+                const textb = tr.find('.input-number');
+                let val = parseFloat($(this).val().replace(/,/g, '')) || 0;
+                let qty = parseFloat(textb.val()) || 1;
+                let unit_price = (qty % 1 !== 0 && qty > 0) ? (val / qty) : val;
+                textb.attr('data-price', unit_price);
+
+                let total_invoice = 0;
+                $('.input-number').each(function () {
+                    const r = $(this).closest('tr');
+                    const q = parseFloat($(this).val()) || 0;
+                    const u = parseFloat($(this).attr('data-price')) || 0;
+                    const row_tot = q * u;
+                    total_invoice += row_tot;
+                    r.find('.item_total').html(formatMoney(row_tot));
+                });
+                $('#sub_total').html(formatMoney(total_invoice));
+                $('.total_invoice').html("&#8358;" + formatMoney(total_invoice));
             });
 
             $('.item_text_price').off('blur');
             $('.item_text_price').on('blur', function () {
-                let val = $(this).val().replace(/,/g, '');
+                let val = parseFloat($(this).val().replace(/,/g, ''));
                 if (isNaN(val) || val === '') {
                     val = 0;
                 }
                 $(this).val(formatMoney(val));
+                calculateTotal();
             });
             $('.btn-number').off("click");
             $('.btn-number').click(function (e) {
@@ -625,21 +642,25 @@
                 calculateTotal();
             });
 
-            $('.input-number').off('keyup');
-            $('.input-number').on('keyup', function () {
-                if (parseFloat($(this).val()) < parseFloat($(this).attr('max'))) {
+            $('.input-number').off('input keyup change');
+            $('.input-number').on('input keyup', function () {
+                let val = parseFloat($(this).val());
+                let max = parseFloat($(this).attr('max'));
+                if (!isNaN(val) && val <= max) {
                     qty_before = $(this).val();
                 }
-            })
+                calculateTotal();
+            });
 
-            $('.input-number').off('change');
             $('.input-number').on('change', function () {
-                if (parseFloat($(this).val()) > parseFloat($(this).attr('max'))) {
+                let val = parseFloat($(this).val());
+                let max = parseFloat($(this).attr('max'));
+                if (!isNaN(val) && val > max) {
                     alert('Not enough quantity, Please add more quantity and re-add the product');
                     $(this).val(qty_before);
                 }
                 calculateTotal();
-            })
+            });
         }
 
         function removeItem(elem) {
@@ -651,11 +672,23 @@
         function calculateTotal() {
             let total_invoice = 0;
             $('.input-number').each(function (index, elem) {
-                const total = $(this).parent().parent().parent().parent();
-                const total_td = total.find('.item_total');
-                const _total = (parseFloat($(this).val()) * parseFloat($(this).attr('data-price')));
+                const tr = $(this).closest('tr');
+                const total_td = tr.find('.item_total');
+                const price_input = tr.find('.item_text_price');
+                const qty = parseFloat($(this).val()) || 0;
+                const unit_price = parseFloat($(this).attr('data-price')) || 0;
+                const _total = qty * unit_price;
                 total_invoice += _total;
                 total_td.html(formatMoney(_total));
+
+                if (!price_input.is(':focus')) {
+                    let display_price = (qty % 1 !== 0) ? _total : unit_price;
+                    if (price_input.is('input')) {
+                        price_input.val(formatMoney(display_price));
+                    } else {
+                        price_input.text(formatMoney(display_price)).attr('value', display_price);
+                    }
+                }
             });
             $('#sub_total').html(formatMoney(total_invoice));
             $('.total_invoice').html("&#8358;" + formatMoney(total_invoice));

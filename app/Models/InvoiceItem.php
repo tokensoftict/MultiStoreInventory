@@ -52,7 +52,7 @@ class InvoiceItem extends Model
 	protected $casts = [
 		'invoice_id' => 'int',
 		'stock_id' => 'int',
-		'quantity' => 'int',
+		'quantity' => 'float',
 		'customer_id' => 'int',
 		'added_by' => 'int',
         'warehousestore_id' => 'int',

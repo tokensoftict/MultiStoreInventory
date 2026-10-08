@@ -306,7 +306,7 @@ class Stock extends Model
                 $batch_ids[$batch->id] = $b;
                 $quantity = 0;
             }
-            if($quantity === 0)  return $batch_ids;
+            if(round((float)$quantity, 4) == 0)  return $batch_ids;
         }
 
         if($quantity != 0) return false;

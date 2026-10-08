@@ -100,8 +100,8 @@ class Warehousestore extends Model
         self::creating(function($obj){
             $value = generateRandom(5);
             Schema::table("stockbatches", function (Blueprint $table) use(& $value) {
-                $table->bigInteger("packed_".$value)->default(0)->after("quantity");
-                $table->bigInteger("yard_".$value)->default(0)->after("quantity");
+                $table->decimal("packed_".$value, 20, 4)->default(0)->after("quantity");
+                $table->decimal("yard_".$value, 20, 4)->default(0)->after("quantity");
             });
             $obj->packed_column = "packed_".$value;
             $obj->yard_column = "yard_".$value;

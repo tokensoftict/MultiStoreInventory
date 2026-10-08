@@ -53,7 +53,7 @@ class InvoiceItemBatch extends Model
 		'cost_price' => 'float',
 		'selling_price' => 'float',
 		'profit' => 'float',
-		'quantity' => 'int'
+		'quantity' => 'float'
 	];
 
 	protected $dates = [
