@@ -173,7 +173,7 @@
                                              <tr style="cursor: pointer" id="product_{{  $items->stock->id }}">
                                                  <th  class="text-center"><input data-image="{{ $items->stock->image }}" name="picture" class="picture" value="1" type="radio"></th>
                                                  <th>{{ $items->stock->name }}<div id="error_{{ $items->stock->id }}" class="errors alert alert-danger" style="display:none;"></div></th>
-                                                 <td><div class="col-md-4"><div class="input-group"> <span class="input-group-btn input-group-sm"> <button  data-field="quant[1]" type="button" class="btn btn-danger btn-number minus" data-type="minus"> <i class="fa fa-minus"></i></button></span><input class="form-control text-center input-number" data-invoice-item-id="{{ $items->id }}"  data-id="{{ $items->stock->id }}" data-packed-price="{{ $items->stock->selling_price }}" data-yard-price="{{ $items->stock->yard_selling_price }}" data-stock-prices="{{ json_encode($items->stock->stockPrices) }}" data-cost-price="{{  $items->cost_price }}" data-price="{{ $items->selling_price }}" style="width:100px;display: block;" required="" max="{{ $items->store == "quantity" ? $items->stock->available_quantity + $items->quantity  :  $items->stock->available_yard_quantity+ $items->quantity }}" min="0.01" step="0.01" type="number" value="{{ $items->quantity }}"> <span class="input-group-btn"> <button type="button" class="btn btn-primary btn-number plus" data-type="plus"><i class="fa fa-plus"></i> </button> </span></div></div>
+                                                  <td><div class="col-md-4"><div class="input-group"> <span class="input-group-btn input-group-sm"> <button  data-field="quant[1]" type="button" class="btn btn-danger btn-number minus" data-type="minus"> <i class="fa fa-minus"></i></button></span><input class="form-control text-center input-number" data-invoice-item-id="{{ $items->id }}"  data-id="{{ $items->stock->id }}" data-packed-price="{{ $items->stock->selling_price }}" data-yard-price="{{ $items->stock->yard_selling_price }}" data-stock-prices="{{ json_encode($items->stock->stockPrices) }}" data-cost-price="{{ ($items->quantity % 1 != 0 && $items->quantity > 0) ? ($items->cost_price / $items->quantity) : $items->cost_price }}" data-price="{{ ($items->quantity % 1 != 0 && $items->quantity > 0) ? ($items->selling_price / $items->quantity) : $items->selling_price }}" style="width:100px;display: block;" required="" max="{{ $items->store == "quantity" ? $items->stock->available_quantity + $items->quantity  :  $items->stock->available_yard_quantity+ $items->quantity }}" min="0.01" step="0.01" type="number" value="{{ $items->quantity }}"> <span class="input-group-btn"> <button type="button" class="btn btn-primary btn-number plus" data-type="plus"><i class="fa fa-plus"></i> </button> </span></div></div>
                                                  <td>
                                                      <select class="form-control product_type {{ $items->stock->type }}">
                                                          @if($items->stock->type == "PACKED")
@@ -199,14 +199,11 @@
                                                      </select>
                                                  </td>
                                                  @endif
-                                                 <th class="text-right item_price">
-                                                     @php
-                                                         $displayedPrice = ($items->quantity % 1 != 0) ? ($items->selling_price * $items->quantity) : $items->selling_price;
-                                                     @endphp
+                                                  <th class="text-right item_price">
                                                      @if($settings['allow_edit_price'] == "Yes")
-                                                          <input type="text" step="0.00000001" class="item_text_price form-control" style="width: 100px; display: inline-block;" value="{{ number_format($displayedPrice, 2) }}">
+                                                          <input type="text" step="0.00000001" class="item_text_price form-control" style="width: 100px; display: inline-block;" value="{{ number_format($items->selling_price, 2) }}">
                                                      @else
-                                                         <span type="text" step="0.00000001" class="item_text_price form-control" style="width: 100px; display: inline-block;" value="{{ $displayedPrice }}">{{ money($displayedPrice) }}</span>
+                                                         <span type="text" step="0.00000001" class="item_text_price form-control" style="width: 100px; display: inline-block;" value="{{ $items->selling_price }}">{{ money($items->selling_price) }}</span>
                                                      @endif
                                                  </th>
                                                  <th class="text-right item_total">{{ number_format($items->total_selling_price,2) }}</th>

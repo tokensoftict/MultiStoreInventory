@@ -599,10 +599,17 @@ class Invoice extends Model
         $returnLogs = [];
 
         foreach ($stocks as $key=>$stock){
+            $qty = (float)$stock['prods']['qty'];
+            $unit_selling = (float)$stock['prods']['price'];
+            $unit_cost = (float)$stock['prods']['cost_price'];
 
-            $total_selling_price  =  $stock['prods']['price'] * $stock['prods']['qty'];
-            $total_cost_price  =  $stock['prods']['cost_price'] * $stock['prods']['qty'];
+            $total_selling_price  =  $unit_selling * $qty;
+            $total_cost_price  =  $unit_cost * $qty;
             $total_profit =   $total_selling_price -  $total_cost_price;
+
+            $item_selling_price = (fmod($qty, 1) != 0) ? $total_selling_price : $unit_selling;
+            $item_cost_price = (fmod($qty, 1) != 0) ? $total_cost_price : $unit_cost;
+            $item_profit = $item_selling_price - $item_cost_price;
 
             //remove stock quantity from database
 
@@ -618,9 +625,9 @@ class Invoice extends Model
                 'invoice_date' =>$invoice_date,
                 'store' => $stock['prods']['type'],
                 'sales_time' =>$sales_time,
-                'cost_price'=>($invoice->sub_total < 0 ? -($stock['prods']['cost_price']) : ($stock['prods']['cost_price'])),
-                'selling_price' =>($invoice->sub_total < 0 ? -($stock['prods']['price']) : ($stock['prods']['price'])),
-                'profit'=>($invoice->sub_total < 0 ? ($stock['prods']['price'] - $stock['prods']['cost_price']) : ($stock['prods']['price'] - $stock['prods']['cost_price'])),
+                'cost_price'=>($invoice->sub_total < 0 ? -($item_cost_price) : ($item_cost_price)),
+                'selling_price' =>($invoice->sub_total < 0 ? -($item_selling_price) : ($item_selling_price)),
+                'profit'=>($invoice->sub_total < 0 ? -($item_profit) : ($item_profit)),
                 'total_selling_price' =>($invoice->sub_total < 0 ? -$total_selling_price : $total_selling_price),
                 'total_cost_price' => ($invoice->sub_total < 0 ? -$total_cost_price : $total_cost_price),
                 'total_profit'=>($invoice->sub_total < 0 ? -$total_profit : $total_profit),
@@ -641,7 +648,7 @@ class Invoice extends Model
                     'customer_id' => $invoice->customer_id,
                     'quantity_before' => $stock['prods']['qty'],
                     'quantity_after' => $stock['prods']['qty'],
-                    'selling_price' => $stock['prods']['price'],
+                    'selling_price' => $item_selling_price,
                     'date' => dailyDate(),
                     'dif' => 0,
                     'store_before' =>  $stock['prods']['type'],
@@ -678,7 +685,13 @@ class Invoice extends Model
                 $stock['stock']->removeSaleableBatches($stock['batches']);
             }
 
+            $qty = (float)$stock['prods']['qty'];
+            $unit_selling = (float)$stock['prods']['price'];
+            $unit_cost = (float)$stock['prods']['cost_price'];
 
+            $batch_selling_price = (fmod($qty, 1) != 0) ? ($unit_selling * $qty) : $unit_selling;
+            $batch_cost_price = (fmod($qty, 1) != 0) ? ($unit_cost * $qty) : $unit_cost;
+            $batch_profit = $batch_selling_price - $batch_cost_price;
 
             foreach ($stock['batches'] as $batch) {
 
@@ -686,9 +699,9 @@ class Invoice extends Model
                     'invoice_id'=> $invoice->id,
                     'stock_id' => $stock['stock']->id,
                     'stockbatch_id'=>$batch['id'],
-                    'cost_price'=> $invoice->sub_total < 0 ? -($stock['prods']['cost_price']) : $stock['prods']['cost_price'],
-                    'selling_price'=> $invoice->sub_total < 0 ? -($stock['prods']['price']) : $stock['prods']['price'],
-                    'profit'=>$invoice->sub_total < 0 ? -($stock['prods']['price'] - $stock['prods']['cost_price']) : ($stock['prods']['price'] - $stock['prods']['cost_price']),
+                    'cost_price'=> $invoice->sub_total < 0 ? -($batch_cost_price) : $batch_cost_price,
+                    'selling_price'=> $invoice->sub_total < 0 ? -($batch_selling_price) : $batch_selling_price,
+                    'profit'=>$invoice->sub_total < 0 ? -($batch_profit) : $batch_profit,
                     'quantity' => $batch['qty'],
                     'department'=> auth()->user()->department,
                     'warehousestore_id' => getActiveStore()->id,
@@ -702,7 +715,6 @@ class Invoice extends Model
         }
 
         return $invoiceItemBatches;
-
     }
 
 
