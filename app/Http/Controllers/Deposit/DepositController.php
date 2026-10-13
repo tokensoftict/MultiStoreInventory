@@ -70,7 +70,8 @@ class DepositController extends Controller
     {
         $data = [];
         $data['customers'] = Customer::query()->get();
-        $data['invoice'] = Deposit::with(['created_by','customer','deposit_items'])->findorfail($id);
+        $data['deposit'] = Deposit::with(['created_by','customer','deposit_items.stock'])->findorfail($id);
+        $data['invoice'] = $data['deposit'];
         $data['settings'] =  $this->settings;
         return view('deposit.update-deposit',$data);
     }

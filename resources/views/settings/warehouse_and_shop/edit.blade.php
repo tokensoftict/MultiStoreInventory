@@ -53,6 +53,17 @@
                                 <label>Footer Notes</label>
                                 <input type="text" value="{{ old('footer_notes',  $warehouse_and_shop->footer_notes) }}"   class="form-control" name="footer_notes" placeholder="Footer Notes"/>
                             </div>
+                            <div class="form-group">
+                                <label>Quantity System</label>
+                                <select class="form-control" name="quantity_system">
+                                    <option value="legacy" {{ old('quantity_system',$warehouse_and_shop->quantity_system ?? 'legacy') == 'legacy' ? 'selected' : '' }}>Standard (Carton &rarr; Pieces)</option>
+                                    <option value="multi_level" {{ old('quantity_system',$warehouse_and_shop->quantity_system ?? 'legacy') == 'multi_level' ? 'selected' : '' }}>Multi-level (Carton &rarr; Packet &rarr; Piece)</option>
+                                </select>
+                                <small class="text-muted">Can only be changed while this store has no stock.</small>
+                                @if ($errors->has('quantity_system'))
+                                    <label class="error" style="display: inline-block;">{{ $errors->first('quantity_system') }}</label>
+                                @endif
+                            </div>
                             <div class="pull-left">
                                 <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Update</button>
                             </div>

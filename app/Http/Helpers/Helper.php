@@ -581,9 +581,23 @@ function monthlyDateRange(){
 }
 
 
-function getActualStore($product_type,$store_selected){
-
+function getActualStore($product_type, $store_selected, $unit_id = null){
     $store = Warehousestore::find($store_selected);
+    if (!$store) {
+        return 'quantity';
+    }
+
+    if (\App\Services\InventoryQuantityService::usesMultiLevel($store)) {
+        return $store->yard_column;
+    }
+
+    if ($unit_id) {
+        $unit = \App\Models\ProductUnit::find($unit_id);
+        if ($unit && $unit->level == 1) {
+            return $store->packed_column;
+        }
+        return $store->yard_column;
+    }
 
     if($product_type == "NORMAL") {
        return $store->packed_column;
@@ -592,8 +606,11 @@ function getActualStore($product_type,$store_selected){
         return $store->yard_column;
     }
 
-    return $store->packed_column;
+    if ($product_type == $store->packed_column || $product_type == $store->yard_column) {
+        return $product_type;
+    }
 
+    return $store->packed_column;
 }
 
 
@@ -604,8 +621,16 @@ function getActiveStore($force = false){
         return Warehousestore::query()->where('id',request()->get('store'))->first();
     }
 
-    if(session()->has('activeStore')) {
-        return (object)session()->get('activeStore');
+    if(session()->has('activeStore') && !$force) {
+        $sessStore = (object)session()->get('activeStore');
+        if (!isset($sessStore->quantity_system) && isset($sessStore->id)) {
+            $dbStore = Warehousestore::find($sessStore->id);
+            if ($dbStore) {
+                session()->put('activeStore', $dbStore->toArray());
+                return (object)$dbStore->toArray();
+            }
+        }
+        return $sessStore;
     }
 
     $store = Warehousestore::query()->where('default',1)->where('status',1)->first();

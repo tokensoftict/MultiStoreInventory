@@ -96,10 +96,22 @@
                                         </thead>
                                         <tbody>
                                             @foreach($nearOSItems as $item)
+                                                @php
+                                                    $isMultiItem = !empty($item->is_multi) || (\App\Services\StockUnitService::isMulti() && \App\Services\StockUnitService::hasUnits($item->stock_id));
+                                                    $currentQtyLabel = !empty($item->breakdown_label)
+                                                        ? $item->breakdown_label
+                                                        : ($isMultiItem ? \App\Services\StockUnitService::breakdownLabel($item->stock_id, $item->available_quantity) : number_format($item->available_quantity));
+                                                    $reorderLevelLabel = !empty($item->reorder_label) ? $item->reorder_label : number_format($item->reorder_level);
+                                                @endphp
                                                 <tr style="border-bottom: 1px solid #f5e79e;">
                                                     <td style="font-weight: 600;">{{ $item->name }}</td>
-                                                    <td class="text-center" style="font-weight: bold; color: #c9302c;">{{ number_format($item->available_quantity) }}</td>
-                                                    <td class="text-center">{{ number_format($item->reorder_level) }}</td>
+                                                    <td class="text-center" style="font-weight: bold; color: #c9302c;">
+                                                        {{ $currentQtyLabel }}
+                                                        @if($isMultiItem)
+                                                            <br><small class="text-muted">({{ $item->available_quantity + 0 }} pcs)</small>
+                                                        @endif
+                                                    </td>
+                                                    <td class="text-center">{{ $reorderLevelLabel }}</td>
                                                     <td class="text-center">
                                                         <span class="label label-danger">Reorder</span>
                                                     </td>

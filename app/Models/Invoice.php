@@ -289,6 +289,10 @@ class Invoice extends Model
 
         $returnLogs = [];
 
+        // Multi-level stores only: unit lines -> base pieces (legacy rows untouched)
+        list($products, $unitErrors) = \App\Services\StockUnitService::normalizeInvoiceProducts($products);
+        $consumed = [];
+
         //check if a product was removed fro return invoice
         if($invoice->status == "COMPLETE"){
 
@@ -362,7 +366,7 @@ class Invoice extends Model
         $prods = [];
 
         foreach ($products as $product){
-            $key = $product['id'] . '-' . $product['type'];
+            $key = \App\Services\StockUnitService::rowKey($product);
             $prods[$key] = $product;
         }
 
@@ -374,7 +378,19 @@ class Invoice extends Model
                 continue;
             }
             $stock = $stocks[$prod['id']];
-            $batches = $stock->getSaleableBatches($prod['type'],$prod['qty']);
+            if (!empty($prod['unit_id'])) {
+                $ck = $prod['id'] . '-' . $prod['type'];
+                $already = $consumed[$ck] ?? 0;
+                $all = $stock->getSaleableBatches($prod['type'], $already + $prod['qty']);
+                $batches = ($all === false) ? false : \App\Services\StockUnitService::sliceBatches($all, (float)$already, (float)$prod['qty']);
+                $consumed[$ck] = $already + $prod['qty'];
+                if (app(Settings::class)->get('allow_selling_below_cost_price') == "0" and (float)$prod['unit_cost'] >= (float)$prod['unit_price']) {
+                    $status = true;
+                    $errors[$prod['id']] = $stock->name." can not be sell under cost price ".number_format($prod['unit_cost'],2);
+                }
+            } else {
+                $batches = $stock->getSaleableBatches($prod['type'],$prod['qty']);
+            }
             if($batches == false){
                 $status = true;
                 $errors[$prod['id']] = "Not enough quantity to process ".$stock->name;
@@ -408,6 +424,11 @@ class Invoice extends Model
                 }
             }
 
+        }
+
+        foreach ($unitErrors as $uid => $umsg) {
+            $status = true;
+            $errors[$uid] = $umsg;
         }
 
         if(count($errors) > 0){ // a validation error occurred return the batch back
@@ -503,8 +524,16 @@ class Invoice extends Model
         $errors = [];
         $prods = [];
 
+        // Multi-level stores only: convert unit lines to base pieces. Legacy stores/rows pass through untouched.
+        list($products, $unitErrors) = \App\Services\StockUnitService::normalizeInvoiceProducts($products);
+        if (count($unitErrors) > 0) {
+            $status = true;
+            $errors = $errors + $unitErrors;
+        }
+        $consumed = [];
+
         foreach ($products as $product){
-            $key = $product['id'] . '-' . $product['type'];
+            $key = \App\Services\StockUnitService::rowKey($product);
             $prods[$key] = $product;
         }
 
@@ -516,7 +545,20 @@ class Invoice extends Model
                 continue;
             }
             $stock = $stocks[$prod['id']];
-            $batches = $stock->getSaleableBatches($prod['type'],$prod['qty']);
+            if (!empty($prod['unit_id'])) {
+                // same product may appear in several units: allocate FIFO cumulatively so batches are never double-used
+                $ck = $prod['id'] . '-' . $prod['type'];
+                $already = $consumed[$ck] ?? 0;
+                $all = $stock->getSaleableBatches($prod['type'], $already + $prod['qty']);
+                $batches = ($all === false) ? false : \App\Services\StockUnitService::sliceBatches($all, (float)$already, (float)$prod['qty']);
+                $consumed[$ck] = $already + $prod['qty'];
+                if (app(Settings::class)->get('allow_selling_below_cost_price') == "0" and (float)$prod['unit_cost'] >= (float)$prod['unit_price']) {
+                    $status = true;
+                    $errors[$prod['id']] = $stock->name." can not be sell under cost price ".number_format($prod['unit_cost'],2);
+                }
+            } else {
+                $batches = $stock->getSaleableBatches($prod['type'],$prod['qty']);
+            }
             if($batches == false){
                 $status = true;
                 $errors[$prod['id']] = "Not enough quantity to process ".$stock->name;
@@ -572,8 +614,8 @@ class Invoice extends Model
         foreach ($stocks as $key=>$stock){
             //lets check if the customer is buying yards or bundle
 
-            $invoiceTotal[$key]['total_selling_price']  =  $stock['prods']['price'] * $stock['prods']['qty'];
-            $invoiceTotal[$key]['total_cost_price']  =  $stock['prods']['cost_price'] * $stock['prods']['qty'];
+            $invoiceTotal[$key]['total_selling_price']  =  !empty($stock['prods']['unit_id']) ? $stock['prods']['unit_price'] * $stock['prods']['unit_qty'] : $stock['prods']['price'] * $stock['prods']['qty'];
+            $invoiceTotal[$key]['total_cost_price']  =  !empty($stock['prods']['unit_id']) ? $stock['prods']['unit_cost'] * $stock['prods']['unit_qty'] : $stock['prods']['cost_price'] * $stock['prods']['qty'];
             $invoiceTotal[$key]['total_profit'] =  $invoiceTotal[$key]['total_selling_price'] -  $invoiceTotal[$key]['total_cost_price'];
             $total_invoice_total_selling += $invoiceTotal[$key]['total_selling_price'];
             $total_invoice_total_cost += $invoiceTotal[$key]['total_cost_price'] ;
@@ -603,12 +645,14 @@ class Invoice extends Model
             $unit_selling = (float)$stock['prods']['price'];
             $unit_cost = (float)$stock['prods']['cost_price'];
 
-            $total_selling_price  =  $unit_selling * $qty;
-            $total_cost_price  =  $unit_cost * $qty;
+            $isUnitLine = !empty($stock['prods']['unit_id']);
+
+            $total_selling_price  =  $isUnitLine ? (float)$stock['prods']['unit_price'] * (float)$stock['prods']['unit_qty'] : $unit_selling * $qty;
+            $total_cost_price  =  $isUnitLine ? (float)$stock['prods']['unit_cost'] * (float)$stock['prods']['unit_qty'] : $unit_cost * $qty;
             $total_profit =   $total_selling_price -  $total_cost_price;
 
-            $item_selling_price = (fmod($qty, 1) != 0) ? $total_selling_price : $unit_selling;
-            $item_cost_price = (fmod($qty, 1) != 0) ? $total_cost_price : $unit_cost;
+            $item_selling_price = $unit_selling;
+            $item_cost_price = $unit_cost;
             $item_profit = $item_selling_price - $item_cost_price;
 
             //remove stock quantity from database
@@ -634,6 +678,11 @@ class Invoice extends Model
                 'discount_type'=>'none',
                 'discount_amount'=>0,
                 'price_category_id' => $stock['prods']['price_category_id'] ?? null,
+                'unit_id' => $isUnitLine ? $stock['prods']['unit_id'] : null,
+                'unit_name' => $isUnitLine ? $stock['prods']['unit_name'] : null,
+                'unit_quantity' => $isUnitLine ? $stock['prods']['unit_qty'] : null,
+                'unit_price' => $isUnitLine ? $stock['prods']['unit_price'] : null,
+                'base_quantity' => $isUnitLine ? $stock['prods']['qty'] : null,
             ]);
 
 
@@ -689,8 +738,9 @@ class Invoice extends Model
             $unit_selling = (float)$stock['prods']['price'];
             $unit_cost = (float)$stock['prods']['cost_price'];
 
-            $batch_selling_price = (fmod($qty, 1) != 0) ? ($unit_selling * $qty) : $unit_selling;
-            $batch_cost_price = (fmod($qty, 1) != 0) ? ($unit_cost * $qty) : $unit_cost;
+            $isUnitLine = !empty($stock['prods']['unit_id']);
+            $batch_selling_price = $unit_selling;
+            $batch_cost_price = $unit_cost;
             $batch_profit = $batch_selling_price - $batch_cost_price;
 
             foreach ($stock['batches'] as $batch) {
@@ -709,6 +759,9 @@ class Invoice extends Model
                     'invoice_date' => $invoice_date,
                     'sales_time' =>$sales_time,
                     'customer_id' =>$customer_id,
+                    'unit_id' => $isUnitLine ? $stock['prods']['unit_id'] : null,
+                    'unit_name' => $isUnitLine ? $stock['prods']['unit_name'] : null,
+                    'base_quantity' => $isUnitLine ? $batch['qty'] : null,
                 ]);
             }
 

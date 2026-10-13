@@ -49,15 +49,23 @@ class StockReportController extends Controller
 
         $sql = rtrim($sql,", ");
 
-        $data['nearos'] = DB::table('stockbatches')->selectRaw(
+        $isMulti = \App\Services\InventoryQuantityService::usesMultiLevel($store);
+        $qtyCol = $isMulti ? $store->yard_column : $store->packed_column;
+
+        $stocksQuery = DB::table('stockbatches')->selectRaw(
             "stockbatches.stock_id,stocks.name,$sql, stocks.reorder_level,stocks.selling_price,stocks.cost_price, stocks.type"
             )
             ->join('stocks', 'stockbatches.stock_id', '=', 'stocks.id')
             ->where('stocks.status', 1)
-            ->whereNotNull('stocks.reorder_level')
-            ->whereRaw("(SELECT SUM(stockbatches." . $store->packed_column . ") FROM stockbatches WHERE stock_id=stocks.id) <= stocks.reorder_level")
-            ->groupBy('stocks.id','stocks.name')
-            ->get();
+            ->whereNotNull('stocks.reorder_level');
+
+        if ($isMulti) {
+            $stocksQuery->whereRaw("(SELECT COALESCE(SUM(sb." . $store->yard_column . "), 0) FROM stockbatches sb WHERE sb.stock_id=stocks.id) <= (stocks.reorder_level * COALESCE((SELECT CASE WHEN pu.units_per_parent > 0 THEN pu.units_per_parent ELSE 1 END FROM product_units pu WHERE pu.stock_id=stocks.id AND pu.level=2 LIMIT 1), 1))");
+        } else {
+            $stocksQuery->whereRaw("(SELECT COALESCE(SUM(sb." . $store->packed_column . "), 0) FROM stockbatches sb WHERE sb.stock_id=stocks.id) <= stocks.reorder_level");
+        }
+
+        $data['nearos'] = $stocksQuery->groupBy('stocks.id','stocks.name')->get();
 
         return view("stock.stocklog.nearosreport",$data);
     }

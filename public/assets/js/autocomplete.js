@@ -82,10 +82,41 @@ $.widget("ui.autocomplete", $.ui.autocomplete, {
             console.log(item);
             const listUi = $('<li></li>')
                 .data("item.autocomplete", item);
-            if(item['show_qty']) {
-                listUi.append('<a>' + item['stock']['name'] + '</a>&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-size: 15px;color:blue">Price : &#x20A6; ' + formatMoney(item.stock.selling_price) + '&nbsp;&nbsp;&nbsp;</span><span style="font-size: 15px;color:green">Yard Price : &#x20A6;' + formatMoney(item.stock.yard_selling_price) + '</span>&nbsp;&nbsp;&nbsp;<span  style="font-size: 15px;color:red">Ava. Qty :' + item.stock.available_quantity + '</span>&nbsp;&nbsp;&nbsp;<span  style="font-size: 15px;color:red">Ava. Yard Qty :' + item.stock.available_yard_quantity + '</span>')
+
+            const isMulti = item.stock && item.stock.multi_level && item.stock.units && item.stock.units.length > 0;
+
+            if (isMulti) {
+                let html = '<a>' + item.stock.name + '</a>&nbsp;&nbsp;&nbsp;&nbsp;';
+
+                // Render all unit prices
+                const priceColors = ['blue', 'purple', 'green', '#e83e8c', '#17a2b8'];
+                item.stock.units.forEach(function(u, idx) {
+                    const color = priceColors[idx % priceColors.length];
+                    const priceFormatted = typeof formatMoney === 'function' ? formatMoney(u.selling_price) : Number(u.selling_price).toFixed(2);
+                    html += '<span style="font-size: 15px;color:' + color + '">' + u.name + ' Price : &#x20A6; ' + priceFormatted + '&nbsp;&nbsp;&nbsp;</span>';
+                });
+
+                // Render all quantity levels if permission allows
+                if (item['show_qty']) {
+                    item.stock.units.forEach(function(u) {
+                        const av = (u.available !== null && u.available !== undefined) ? u.available : 0;
+                        html += '<span style="font-size: 15px;color:red">Ava. ' + u.name + ' : ' + av + '&nbsp;&nbsp;&nbsp;</span>';
+                    });
+                    if (item.stock.stock_label) {
+                        html += '<span style="font-size: 15px;color:#8a6d3b;font-weight:bold">(' + item.stock.stock_label + ')&nbsp;&nbsp;&nbsp;</span>';
+                    }
+                }
+
+                listUi.append(html);
             } else {
-                listUi.append('<a>' + item['stock']['name'] + '</a>&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-size: 15px;color:blue">Price : &#x20A6; ' + formatMoney(item.stock.selling_price) + '&nbsp;&nbsp;&nbsp;</span><span style="font-size: 15px;color:green">Yard Price : &#x20A6;' + formatMoney(item.stock.yard_selling_price))
+                const stockPrice = typeof formatMoney === 'function' ? formatMoney(item.stock.selling_price) : Number(item.stock.selling_price).toFixed(2);
+                const yardPrice = typeof formatMoney === 'function' ? formatMoney(item.stock.yard_selling_price) : Number(item.stock.yard_selling_price).toFixed(2);
+
+                if(item['show_qty']) {
+                    listUi.append('<a>' + item['stock']['name'] + '</a>&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-size: 15px;color:blue">Price : &#x20A6; ' + stockPrice + '&nbsp;&nbsp;&nbsp;</span><span style="font-size: 15px;color:green">Yard Price : &#x20A6;' + yardPrice + '</span>&nbsp;&nbsp;&nbsp;<span  style="font-size: 15px;color:red">Ava. Qty :' + item.stock.available_quantity + '</span>&nbsp;&nbsp;&nbsp;<span  style="font-size: 15px;color:red">Ava. Yard Qty :' + item.stock.available_yard_quantity + '</span>');
+                } else {
+                    listUi.append('<a>' + item['stock']['name'] + '</a>&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-size: 15px;color:blue">Price : &#x20A6; ' + stockPrice + '&nbsp;&nbsp;&nbsp;</span><span style="font-size: 15px;color:green">Yard Price : &#x20A6;' + yardPrice + '</span>');
+                }
             }
             listUi.appendTo(ul);
 

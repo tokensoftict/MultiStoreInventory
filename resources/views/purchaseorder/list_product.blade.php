@@ -64,10 +64,17 @@
                                         <td>{{ $data->purchase_order->purchase_order_invoice_number }}</td>
                                         <td>{{ $data->purchase_order->supplier->name }}</td>
                                         <td>{{ $data->stock->name }}</td>
-                                        <td>{{ $data->qty }}</td>
+                                        <td>
+                                            @if(!empty($data->unit_name))
+                                                {{ $data->unit_quantity + 0 }} {{ $data->unit_name }}
+                                                <br><small class="text-muted">({{ $data->qty + 0 }} pcs)</small>
+                                            @else
+                                                {{ $data->qty }}
+                                            @endif
+                                        </td>
                                         @if(userCanView('purchaseorders.showpo_total'))
-                                        <td>{{ number_format(($data->cost_price * $data->qty),2) }}</td>
-                                        <td>{{ number_format(($data->selling_price * $data->qty),2) }}</td>
+                                        <td>{{ number_format((!empty($data->unit_name) && $data->unit_price ? $data->unit_price * $data->unit_quantity : $data->cost_price * $data->qty),2) }}</td>
+                                        <td>{{ number_format((!empty($data->unit_name) && $data->selling_price ? $data->selling_price * $data->unit_quantity : $data->selling_price * $data->qty),2) }}</td>
                                         @endif
                                         <td>{{ convert_date2($data->purchase_order->date_created) }}</td>
                                         <td>{{ $data->user->name }}</td>

@@ -331,6 +331,11 @@
 
     <script>
 
+        // Multi-level quantity helpers (only used when a product carries units)
+        const BASE_YARD_COLUMN = "{{ getActiveStore()->yard_column }}";
+        function unitOptValue(u) { return BASE_YARD_COLUMN + '__u' + u.id; }
+        function defaultUnit(stock) { return stock.units[stock.units.length - 1]; } // Piece (smallest)
+
         function bindAllTr(){
             $('#appender').find('tr').off('click');
             $('#appender').find('tr').on('click',function(){
@@ -341,19 +346,62 @@
         }
 
         function appendToTable(data){
-            //if(!document.getElementById('product_'+data.stock.id)) {
-            $('#appender').prepend(cartTemplate(data));
-            $('.picture').prop('checked',false);
-            $('#'+'product_'+data.stock.id).find('.picture').prop('checked', true);
-            $('#imageThumb').attr('src', $('#'+'product_'+data.stock.id).find('.picture').attr('data-image'));
-            bindIncrement();
-            bindAllTr();
-            bindproductType();
-            calculateTotal();
-            // }else{
-            //     alert(data.stock.name+' already exist in cart')
-            // }
+            let packedQty = parseInt(data.stock.available_quantity) || 0;
+            let yardQty   = parseInt(data.stock.available_yard_quantity) || 0;
+            if (packedQty <= 0 && yardQty <= 0) {
+                toastr.error('"' + data.stock.name + '" has no available quantity.', 'Out of Stock');
+                return;
+            }
 
+            let defaultType = "{{ getActiveStore()->packed_column }}";
+            if (data.stock.type != "Normal" && parseInt(data.stock.available_quantity) == 0 && parseInt(data.stock.available_yard_quantity) > 0) {
+                defaultType = "{{ getActiveStore()->yard_column }}";
+            }
+            if (data.stock.multi_level && data.stock.units && data.stock.units.length) {
+                let onlyPieces = (data.stock.units.length === 1) || data.stock.only_pieces;
+                if (onlyPieces) {
+                    defaultType = unitOptValue(defaultUnit(data.stock));
+                } else {
+                    defaultType = "";
+                }
+            }
+
+            if (defaultType === "") {
+                // If a pending row already exists for this product without a selected unit, prompt the user
+                var pendingRow = $('#appender').find('.input-number[data-id="' + data.stock.id + '"]').filter(function () {
+                    return !$(this).closest('tr').find('.product_type').val();
+                });
+                if (pendingRow.length > 0) {
+                    alert('Please select a unit for ' + data.stock.name + ' in the cart before adding another.');
+                    pendingRow.closest('tr').find('.product_type').focus();
+                    return;
+                }
+            }
+
+            var existingInput = defaultType === "" ? $() : $('#appender').find('.input-number[data-id="' + data.stock.id + '"]').filter(function () {
+                return $(this).closest('tr').find('.product_type').val() === defaultType;
+            });
+
+            if (existingInput.length > 0) {
+                var currentVal = parseFloat(existingInput.val());
+                var maxVal = parseFloat(existingInput.attr('max'));
+                if (currentVal < maxVal) {
+                    existingInput.val(currentVal + 1).change();
+                } else {
+                    alert('Not enough quantity to add more of ' + data.stock.name);
+                }
+            } else {
+                $('#appender').prepend(cartTemplate(data));
+                $('.picture').prop('checked',false);
+                var trId = defaultType === "" ? ('product_' + data.stock.id + '_pending_' + Date.now()) : ('product_' + data.stock.id + '_' + defaultType);
+                $('#appender').find('tr').first().attr('id', trId);
+                $('#' + trId).find('.picture').prop('checked', true);
+                $('#imageThumb').attr('src', $('#' + trId).find('.picture').attr('data-image'));
+                bindIncrement();
+                bindAllTr();
+                bindproductType();
+                calculateTotal();
+            }
         }
 
 
@@ -362,10 +410,41 @@
             $('.product_type').on('change',function(){
                 const price = $(this).parent().parent().find('.input-number');
                 const td_price = $(this).parent().parent().find('.item_price');
-                price.attr('max',$('option:selected', this).attr('data-av-qty'));
-                price.attr('data-price',$('option:selected', this).attr('data-price'));
-                price.attr('data-cost-price',$('option:selected', this).attr('data-cost-price'));
-                td_price.html('<input type="text" step="0.00000001" class="item_text_price form-control" value="'+$('option:selected', this).attr('data-price')+'"/>')
+                const newType = $(this).val();
+                if (!newType) return;
+                const stockId = price.attr('data-id');
+                const tr = $(this).closest('tr');
+
+                // Check if another row with same stockId and newType exists
+                var duplicateInput = $('#appender').find('.input-number[data-id="' + stockId + '"]').filter(function () {
+                    return $(this).closest('tr')[0] !== tr[0] && $(this).closest('tr').find('.product_type').val() === newType;
+                });
+
+                if (duplicateInput.length > 0) {
+                    var currentVal = parseFloat(price.val());
+                    var duplicateVal = parseFloat(duplicateInput.val());
+                    var duplicateMax = parseFloat(duplicateInput.attr('max'));
+                    if (duplicateVal + currentVal <= duplicateMax) {
+                        duplicateInput.val(duplicateVal + currentVal).change();
+                        tr.remove();
+                        calculateTotal();
+                        return;
+                    } else {
+                        alert('Merging would exceed the available stock limit for this unit. Cannot change unit.');
+                        $(this).val('');
+                        return;
+                    }
+                }
+
+                price.attr('max', $('option:selected', this).attr('data-av-qty'));
+                price.attr('data-price', $('option:selected', this).attr('data-price'));
+                price.attr('data-cost-price', $('option:selected', this).attr('data-cost-price'));
+                @if($settings['allow_edit_price'] == "Yes")
+                td_price.html('<input type="text" step="0.00000001" class="item_text_price form-control" value="'+$('option:selected', this).attr('data-price')+'"/>');
+                @else
+                td_price.html('<span class="item_text_price form-control" value="'+$('option:selected', this).attr('data-price')+'">'+formatMoney($('option:selected', this).attr('data-price'))+'</span>');
+                @endif
+                tr.attr('id', 'product_' + stockId + '_' + newType);
                 bindproductType();
                 bindIncrement();
                 calculateTotal();
@@ -375,10 +454,11 @@
         function bindIncrement(){
             let qty_before = 1;
 
-            $('.item_text_price').off('keyup');
-            $('.item_text_price').on('keyup',function(){
+            $('.item_text_price').off('keyup input');
+            $('.item_text_price').on('keyup input',function(){
                 const textb = $(this).parent().parent().find('.input-number');
-                textb.attr('data-price',$(this).val());
+                let val = parseFloat($(this).val()) || 0;
+                textb.attr('data-price', val);
                 calculateTotal();
             });
             $('.btn-number').off("click");
@@ -387,30 +467,30 @@
                 fieldName = $(this).attr('data-field');
                 type      = $(this).attr('data-type');
                 var input = $(this).parent().parent().find('.form-control');
-                var currentVal = parseInt(input.val());
+                var currentVal = parseFloat(input.val());
                 if (!isNaN(currentVal)) {
                     if(type == 'minus') {
 
-                        if(currentVal > input.attr('min')) {
+                        if(currentVal > parseFloat(input.attr('min'))) {
                             input.val(currentVal - 1).change();
                         }
-                        if(parseInt(input.val()) == input.attr('min')) {
+                        if(parseFloat(input.val()) <= parseFloat(input.attr('min'))) {
                             $(this).attr('disabled', true);
                         }
-                        if(parseInt(input.val()) < input.attr('max')){
+                        if(parseFloat(input.val()) < parseFloat(input.attr('max'))){
                             $(this).parent().parent().find('.plus').removeAttr('disabled')
                         }
 
                     } else if(type == 'plus') {
 
-                        if(currentVal < input.attr('max')) {
+                        if(currentVal < parseFloat(input.attr('max'))) {
                             input.val(currentVal + 1).change();
                         }
-                        if(parseInt(input.val()) == input.attr('max')) {
+                        if(parseFloat(input.val()) >= parseFloat(input.attr('max'))) {
                             $(this).attr('disabled', true);
                         }
 
-                        if(parseInt(input.val()) > input.attr('min')){
+                        if(parseFloat(input.val()) > parseFloat(input.attr('min'))){
                             $(this).parent().parent().find('.minus').removeAttr('disabled')
                         }
 
@@ -423,14 +503,14 @@
 
             $('.input-number').off('keyup');
             $('.input-number').on('keyup',function () {
-                if(parseInt($(this).val()) < parseInt($(this).attr('max'))) {
+                if(parseFloat($(this).val()) < parseFloat($(this).attr('max'))) {
                     qty_before = $(this).val();
                 }
             })
 
             $('.input-number').off('change');
             $('.input-number').on('change',function(){
-                if(parseInt($(this).val()) > parseInt($(this).attr('max'))){
+                if(parseFloat($(this).val()) > parseFloat($(this).attr('max'))){
                     alert('Not enough quantity, Please add more quantity and re-add the product');
                     $(this).val(qty_before);
                 }
@@ -447,9 +527,9 @@
         function calculateTotal(){
             let total_invoice = 0;
             $('.input-number').each(function(index, elem){
-                const total = $(this).parent().parent().parent().parent();
+                const total = $(this).closest('tr');
                 const total_td = total.find('.item_total');
-                const _total = (parseInt($(this).val()) * parseFloat($(this).attr('data-price')));
+                const _total = (parseFloat($(this).val()) * parseFloat($(this).attr('data-price')));
                 total_invoice +=_total;
                 total_td.html(formatMoney(_total));
             });
@@ -462,21 +542,37 @@
         function wrapItemIncart(){
             const  product = [];
             let error_status = false;
+            let unselected_unit = false;
             $('.input-number').each(function(index, elem){
-                const type = $(this).parent().parent().parent().parent().find('.product_type');
+                const type = $(this).closest('tr').find('.product_type');
+                let typeVal = type.val();
+                if (!typeVal) {
+                    unselected_unit = true;
+                }
+                let unitId = null;
+                if (typeVal && typeVal.indexOf('__u') !== -1) {
+                    const parts = typeVal.split('__u');
+                    typeVal = parts[0];
+                    unitId = parts[1];
+                }
                 product.push(
                     {
                         id: $(this).attr('data-id'),
                         qty: $(this).val(),
-                        type: type.val(),
+                        type: typeVal,
+                        unit_id: unitId,
                         price : $(this).attr('data-price'),
                         cost_price : $(this).attr('data-cost-price')
                     }
                 );
-                if(parseInt($(elem).val()) > parseInt($(elem).attr('max'))){
+                if(parseFloat($(elem).val()) > parseFloat($(elem).attr('max'))){
                     error_status = true;
                 }
             });
+            if (unselected_unit === true) {
+                alert('Please select a unit for all items in the cart before submitting.');
+                return false;
+            }
             if(error_status === true){
                 alert('One or more Item in your invoice is out of stock, please cross check before submitting the invoice')
             }
@@ -519,20 +615,57 @@
                 type_select +='</select>';
             }
 
-            if(data.stock.available_quantity == 0 && data.stock.available_yard_quantity >0){
+            if(!data.stock.multi_level && data.stock.available_quantity == 0 && data.stock.available_yard_quantity >0){
                 data.stock.available_quantity = data.stock.available_yard_quantity;
                 data.stock.selling_price = data.stock.yard_selling_price
             }
+
+            let defaultType = "{{ getActiveStore()->packed_column }}";
+            let currentPrice = data.stock.selling_price;
+            let currentCost = data.stock.cost_price;
+            let currentMax = data.stock.available_quantity;
+
+            if (data.stock.multi_level && data.stock.units && data.stock.units.length) {
+                let onlyPieces = (data.stock.units.length === 1) || data.stock.only_pieces;
+                if (onlyPieces) {
+                    const du = defaultUnit(data.stock);
+                    defaultType = unitOptValue(du);
+                    type_select = '<select class="form-control product_type">';
+                    data.stock.units.forEach(function (u) {
+                        type_select += '<option ' + (u.id === du.id ? 'selected ' : '') + 'value="' + unitOptValue(u) + '" data-unit-id="' + u.id + '" data-cost-price="' + u.cost_price + '" data-price="' + u.selling_price + '" data-av-qty="' + u.available + '">' + u.name + ' (' + u.available + ' avail.)</option>';
+                    });
+                    type_select += '</select>';
+                    currentMax = du.available;
+                    currentPrice = du.selling_price;
+                    currentCost = du.cost_price;
+                } else {
+                    defaultType = "pending";
+                    type_select = '<select class="form-control product_type">';
+                    type_select += '<option value="" disabled selected>-- Select Unit --</option>';
+                    data.stock.units.forEach(function (u) {
+                        type_select += '<option value="' + unitOptValue(u) + '" data-unit-id="' + u.id + '" data-cost-price="' + u.cost_price + '" data-price="' + u.selling_price + '" data-av-qty="' + u.available + '">' + u.name + ' (' + u.available + ' avail.)</option>';
+                    });
+                    type_select += '</select>';
+                    currentMax = 0;
+                    currentPrice = 0;
+                    currentCost = 0;
+                }
+            }
+
             @if($settings['allow_edit_price'] == "Yes")
-                    {!! 'return `<tr style="cursor: pointer" id="product_`+data.stock.id+`"><th  class="text-center"><input data-image="`+data.stock.image+`" name="picture" class="picture" value="1" type="radio"></th><th>`+data.stock.name+`<div id="error_`+data.stock.id+`" class="errors alert alert-danger" `+(data[`error`] ? `` : `style="display:none;"`)+`>`+(data[`error`] ? data[`error`] : ``)+`</div>`+`</th><td><div class="col-md-4"><div class="input-group"> <span class="input-group-btn input-group-sm"> <button  data-field="quant[1]" type="button" class="btn btn-danger btn-number minus" data-type="minus"> <i class="fa fa-minus"></i></button></span><input class="form-control text-center input-number"  data-id="`+data.stock.id+`" data-price="`+data.stock.selling_price+`" data-cost-price="`+data.stock.cost_price+`" style="width:100px;display: block;" required="" max="`+data.stock.available_quantity+`" min="1" type="number" value="1"> <span class="input-group-btn"> <button type="button" class="btn btn-primary btn-number plus" data-type="plus"><i class="fa fa-plus"></i> </button> </span></div></div><td>`+type_select+`</td><th class="text-right item_price"><input type="text" step="0.00000001" class="item_text_price form-control" value="`+data.stock.selling_price+`"/></th><th class="text-right item_total">`+formatMoney(data.stock.selling_price)+`</th><td class="text-right"> <a href="#" onclick="return removeItem(this);" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i></a></td></tr>`;' !!}
-                    @else
-                    {!! 'return `<tr style="cursor: pointer" id="product_`+data.stock.id+`"><th  class="text-center"><input data-image="`+data.stock.image+`" name="picture" class="picture" value="1" type="radio"></th><th>`+data.stock.name+`<div id="error_`+data.stock.id+`" class="errors alert alert-danger" `+(data[`error`] ? `` : `style="display:none;"`)+`>`+(data[`error`] ? data[`error`] : ``)+`</div>`+`</th><td><div class="col-md-4"><div class="input-group"> <span class="input-group-btn input-group-sm"> <button  data-field="quant[1]" type="button" class="btn btn-danger btn-number minus" data-type="minus"> <i class="fa fa-minus"></i></button></span><input class="form-control text-center input-number"  data-id="`+data.stock.id+`" data-price="`+data.stock.selling_price+`" data-cost-price="`+data.stock.cost_price+`" style="width:100px;display: block;" required="" max="`+data.stock.available_quantity+`" min="1" type="number" value="1"> <span class="input-group-btn"> <button type="button" class="btn btn-primary btn-number plus" data-type="plus"><i class="fa fa-plus"></i> </button> </span></div></div><td>`+type_select+`</td><th class="text-right item_price"><span class="item_text_price form-control" value="`+data.stock.selling_price+`">`+formatMoney(data.stock.selling_price)+`</span></th><th class="text-right item_total">`+formatMoney(data.stock.selling_price)+`</th><td class="text-right"> <a href="#" onclick="return removeItem(this);" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i></a></td></tr>`;' !!}
-                    @endif
+                    {!! 'return `<tr style="cursor: pointer" id="product_`+data.stock.id+`_`+defaultType+`"><th  class="text-center"><input data-image="`+data.stock.image+`" name="picture" class="picture" value="1" type="radio"></th><th>`+data.stock.name+`<div id="error_`+data.stock.id+`" class="errors alert alert-danger" `+(data[`error`] ? `` : `style="display:none;"`)+`>`+(data[`error`] ? data[`error`] : ``)+`</div>`+`</th><td><div class="col-md-4"><div class="input-group"> <span class="input-group-btn input-group-sm"> <button  data-field="quant[1]" type="button" class="btn btn-danger btn-number minus" data-type="minus"> <i class="fa fa-minus"></i></button></span><input class="form-control text-center input-number"  data-id="`+data.stock.id+`" data-price="`+currentPrice+`" data-cost-price="`+currentCost+`" style="width:100px;display: block;" required="" max="`+currentMax+`" min="0.01" step="0.01" type="number" value="1"> <span class="input-group-btn"> <button type="button" class="btn btn-primary btn-number plus" data-type="plus"><i class="fa fa-plus"></i> </button> </span></div></div><td>`+type_select+`</td><th class="text-right item_price"><input type="text" step="0.00000001" class="item_text_price form-control" value="`+currentPrice+`"/></th><th class="text-right item_total">`+formatMoney(currentPrice)+`</th><td class="text-right"> <a href="#" onclick="return removeItem(this);" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i></a></td></tr>`;' !!}
+            @else
+                    {!! 'return `<tr style="cursor: pointer" id="product_`+data.stock.id+`_`+defaultType+`"><th  class="text-center"><input data-image="`+data.stock.image+`" name="picture" class="picture" value="1" type="radio"></th><th>`+data.stock.name+`<div id="error_`+data.stock.id+`" class="errors alert alert-danger" `+(data[`error`] ? `` : `style="display:none;"`)+`>`+(data[`error`] ? data[`error`] : ``)+`</div>`+`</th><td><div class="col-md-4"><div class="input-group"> <span class="input-group-btn input-group-sm"> <button  data-field="quant[1]" type="button" class="btn btn-danger btn-number minus" data-type="minus"> <i class="fa fa-minus"></i></button></span><input class="form-control text-center input-number"  data-id="`+data.stock.id+`" data-price="`+currentPrice+`" data-cost-price="`+currentCost+`" style="width:100px;display: block;" required="" max="`+currentMax+`" min="0.01" step="0.01" type="number" value="1"> <span class="input-group-btn"> <button type="button" class="btn btn-primary btn-number plus" data-type="plus"><i class="fa fa-plus"></i> </button> </span></div></div><td>`+type_select+`</td><th class="text-right item_price"><span class="item_text_price form-control" value="`+currentPrice+`">`+formatMoney(currentPrice)+`</span></th><th class="text-right item_total">`+formatMoney(currentPrice)+`</th><td class="text-right"> <a href="#" onclick="return removeItem(this);" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i></a></td></tr>`;' !!}
+            @endif
         }
 
         function ProcessDeposit(btn){
 
             const stock = wrapItemIncart();
+
+            if (stock === false) {
+                return false;
+            }
 
             if(stock.length === 0){
                 alert('You can not submit an empty cart, please add product to continue');

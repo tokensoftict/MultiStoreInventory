@@ -122,9 +122,19 @@ class PurchaseOrder extends Model
                 $purchase->stockbatch_id = $batch->id;
                 $purchase->update();
 
-                $purchase->stock->cost_price = $purchase->cost_price;
-                $purchase->stock->selling_price = $purchase->selling_price;
-                $purchase->stock->update();
+                if (empty($purchase->unit_id)) {
+                    $purchase->stock->cost_price = $purchase->cost_price;
+                    $purchase->stock->selling_price = $purchase->selling_price;
+                    $purchase->stock->update();
+                } else {
+                    // multi-level: refresh the received unit's own prices (levels stay independent)
+                    $units = \App\Services\StockUnitService::units($purchase->stock_id);
+                    $mult = \App\Services\InventoryQuantityService::multiplier($units, $purchase->unit_id);
+                    \App\Models\ProductUnit::where('id', $purchase->unit_id)->update([
+                        'cost_price' => $purchase->unit_price,
+                        'selling_price' => round($purchase->selling_price * $mult, 4),
+                    ]);
+                }
             }else{
                 $batches =  $purchase->stock->getSaleableBatches( $purchase->store, $purchase->qty);
                 $purchase->stock->removeSaleableBatches($batches);
@@ -192,6 +202,12 @@ class PurchaseOrder extends Model
         $cost_price = $request->get('cost_price');
         $selling_price = $request->get('selling_price');
         $batch = NULL;
+        // Multi-level stores: items are created per unit (original unit quantities preserved)
+        $mlTotal = self::createMultiLevelItems($po, $request);
+        if ($mlTotal !== null) {
+            $total = $mlTotal;
+            $stocks = [];
+        }
         foreach($stocks as $key=>$value){
             $total += ($cost_price[$key] * $qty[$key]);
             PurchaseOrderItem::create([
@@ -248,6 +264,12 @@ class PurchaseOrder extends Model
         $cost_price = $request->get('cost_price');
         $selling_price = $request->get('selling_price');
         $batch = NULL;
+        // Multi-level stores: items are created per unit (original unit quantities preserved)
+        $mlTotal = self::createMultiLevelItems($po, $request);
+        if ($mlTotal !== null) {
+            $total = $mlTotal;
+            $stocks = [];
+        }
         foreach($stocks as $key=>$value){
             $total += ($cost_price[$key] * $qty[$key]);
             PurchaseOrderItem::create([
@@ -285,5 +307,71 @@ class PurchaseOrder extends Model
         return redirect()->route($route)->with('success','Purchase Order has been created successfully!');
     }
 
+    /**
+     * Create purchase/return items for a multi-level store. Returns the PO total, or null when the
+     * store is not multi-level (the legacy path then runs untouched).
+     * One item row per unit: qty = base pieces, unit_* keeps what was actually received.
+     */
+    private static function createMultiLevelItems($po, $request)
+    {
+        $store = \App\Services\StockUnitService::storeByColumn($request->get('store'));
+        if (!$store || !\App\Services\StockUnitService::isMulti($store->id)) {
+            return null;
+        }
+
+        $stockIds = (array)$request->get('stock_id', []);
+        $unitIds = (array)$request->get('unit_id', []);
+        $qtys = (array)$request->get('qty', []);
+        $costs = (array)$request->get('cost_price', []);
+        $sells = (array)$request->get('selling_price', []);
+
+        $total = 0;
+        foreach ($stockIds as $key => $stockId) {
+            $unitId = $unitIds[$key] ?? null;
+            $unitQty = (float)($qtys[$key] ?? 0);
+            $unitCost = (float)($costs[$key] ?? 0);
+            $unitSell = (float)($sells[$key] ?? 0);
+
+            $units = \App\Services\StockUnitService::units($stockId);
+            $unit = null;
+            foreach ($units as $u) {
+                if ((string)$u['id'] === (string)$unitId) {
+                    $unit = $u;
+                }
+            }
+            $errors = [];
+            if (!$unit) {
+                $errors['stock_id'] = 'Select a valid unit for every item of a multi-level store.';
+            } elseif ($unitQty <= 0 || $unitCost < 0 || $unitSell < 0) {
+                $errors['qty'] = 'Quantity must be greater than zero and prices cannot be negative.';
+            }
+            if ($errors) {
+                throw \Illuminate\Validation\ValidationException::withMessages($errors);
+            }
+
+            $mult = \App\Services\InventoryQuantityService::multiplier($units, $unit['id']);
+            $base = \App\Services\InventoryQuantityService::toBase($units, $unit['id'], $unitQty);
+            $total += $unitCost * $unitQty;
+
+            PurchaseOrderItem::create([
+                'stock_id' => $stockId,
+                'qty' => $base,
+                'added_by' => auth()->id(),
+                'store' => $store->yard_column,
+                'stockbatch_id' => NULL,
+                'type' => $request->type,
+                'purchase_order_invoice_number' => $request->purchase_order_invoice_number,
+                'cost_price' => $unitCost / $mult,
+                'selling_price' => $unitSell / $mult,
+                'purchase_order_id' => $po->id,
+                'unit_id' => $unit['id'],
+                'unit_name' => $unit['name'],
+                'unit_quantity' => $unitQty,
+                'unit_price' => $unitCost,
+                'base_quantity' => $base,
+            ]);
+        }
+        return $total;
+    }
 
 }

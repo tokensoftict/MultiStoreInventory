@@ -41,25 +41,43 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div class="col-sm-3">
+                                <div class="col-sm-3 legacy-po-field">
                                     <div class="form-group" style="margin-bottom: 0;">
                                         <label style="font-size: 11px; margin-bottom: 3px; font-weight: 600;">Recent Cost Price</label>
                                         <input style="background-color: #FFF; color: #000; height: 30px; font-size: 11px;" type="number" step="any" placeholder="Cost Price" class="form-control" id="cost_price"/>
                                     </div>
                                 </div>
-                                <div class="col-sm-3">
+                                <div class="col-sm-3 legacy-po-field">
                                     <div class="form-group" style="margin-bottom: 0;">
                                         <label style="font-size: 11px; margin-bottom: 3px; font-weight: 600;">Selling Price</label>
                                         <input style="background-color: #FFF; color: #000; height: 30px; font-size: 11px;" type="number" step="any" placeholder="Selling Price" class="form-control" id="selling_price"/>
                                     </div>
                                 </div>
-                                <div class="col-sm-2">
+                                <div class="col-sm-2 legacy-po-field">
                                     <div class="form-group" style="margin-bottom: 0;">
                                         <label style="font-size: 11px; margin-bottom: 3px; font-weight: 600;">Quantity</label>
                                         <input type="number" placeholder="Quantity" class="form-control" id="qty" style="height: 30px; font-size: 11px;"/>
                                     </div>
                                 </div>
                             </div>
+                            @if(\App\Services\StockUnitService::isMulti())
+                                <div id="ml_panel" class="row" style="margin-top: 10px; display: none;">
+                                    <div class="col-sm-12">
+                                        <table class="table table-condensed table-bordered" style="margin-bottom: 0; font-size: 11px;">
+                                            <thead>
+                                            <tr>
+                                                <th>Unit</th>
+                                                <th style="width: 20%;">Quantity Received</th>
+                                                <th style="width: 22%;">Cost Price / Unit</th>
+                                                <th style="width: 22%;">Selling Price / Unit</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody id="ml_rows"></tbody>
+                                        </table>
+                                        <small class="text-muted">Enter any combination, e.g. 10 Cartons + 5 Packets + 7 Pieces. Stock is saved as total pieces; what you entered is kept on the record.</small>
+                                    </div>
+                                </div>
+                            @endif
                             <div class="row" style="margin-top: 12px;">
                                 <div class="col-sm-12 text-right">
                                     <button class="btn btn-sm btn-info" onclick="add_item()" type="button" style="padding: 5px 15px; font-size: 11px;">
@@ -92,16 +110,26 @@
                                     </thead>
                                     <tbody id="appender">
                                     @foreach($porder->purchase_order_items as $items)
-                                        <tr id='row_{{ $items->stock->id }}'>
+                                        @php
+                                            $isUnitItem = !empty($items->unit_id);
+                                            $itemMult = $isUnitItem ? \App\Services\InventoryQuantityService::multiplier(\App\Services\StockUnitService::units($items->stock_id), $items->unit_id) : 1;
+                                            $rowQty = $isUnitItem ? $items->unit_quantity : $items->qty;
+                                            $rowCost = $isUnitItem ? $items->unit_price : $items->cost_price;
+                                            $rowSell = $isUnitItem ? round($items->selling_price * $itemMult, 4) : $items->selling_price;
+                                        @endphp
+                                        <tr id='row_{{ $items->stock->id }}{{ $isUnitItem ? "_".$items->unit_id : "" }}'>
                                             <input type="hidden" name="stock_id[]" value="{{ $items->stock->id }}"/>
-                                            <input type="hidden" name="qty[]" value="{{ $items->qty }}"/>
-                                            <input type="hidden" name="cost_price[]" value="{{ $items->cost_price }}"/>
-                                            <input type="hidden" name="selling_price[]" value="{{ $items->selling_price }}"/>
-                                            <td>{{ $items->stock->name }}</td>
-                                            <td class='text-center'>{{ $items->qty }}</td>
-                                            <td class='text-right'>{{ number_format($items->selling_price,2) }}</td>
-                                            <td class='text-right'>{{ number_format($items->cost_price,2) }}</td>
-                                            <td class='total_attr text-right' data-value='{{ $items->cost_price * $items->qty }}'>{{ number_format(($items->cost_price * $items->qty),2) }}</td>
+                                            @if($isUnitItem)
+                                                <input type="hidden" name="unit_id[]" value="{{ $items->unit_id }}"/>
+                                            @endif
+                                            <input type="hidden" name="qty[]" value="{{ $rowQty }}"/>
+                                            <input type="hidden" name="cost_price[]" value="{{ $rowCost }}"/>
+                                            <input type="hidden" name="selling_price[]" value="{{ $rowSell }}"/>
+                                            <td>{{ $items->stock->name }}{{ $isUnitItem ? ' ('.$items->unit_name.')' : '' }}</td>
+                                            <td class='text-center'>{{ $rowQty + 0 }}{{ $isUnitItem ? ' '.$items->unit_name : '' }}</td>
+                                            <td class='text-right'>{{ number_format($rowSell,2) }}</td>
+                                            <td class='text-right'>{{ number_format($rowCost,2) }}</td>
+                                            <td class='total_attr text-right' data-value='{{ $rowCost * $rowQty }}'>{{ number_format(($rowCost * $rowQty),2) }}</td>
                                             <td class="text-center"><button class="btn btn-xs btn-danger" onclick="remove_item(this)"><i class="fa fa-trash"></i></button></td>
                                         </tr>
                                     @endforeach
@@ -233,12 +261,83 @@
                     $("#selling_price").val(data['selling_price']);
                     $("#quantity_qty").val(data['qty']);
                 }
+                // Multi-level: show one input row per unit instead of the single quantity/price fields
+                if (document.getElementById('ml_panel')) {
+                    if (data && data.units && data.units.length) {
+                        mlUnits = data.units;
+                        var rows = '';
+                        $.each(mlUnits, function (i, u) {
+                            rows += '<tr data-unit-id="' + u.id + '">' +
+                                '<td>' + u.name + '</td>' +
+                                '<td><input type="number" min="0" step="any" class="form-control ml-qty" style="height:26px;font-size:11px;" placeholder="0"/></td>' +
+                                '<td><input type="number" min="0" step="any" class="form-control ml-cost" style="height:26px;font-size:11px;" value="' + u.cost_price + '"/></td>' +
+                                '<td><input type="number" min="0" step="any" class="form-control ml-sell" style="height:26px;font-size:11px;" value="' + u.selling_price + '"/></td>' +
+                                '</tr>';
+                        });
+                        $('#ml_rows').html(rows);
+                        $('#ml_panel').show();
+                        $('.legacy-po-field').hide();
+                    } else {
+                        mlUnits = null;
+                        $('#ml_panel').hide();
+                        $('.legacy-po-field').show();
+                    }
+                }
             });
 
             $( "#supplier" ).select2();
         });
 
+        var mlUnits = null;
+
+        function add_item_multi_level(){
+            var stockId = $("#products option:selected").val();
+            var name = $("#products option:selected").text();
+            if (stockId === "") {
+                alert('Please select a product first.');
+                return false;
+            }
+            var added = 0;
+            var invalid = false;
+            $('#ml_rows tr').each(function () {
+                var qty = parseFloat($(this).find('.ml-qty').val());
+                var cost = parseFloat($(this).find('.ml-cost').val());
+                var sell = parseFloat($(this).find('.ml-sell').val());
+                if (isNaN(qty) || qty === 0) { return; }
+                if (qty < 0 || isNaN(cost) || cost < 0 || isNaN(sell) || sell < 0) { invalid = true; return false; }
+                var unitId = $(this).attr('data-unit-id');
+                var unitName = $(this).find('td').first().text();
+                var rowId = 'row_' + stockId + '_' + unitId;
+                if (document.getElementById(rowId)) { alert(unitName + ' for this product is already in the list'); invalid = true; return false; }
+                var total = qty * cost;
+                var html = "<tr id='" + rowId + "'>";
+                html += '<input type="hidden" name="stock_id[]" value="' + stockId + '"/>';
+                html += '<input type="hidden" name="unit_id[]" value="' + unitId + '"/>';
+                html += '<input type="hidden" name="qty[]" value="' + qty + '"/>';
+                html += '<input type="hidden" name="cost_price[]" value="' + cost + '"/>';
+                html += '<input type="hidden" name="selling_price[]" value="' + sell + '"/>';
+                html += "<td>" + name + " (" + unitName + ")</td>";
+                html += "<td class='text-center'>" + qty + " " + unitName + "</td>";
+                html += "<td class='text-right'>" + formatMoney(sell) + "</td>";
+                html += "<td class='text-right'>" + formatMoney(cost) + "</td>";
+                html += "<td class='total_attr text-right' data-value='" + total + "'>" + formatMoney(total) + "</td>";
+                html += '<td class="text-center"><button class="btn btn-xs btn-danger" onclick="remove_item(this)"><i class="fa fa-trash"></i></button></td>';
+                html += "</tr>";
+                $("#appender").append(html);
+                added++;
+            });
+            if (invalid) { return false; }
+            if (added === 0) {
+                alert('Enter a quantity for at least one unit (cartons, packets or pieces).');
+                return false;
+            }
+            $('#products').val('').trigger('change');
+            total_po();
+            return false;
+        }
+
         function add_item(){
+            if (mlUnits) { return add_item_multi_level(); }
             if(($("#products option:selected").val() === "") || ($("#qty").val() === "") || ($("#cost_price").val() === "") || ($("#selling_price").val() === "")){
                 alert('Please fill out all product fields before adding.');
                 return false;
@@ -316,6 +415,11 @@
                     }
                     var item = data[0];
                     var rowId = 'row_' + item.id;
+                    var scanUnit = null;
+                    if (item.units && item.units.length) {
+                        scanUnit = item.units[item.units.length - 1]; // Piece
+                        rowId = 'row_' + item.id + '_' + scanUnit.id;
+                    }
                     var existingRow = document.getElementById(rowId);
 
                     if (existingRow) {
@@ -331,23 +435,24 @@
                         var newTotal = cp * newQty;
 
                         $qtyHidden.val(newQty);
-                        $qtyCell.text(newQty);
+                        $qtyCell.text(newQty + (scanUnit ? ' ' + scanUnit.name : ''));
                         $totalCell.attr('data-value', newTotal).text(formatMoney(newTotal));
                         total_po();
                     } else {
                         // New product — add row
                         var qty   = 1;
-                        var cp    = parseFloat(item.cost_price)  || 0;
-                        var sp    = parseFloat(item.selling_price) || 0;
+                        var cp    = parseFloat(scanUnit ? scanUnit.cost_price : item.cost_price)  || 0;
+                        var sp    = parseFloat(scanUnit ? scanUnit.selling_price : item.selling_price) || 0;
                         var total = cp * qty;
 
                         var html = "<tr id='" + rowId + "'>";
                         html += '<input type="hidden" name="stock_id[]" value="' + item.id + '"/>';
+                        if (scanUnit) { html += '<input type="hidden" name="unit_id[]" value="' + scanUnit.id + '"/>'; }
                         html += '<input type="hidden" name="qty[]" value="' + qty + '"/>';
                         html += '<input type="hidden" name="cost_price[]" value="' + cp + '"/>';
                         html += '<input type="hidden" name="selling_price[]" value="' + sp + '"/>';
                         html += '<td>' + item.text + '</td>';
-                        html += '<td class="text-center">' + qty + '</td>';
+                        html += '<td class="text-center">' + qty + (scanUnit ? ' ' + scanUnit.name : '') + '</td>';
                         html += '<td class="text-right">' + formatMoney(sp) + '</td>';
                         html += '<td class="text-right">' + formatMoney(cp) + '</td>';
                         html += '<td class="total_attr text-right" data-value="' + total + '">' + formatMoney(total) + '</td>';

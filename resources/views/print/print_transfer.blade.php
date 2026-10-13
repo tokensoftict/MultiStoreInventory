@@ -45,11 +45,22 @@
                         @php
                             $total +=($trans->quantity * $trans->selling_price)
                         @endphp
+                        @php
+                            $transPrice = !empty($trans->unit_name) && $trans->unit_price ? $trans->unit_price : $trans->cost_price;
+                            $transQty = !empty($trans->unit_name) && $trans->unit_quantity ? $trans->unit_quantity : $trans->quantity;
+                        @endphp
                         <tr>
                             <td class="text-left">{{ $trans->stock->name }}</td>
-                            <td class="text-center">{{ number_format($trans->cost_price,2) }}</td>
-                            <td class="text-center">{{ $trans->quantity }}</td>
-                            <td class="text-right">{{ number_format(($trans->quantity * $trans->cost_price),2) }}</td>
+                            <td class="text-center">{{ number_format($transPrice,2) }}</td>
+                            <td class="text-center">
+                                @if(!empty($trans->unit_name))
+                                    {{ $trans->unit_quantity + 0 }} {{ $trans->unit_name }}
+                                    <br><small>({{ $trans->quantity + 0 }} pcs)</small>
+                                @else
+                                    {{ $trans->quantity }}
+                                @endif
+                            </td>
+                            <td class="text-right">{{ number_format(($transQty * $transPrice),2) }}</td>
                         </tr>
                     @endforeach
                     </tbody>

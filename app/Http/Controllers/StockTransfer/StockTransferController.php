@@ -31,7 +31,7 @@ class StockTransferController extends Controller
         $data['type'] =  NULL;
         if($request->getMethod() == "POST" && !isset($request->stock_id)){
             if($request->from == $request->to)
-                return redirect()->route('stocktransfer.add_transfer')->with('error','Sorry, You can transfer stock to the store');
+                return redirect()->route('stocktransfer.add_transfer')->with('error','Error, You can not transfer stock to the same store');
             else
                 $data['from'] = $request->from; $data['to'] = $request->to; $data['type'] = $request->type;
         }

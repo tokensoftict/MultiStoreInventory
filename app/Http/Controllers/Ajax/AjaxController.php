@@ -64,10 +64,20 @@ class AjaxController extends Controller
                 $q->orWhere('barcode', "=", $query);
             })->groupBy('stock_id')->get();
 
-        $data = $available->map(function($stock) {
+        $multiLevel = \App\Services\StockUnitService::isMulti();
+
+        $data = $available->map(function($stock) use ($multiLevel) {
             // Convert model to array and append the dynamic variable
             $stockArray = $stock->toArray();
             $stockArray['show_qty'] = userCanView('invoiceandsales.showqty');
+            if ($multiLevel && \App\Services\StockUnitService::hasUnits($stock->stock_id)) {
+                $base = (float)$stock->stock->available_yard_quantity;
+                $stockArray['stock']['multi_level'] = true;
+                $stockArray['stock']['base_quantity'] = $base;
+                $stockArray['stock']['units'] = \App\Services\StockUnitService::unitsForUi($stock->stock_id, $base);
+                $stockArray['stock']['only_pieces'] = \App\Models\QuantityUnit::isOnlyPiecesEnabled();
+                $stockArray['stock']['stock_label'] = \App\Services\StockUnitService::breakdownLabel($stock->stock_id, $base);
+            }
             return $stockArray;
         });
 
@@ -107,7 +117,23 @@ class AjaxController extends Controller
                 $q->orWhere('barcode', "=", $query);
             })->groupBy('stock_id')->get();
 
-        return $available;
+        $multiLevel = \App\Services\StockUnitService::isMulti();
+
+        $data = $available->map(function($stock) use ($multiLevel) {
+            $stockArray = $stock->toArray();
+            $stockArray['show_qty'] = userCanView('invoiceandsales.showqty');
+            if ($multiLevel && \App\Services\StockUnitService::hasUnits($stock->stock_id)) {
+                $base = (float)$stock->stock->available_yard_quantity;
+                $stockArray['stock']['multi_level'] = true;
+                $stockArray['stock']['base_quantity'] = $base;
+                $stockArray['stock']['units'] = \App\Services\StockUnitService::unitsForUi($stock->stock_id, $base);
+                $stockArray['stock']['only_pieces'] = \App\Models\QuantityUnit::isOnlyPiecesEnabled();
+                $stockArray['stock']['stock_label'] = \App\Services\StockUnitService::breakdownLabel($stock->stock_id, $base);
+            }
+            return $stockArray;
+        });
+
+        return response()->json($data);
     }
 
 
@@ -130,28 +156,28 @@ class AjaxController extends Controller
 
         $query =  explode(' ', $query);
 
+        $targetStore = null;
+        if ($request->store) {
+            $targetStore = Warehousestore::find($request->store);
+        }
+        if (!$targetStore) {
+            $targetStore = getActiveStore();
+        }
+
         $stocks = Stockbatch::select(
             'stock_id'
-        )->with(['stock'])->where(function($query) use (&$warehouses, $request){
+        )->with(['stock'])->where(function($query) use ($targetStore, $request){
             if(!$request->type) {
-                $query->orWhere(getActiveStore()->packed_column, '>', 0);
-                $query->orWhere(getActiveStore()->yard_column, '>', 0);
+                $query->where(function($sub) use ($targetStore) {
+                    $sub->orWhere($targetStore->packed_column, '>', 0);
+                    $sub->orWhere($targetStore->yard_column, '>', 0);
+                });
             }else{
-                if(!$request->store) {
-                    if ($request->type == "NORMAL") {
-                        $query->where(getActiveStore()->packed_column, '>', 0);
-                    }
-                    if ($request->type == "PACKED") {
-                        $query->where(getActiveStore()->yard_column, '>', 0);
-                    }
-                }else{
-                    $store = Warehousestore::find($request->store);
-                    if ($request->type == "NORMAL") {
-                        $query->where($store->packed_column, '>', 0);
-                    }
-                    if ($request->type == "PACKED") {
-                        $query->where($store->yard_column, '>', 0);
-                    }
+                if ($request->type == "NORMAL") {
+                    $query->where($targetStore->packed_column, '>', 0);
+                }
+                if ($request->type == "PACKED") {
+                    $query->where($targetStore->yard_column, '>', 0);
                 }
             }
         })->whereHas('stock',function($q) use (&$query){
@@ -165,28 +191,37 @@ class AjaxController extends Controller
             $q->orWhere('barcode', "=", $query);
         })->groupBy('stock_id')->get();
 
+        $isMulti = $targetStore ? \App\Services\StockUnitService::isMulti($targetStore->id) : \App\Services\StockUnitService::isMulti();
+
         foreach ($stocks as $stock) {
-            if(isset($request->store)) {
-                $result[] = [
-                    'available_quantity' => $stock->stock->getCustomPackedStockQuantity($request->store),
-                    'available_yard_quantity' => $stock->stock->getCustomYardStockQuantity($request->store),
-                    'text' => $stock->stock->name,
-                    "id" => $stock->stock->id,
-                    'cost_price' => getStockActualCostPrice($stock->stock, 'NORMAL'),
-                    'selling_price' => getStockActualSellingPrice($stock->stock, 'NORMAL'),
-                    'yard_cost_price' => getStockActualCostPrice($stock->stock, 'PACKED'),
-                    'yard_selling_price' => getStockActualSellingPrice($stock->stock, 'PACKED'),
-                ];
-            }else{
-                $result[] = [
-                    'available_quantity' => $stock->stock->available_quantity,
-                    'available_yard_quantity' => $stock->stock->available_yard_quantity,
-                    'text' => $stock->stock->name,
-                    "id" => $stock->stock->id,
-                    'cost_price' => getStockActualCostPrice($stock->stock, $request->type),
-                    'selling_price' => getStockActualSellingPrice($stock->stock, $request->type)
-                ];
+            $packedQty = isset($request->store)
+                ? $stock->stock->getCustomPackedStockQuantity($request->store)
+                : $stock->stock->available_quantity;
+            $yardQty = isset($request->store)
+                ? $stock->stock->getCustomYardStockQuantity($request->store)
+                : $stock->stock->available_yard_quantity;
+
+            $item = [
+                'available_quantity' => $packedQty,
+                'available_yard_quantity' => $yardQty,
+                'text' => $stock->stock->name,
+                "id" => $stock->stock->id,
+                'cost_price' => getStockActualCostPrice($stock->stock, 'NORMAL'),
+                'selling_price' => getStockActualSellingPrice($stock->stock, 'NORMAL'),
+                'yard_cost_price' => getStockActualCostPrice($stock->stock, 'PACKED'),
+                'yard_selling_price' => getStockActualSellingPrice($stock->stock, 'PACKED'),
+            ];
+
+            if ($isMulti && \App\Services\StockUnitService::hasUnits($stock->stock_id)) {
+                $base = (float)$yardQty;
+                $item['multi_level'] = true;
+                $item['base_quantity'] = $base;
+                $item['units'] = \App\Services\StockUnitService::unitsForUi($stock->stock_id, $base);
+                $item['only_pieces'] = \App\Models\QuantityUnit::isOnlyPiecesEnabled();
+                $item['stock_label'] = \App\Services\StockUnitService::breakdownLabel($stock->stock_id, $base);
             }
+
+            $result[] = $item;
         }
         return response()->json($result);
 
@@ -218,8 +253,10 @@ class AjaxController extends Controller
                 }
             })->orWhere('barcode', "=", $query)->get();
 
+        $multiLevel = \App\Services\StockUnitService::isMulti();
+
         foreach ($stocks as $stock) {
-            $result[] = [
+            $row = [
                 'available_quantity' => $stock->available_quantity,
                 'available_yard_quantity' => $stock->available_yard_quantity,
                 'text' => $stock->name,
@@ -227,6 +264,11 @@ class AjaxController extends Controller
                 'cost_price' =>$stock->cost_price,
                 'selling_price' =>$stock->selling_price
             ];
+            if ($multiLevel && \App\Services\StockUnitService::hasUnits($stock->id)) {
+                $row['units'] = \App\Services\StockUnitService::unitsForUi($stock->id);
+                $row['only_pieces'] = \App\Models\QuantityUnit::isOnlyPiecesEnabled();
+            }
+            $result[] = $row;
         }
         return response()->json($result);
 

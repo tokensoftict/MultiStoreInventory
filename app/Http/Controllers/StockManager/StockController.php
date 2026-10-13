@@ -78,6 +78,12 @@ class StockController extends Controller
 
         $validate = Stock::$validation;
 
+        $multiLevel = \App\Services\StockUnitService::isMulti();
+        if ($multiLevel) {
+            // legacy price inputs are replaced by unit prices; keep legacy validation satisfied
+            $request->merge(['selling_price' => $request->get('selling_price') ?: 0]);
+        }
+
         $request->validate($validate);
 
         $stock_data = $request->only(Stock::$field);
@@ -89,12 +95,43 @@ class StockController extends Controller
             $stock_data['yard_cost_price'] = 0;
         }
 
-        DB::transaction(function () use ($stock_data, $request) {
+        DB::transaction(function () use ($stock_data, $request, $multiLevel) {
             $stock = Stock::create($stock_data);
 
             $batch = $request->get('stock_batch');
 
-            if ($request->get('stock_batch') && (!empty($batch['quantity']) && $batch['quantity'] != 0)) {
+            if ($multiLevel) {
+                // Carton -> Packet -> Piece store: save units, then receive opening stock as base pieces
+                $errors = \App\Services\StockUnitService::saveUnits($stock, (array)$request->get('units', []));
+                if ($errors) {
+                    throw \Illuminate\Validation\ValidationException::withMessages(['units' => $errors]);
+                }
+                $store = getActiveStore();
+                $units = \App\Models\ProductUnit::where('stock_id', $stock->id)->where('status', 1)->get()->keyBy('level');
+                $normalized = \App\Services\InventoryQuantityService::normalize($units->values());
+                $received = [];
+                foreach ((array)($batch['units_qty'] ?? []) as $level => $qty) {
+                    if ($qty === null || $qty === '' || (float)$qty == 0) {
+                        continue;
+                    }
+                    if (!is_numeric($qty) || $qty < 0 || !isset($units[$level])) {
+                        throw \Illuminate\Validation\ValidationException::withMessages(['units' => ['Opening quantities must be zero or more, for defined units only.']]);
+                    }
+                    $received[$units[$level]->id] = (float)$qty;
+                }
+                if ($received) {
+                    $base = \App\Services\InventoryQuantityService::toBaseMixed($normalized, $received);
+                    $stock->stockbatches()->create([
+                        'received_date' => date('Y-m-d'),
+                        'supplier_id' => $batch['supplier_id'] ?? null,
+                        'expiry_date' => $batch['expiry_date'] ?? null,
+                        $store->yard_column => $base,
+                    ]);
+                }
+                $batch = null; // legacy opening-stock path must not run
+            }
+
+            if ($batch && (!empty($batch['quantity']) && $batch['quantity'] != 0)) {
                 $batch['received_date'] = date('Y-m-d');
                 $store = getActiveStore();
                 $quantity = $batch['quantity'];
@@ -159,9 +196,20 @@ class StockController extends Controller
 
         $validate = Stock::$validation;
 
+        if (\App\Services\StockUnitService::isMulti()) {
+            $request->merge(['selling_price' => $request->get('selling_price') ?: $stock->selling_price ?: 0]);
+        }
+
         $request->validate($validate);
 
         $stock_data = $request->only(Stock::$field);
+
+        if (\App\Services\StockUnitService::isMulti() && $request->has('units')) {
+            $errors = \App\Services\StockUnitService::saveUnits($stock, (array)$request->get('units'));
+            if ($errors) {
+                return redirect()->back()->withInput()->withErrors(['units' => $errors]);
+            }
+        }
 
         $stock->update($stock_data);
 

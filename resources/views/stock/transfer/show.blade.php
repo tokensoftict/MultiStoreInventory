@@ -49,7 +49,7 @@
                                     <thead>
                                     <tr>
                                         <th class="text-left">Name</th>
-                                        <th class="text-center">Product Type</th>
+                                        <th class="text-center">Unit / Type</th>
                                         <th class="text-center">Selling Price</th>
                                         <th class="text-center">Quantity</th>
                                         <th class="text-right">Total Selling Price</th>
@@ -58,18 +58,37 @@
                                     <tbody>
                                     @php
                                         $total = 0;
-                                        $errors = session('errors')
+                                        $errors = session('errors');
                                     @endphp
                                     @foreach($transfer->stock_transfer_items()->get() as $trans)
                                         @php
-                                            $total +=($trans->quantity * $trans->selling_price)
+                                            $isUnit = !empty($trans->unit_name);
+                                            $transPrice = $isUnit && $trans->unit_price ? $trans->unit_price : $trans->selling_price;
+                                            $transQty = $isUnit && $trans->unit_quantity ? $trans->unit_quantity : $trans->quantity;
+                                            $rowTotal = $transPrice * $transQty;
+                                            $total += $rowTotal;
                                         @endphp
                                         <tr>
                                             <td class="text-left">{{ $trans->stock->name }}</td>
-                                            <td>{{ array_flip(config('stock_type_name.'.config('app.store')))[$trans->product_type] }}</td>
-                                            <td class="text-center">{{ number_format($trans->selling_price,2) }}</td>
-                                            <td class="text-center">{{ $trans->quantity }}</td>
-                                            <td class="text-right">{{ number_format(($trans->quantity * $trans->selling_price),2) }}</td>
+                                            <td class="text-center">
+                                                @if($isUnit)
+                                                    <span class="badge badge-info">{{ $trans->unit_name }}</span>
+                                                @else
+                                                    {{ array_flip(config('stock_type_name.'.config('app.store')))[$trans->product_type] ?? $trans->product_type }}
+                                                @endif
+                                            </td>
+                                            <td class="text-center">{{ number_format($transPrice,2) }}</td>
+                                            <td class="text-center">
+                                                @if($isUnit)
+                                                    <b>{{ $transQty + 0 }} {{ $trans->unit_name }}</b>
+                                                    @if($trans->quantity && $trans->quantity != $transQty)
+                                                        <br><small class="text-muted">({{ $trans->quantity + 0 }} pcs)</small>
+                                                    @endif
+                                                @else
+                                                    {{ $trans->quantity }}
+                                                @endif
+                                            </td>
+                                            <td class="text-right">{{ number_format($rowTotal,2) }}</td>
                                         </tr>
                                     @endforeach
                                     </tbody>

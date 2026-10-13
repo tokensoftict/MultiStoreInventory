@@ -120,8 +120,20 @@
             <tr>
                 <td>{{ $loop->iteration }}</td>
                 <td align="left" class="text-left">{{ $item->stock->name }}</td>
-                <td align="center" class="text-center">{{ $item->quantity }}</td>
-                <td align="center" class="text-center">{{ number_format($item->selling_price,2) }}</td>
+                <td align="center" class="text-center">
+                    @if(!empty($item->unit_name))
+                        {{ $item->unit_quantity + 0 }} {{ $item->unit_name }}
+                    @else
+                        {{ $item->quantity }}
+                    @endif
+                </td>
+                <td align="center" class="text-center">
+                    @if(!empty($item->unit_name))
+                        {{ number_format($item->unit_price, 2) }}
+                    @else
+                        {{ number_format($item->selling_price, 2) }}
+                    @endif
+                </td>
                 <td align="right" class="text-right">{{ number_format(($item->total_selling_price),2) }}</td>
             </tr>
         @endforeach

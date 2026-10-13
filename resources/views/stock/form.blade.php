@@ -110,23 +110,81 @@
                                     <header class="panel-heading panel-border">
                                         Stock Price Settings
                                     </header>
-                                    <div class="panel-body" >
+                                    @php
+                                        $ml = \App\Services\StockUnitService::isMulti();
+                                        $unitRows = [];
+                                        if ($ml && isset($stock->id)) {
+                                            foreach ($stock->units()->where('status', 1)->get() as $u) { $unitRows[$u->level] = $u; }
+                                        }
+                                        $activeUnits = \App\Models\QuantityUnit::activeUnits();
+                                        $unitTitleChain = $activeUnits->pluck('name')->implode(' &rarr; ');
+                                        $baseUnit = \App\Models\QuantityUnit::getBaseUnit();
+                                    @endphp
+                                    @if($ml)
+                                        <div class="panel-body" style="border-bottom: 1px solid #eee;">
+                                            <h5><strong>Units ({!! $unitTitleChain !!})</strong></h5>
+                                            @if(count($activeUnits) > 1)
+                                                <small class="text-muted">The {{ $baseUnit->name ?? 'base unit' }} is required. Prices are independent per unit. Conversion = how many of that unit make 1 of the unit above it.</small>
+                                            @else
+                                                <small class="text-muted">Only the {{ $baseUnit->name ?? 'base unit' }} is enabled in settings. Packaging units are currently disabled.</small>
+                                            @endif
+                                            @if ($errors->has('units'))
+                                                @foreach($errors->get('units') as $unitError)
+                                                    @foreach((array)$unitError as $msg)
+                                                        <div class="alert alert-danger" style="margin-top:8px;">{{ $msg }}</div>
+                                                    @endforeach
+                                                @endforeach
+                                            @endif
+                                            @foreach($activeUnits as $idx => $qu)
+                                                @php
+                                                    $lvl = $qu->level;
+                                                    $ur = $unitRows[$lvl] ?? null;
+                                                    $prevUnit = $idx > 0 ? $activeUnits[$idx - 1] : null;
+                                                @endphp
+                                                <div style="border:1px solid #eee; padding:8px; margin-top:8px; border-radius:4px;">
+                                                    <div class="form-group">
+                                                        <label>{{ $qu->name }} @if($qu->is_base)<span class="label label-primary">Base Unit</span>@endif</label>
+                                                        <input type="text" readonly class="form-control" name="units[{{ $lvl }}][name]" value="{{ old('units.'.$lvl.'.name', $ur ? $ur->name : $qu->name) }}" placeholder="{{ $qu->name }}"/>
+                                                    </div>
+                                                    @if($prevUnit)
+                                                        <div class="form-group">
+                                                            <label>{{ $qu->name }} in 1 {{ $prevUnit->name }}</label>
+                                                            <input type="number" min="0.0001" step="any" class="form-control" name="units[{{ $lvl }}][units_per_parent]" value="{{ old('units.'.$lvl.'.units_per_parent', $ur ? $ur->units_per_parent + 0 : '') }}" placeholder="e.g. 10"/>
+                                                        </div>
+                                                    @else
+                                                        <input type="hidden" name="units[{{ $lvl }}][units_per_parent]" value="1"/>
+                                                    @endif
+                                                    <div class="row">
+                                                        <div class="col-xs-6"><div class="form-group">
+                                                            <label>Cost price</label>
+                                                            <input type="number" min="0" step="any" class="form-control" name="units[{{ $lvl }}][cost_price]" value="{{ old('units.'.$lvl.'.cost_price', $ur ? $ur->cost_price + 0 : '') }}"/>
+                                                        </div></div>
+                                                        <div class="col-xs-6"><div class="form-group">
+                                                            <label>Selling price</label>
+                                                            <input type="number" min="0" step="any" class="form-control" name="units[{{ $lvl }}][selling_price]" value="{{ old('units.'.$lvl.'.selling_price', $ur ? $ur->selling_price + 0 : '') }}"/>
+                                                        </div></div>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                    <div class="panel-body" @if(!empty($ml)) style="display:none;" @endif>
                                         <div class="form-group">
                                             <label>Selling Price <span  style="color:red;">*</span></label>
-                                            <input type="number" step="0.00001" value="{{ old('selling_price',$stock->selling_price) }}"   class="form-control" name="selling_price" placeholder="Selling Price"/>
+                                            <input type="number" step="0.00001" value="{{ old('selling_price',$stock->selling_price) }}"   class="form-control" name="selling_price" placeholder="Selling Price" {{ !empty($ml) ? "disabled" : "" }}/>
                                         </div>
 
                                         <div class="form-group">
                                             <label>Cost Price <span  style="color:red;">*</span></label>
-                                            <input type="number" step="0.00001" value="{{ old('cost_price',$stock->cost_price) }}"   class="form-control" name="cost_price" placeholder="Cost Price"/>
+                                            <input type="number" step="0.00001" value="{{ old('cost_price',$stock->cost_price) }}"   class="form-control" name="cost_price" placeholder="Cost Price" {{ !empty($ml) ? "disabled" : "" }}/>
                                         </div>
                                         <div class="form-group">
                                             <label>Yard / Pieces Selling Price</label>
-                                            <input type="number" step="0.00001" value="{{ old('yard_selling_price',$stock->yard_selling_price) }}"   class="form-control" name="yard_selling_price" placeholder="Yard Selling Price"/>
+                                            <input type="number" step="0.00001" value="{{ old('yard_selling_price',$stock->yard_selling_price) }}"   class="form-control" name="yard_selling_price" placeholder="Yard Selling Price" {{ !empty($ml) ? "disabled" : "" }}/>
                                         </div>
                                         <div class="form-group">
                                             <label>Yard / Pieces Cost Price</label>
-                                            <input type="number" step="0.00001" value="{{ old('cost_price',$stock->yard_cost_price) }}" required  class="form-control" name="yard_cost_price" placeholder="Yard Cost Price"/>
+                                            <input type="number" step="0.00001" value="{{ old('cost_price',$stock->yard_cost_price) }}" required  class="form-control" name="yard_cost_price" placeholder="Yard Cost Price" {{ !empty($ml) ? "disabled" : "" }}/>
                                         </div>
                                         @if(!empty($active_price_categories))
                                             <hr/>
@@ -143,12 +201,26 @@
                                 @if(!isset($stock->id))
                                     <section class="panel">
                                         <header class="panel-heading panel-border">
-                                            Stock Quantity Settings
+                                             Stock Quantity Settings
                                         </header>
                                         <div class="panel-body" >
-                                            <div class="form-group">
+                                            @if(!empty($ml))
+                                                <div class="form-group">
+                                                    <label>Initial Quantity (any combination)</label>
+                                                    <div class="row">
+                                                        @php $colWidth = count($activeUnits) == 2 ? 6 : 4; @endphp
+                                                        @foreach($activeUnits as $qu)
+                                                            <div class="col-xs-{{ $colWidth }}">
+                                                                <small class="text-muted">{{ $qu->name }}</small>
+                                                                <input type="number" min="0" step="any" class="form-control" name="stock_batch[units_qty][{{ $qu->level }}]" placeholder="0"/>
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            @endif
+                                            <div class="form-group" @if(!empty($ml)) style="display:none;" @endif>
                                                 <label>Initial Quantity <span  style="color:red;">*</span></label>
-                                                <input type="number"  value=""  class="form-control" name="stock_batch[quantity]" placeholder="Initial Quantity"/>
+                                                <input type="number"  value=""  class="form-control" name="stock_batch[quantity]" placeholder="Initial Quantity" {{ !empty($ml) ? "disabled" : "" }}/>
                                                 @if ($errors->has('name'))
                                                     <label for="name-error" class="error"
                                                            style="display: inline-block;">{{ $errors->first('name') }}</label>
@@ -179,11 +251,17 @@
                                             Available Quantity
                                         </header>
                                         <div class="panel-body">
-                                            <div class="form-group">
+                                            @if(!empty($ml))
+                                                <div class="form-group">
+                                                    <label>Available Quantity</label>
+                                                    <span class="form-control" style="height:auto;">{{ \App\Services\StockUnitService::breakdownLabel($stock->id, $stock->available_yard_quantity) }} <small class="text-muted">({{ $stock->available_yard_quantity + 0 }} pieces)</small></span>
+                                                </div>
+                                            @endif
+                                            <div class="form-group" @if(!empty($ml)) style="display:none;" @endif>
                                                 <label>Available Bundle Quantity <span  style="color:red;">*</span></label>
                                                 <span class="form-control">{{ $stock->available_quantity }}</span>
                                             </div>
-                                            <div class="form-group">
+                                            <div class="form-group" @if(!empty($ml)) style="display:none;" @endif>
                                                 <label>Available Yards Quantity <span  style="color:red;">*</span></label>
                                                 <span class="form-control">{{ $stock->available_yard_quantity }}</span>
                                             </div>

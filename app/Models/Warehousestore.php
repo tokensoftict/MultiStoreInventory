@@ -49,7 +49,8 @@ class Warehousestore extends Model
         'second_address',
         'contact_number',
         'footer_notes',
-        'logo'
+        'logo',
+        'quantity_system'
     ];
 
 
@@ -73,6 +74,7 @@ class Warehousestore extends Model
         'second_address',
         'contact_number',
         'footer_notes',
+        'quantity_system',
     ];
 
 
@@ -84,6 +86,12 @@ class Warehousestore extends Model
         $this->attributes['key'] = $key;
     }
 
+
+    /** True only when this store was explicitly switched to Carton/Packet/Piece. */
+    public function usesMultiLevel(): bool
+    {
+        return ($this->quantity_system ?? 'legacy') === 'multi_level';
+    }
 
     public function toggleDefault()
     {

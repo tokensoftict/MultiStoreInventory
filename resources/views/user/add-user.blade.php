@@ -109,6 +109,9 @@
                                                         <select class="form-control" name="group_id" required>
                                                             <option value="">-Select Group-</option>
                                                             @foreach($groups as $group)
+                                                                @if($group->id == 1 && auth()->user()->group_id != 1)
+                                                                    @continue
+                                                                @endif
                                                                 <option {{ (old('group_id',$user->group_id) == $group->id ) ? 'selected' : "" }} value="{{ $group->id }}">{{ $group->name }}</option>
                                                             @endforeach
                                                         </select>

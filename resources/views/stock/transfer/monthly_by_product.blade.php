@@ -66,11 +66,26 @@
                                     <td>{{ $transfer->store_from->name }}</td>
                                     <td>{{ $transfer->store_to->name }}</td>
                                     <td>{!! $transfer->stock_transfer->status == "COMPLETE" ? label( $transfer->stock_transfer->status,'success') : label( $transfer->status,'primary') !!}</td>
+                                    @php
+                                        $isUnit = !empty($transfer->unit_name);
+                                        $transPrice = $isUnit && $transfer->unit_price ? $transfer->unit_price : $transfer->selling_price;
+                                        $transQty = $isUnit && $transfer->unit_quantity ? $transfer->unit_quantity : $transfer->quantity;
+                                        $lineTotal = $transPrice * $transQty;
+                                    @endphp
                                     <td>{{ convert_date2($transfer->transfer_date) }}</td>
-                                    <td>{{ array_flip(config('stock_type_name.'.config('app.store')))[$transfer->product_type] }}</td>
-                                    <td>{{ number_format($transfer->selling_price,2) }}</td>
-                                    <td>{{ $transfer->quantity }}</td>
-                                    <td>{{ number_format(($transfer->selling_price * $transfer->quantity),2) }}</td>
+                                    <td>{{ $isUnit ? $transfer->unit_name : (array_flip(config('stock_type_name.'.config('app.store')))[$transfer->product_type] ?? $transfer->product_type) }}</td>
+                                    <td>{{ number_format($transPrice,2) }}</td>
+                                    <td>
+                                        @if($isUnit)
+                                            {{ $transQty + 0 }} {{ $transfer->unit_name }}
+                                            @if($transfer->quantity && $transfer->quantity != $transQty)
+                                                <small class="text-muted">({{ $transfer->quantity + 0 }} pcs)</small>
+                                            @endif
+                                        @else
+                                            {{ $transfer->quantity }}
+                                        @endif
+                                    </td>
+                                    <td>{{ number_format($lineTotal,2) }}</td>
                                     <td>{{ $transfer->user->name }}</td>
                                 </tr>
                             @empty

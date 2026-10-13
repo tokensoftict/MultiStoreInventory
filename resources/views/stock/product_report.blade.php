@@ -78,7 +78,13 @@
                                             <th>{{ $loop->iteration }}</th>
                                             <th>{{ $shop->name }}</th>
                                             <th>{{ $stock->getCustomPackedStockQuantity($shop->id) }}</th>
-                                            <th>{{ $stock->getCustomYardStockQuantity($shop->id) }}</th>
+                                            <th>
+                                                @if(\App\Services\StockUnitService::isMulti($shop->id) && \App\Services\StockUnitService::hasUnits($stock->id))
+                                                    {{ \App\Services\StockUnitService::breakdownLabel($stock->id, $stock->getCustomYardStockQuantity($shop->id)) }} <small class="text-muted">({{ $stock->getCustomYardStockQuantity($shop->id) + 0 }} pcs)</small>
+                                                @else
+                                                    {{ $stock->getCustomYardStockQuantity($shop->id) }}
+                                                @endif
+                                            </th>
                                         </tr>
                                     @endforeach
                                 </table>
@@ -118,8 +124,15 @@
                                             <td>{{ convert_date2($transfer->transfer_date) }}</td>
                                             <td>{{ array_flip(config('stock_type_name.'.config('app.store')))[$transfer->product_type] }}</td>
                                             <td>{{ number_format($transfer->selling_price,2) }}</td>
-                                            <td>{{ $transfer->quantity }}</td>
-                                            <td>{{ number_format(($transfer->selling_price * $transfer->quantity),2) }}</td>
+                                            <td>
+                                                @if(!empty($transfer->unit_name))
+                                                    {{ $transfer->unit_quantity + 0 }} {{ $transfer->unit_name }}
+                                                    <br><small class="text-muted">({{ $transfer->quantity + 0 }} pcs)</small>
+                                                @else
+                                                    {{ $transfer->quantity }}
+                                                @endif
+                                            </td>
+                                            <td>{{ number_format(((!empty($transfer->unit_name) && $transfer->unit_quantity ? $transfer->unit_quantity * ($transfer->unit_price ?? $transfer->selling_price) : $transfer->selling_price * $transfer->quantity)),2) }}</td>
                                             <td>{{ $transfer->user->name }}</td>
                                         </tr>
                                     @empty
@@ -174,10 +187,17 @@
                                         <td>{{ $invoice->invoice->invoice_paper_number }}</td>
                                         <td>{{ $invoice->customer->firstname }} {{ $invoice->customer->lastname }}</td>
                                         <td>{{ $invoice->stock->name }}</td>
-                                        <td>{{ $invoice->quantity }}</td>
-                                        <td>{{ number_format(($invoice->quantity * $invoice->cost_price),2) }}</td>
-                                        <td>{{ number_format(($invoice->quantity * $invoice->selling_price),2) }}</td>
-                                        <td>{{ number_format((($invoice->quantity * $invoice->selling_price)-($invoice->quantity * $invoice->cost_price)),2) }}</td>
+                                        <td>
+                                            @if(!empty($invoice->unit_name))
+                                                {{ $invoice->unit_quantity + 0 }} {{ $invoice->unit_name }}
+                                                <br><small class="text-muted">({{ $invoice->quantity + 0 }} pcs)</small>
+                                            @else
+                                                {{ $invoice->quantity }}
+                                            @endif
+                                        </td>
+                                        <td>{{ number_format(($invoice->total_cost_price ?? ($invoice->quantity * $invoice->cost_price)),2) }}</td>
+                                        <td>{{ number_format(($invoice->total_selling_price ?? ($invoice->quantity * $invoice->selling_price)),2) }}</td>
+                                        <td>{{ number_format(($invoice->total_profit ?? (($invoice->quantity * $invoice->selling_price)-($invoice->quantity * $invoice->cost_price))),2) }}</td>
                                         <td>{!! invoice_status($invoice->status) !!}</td>
                                         <td>{{ convert_date2($invoice->invoice->invoice_date) }}</td>
                                         <td>{{ $invoice->invoice->sales_time }}</td>
@@ -209,9 +229,28 @@
                                             <td>{{ $item->purchase_order->supplier->name ?? "" }}</td>
                                             <td>{{ convert_date2($item->purchase_order->date_created) }}</td>
                                             <td>{!! $item->purchase_order->status == "DRAFT" ? label('DRAFT','primary') :   label('COMPLETE','success') !!}</td>
-                                            <td class="text-center">{{ $item->qty }}</td>
-                                            <td class="text-center">{{ number_format($item->cost_price,2) }}</td>
-                                            <td class="text-right">{{ number_format(($item->cost_price * $item->qty),2) }}</td>
+                                            <td class="text-center">
+                                                @if(!empty($item->unit_name))
+                                                    {{ $item->unit_quantity + 0 }} {{ $item->unit_name }}
+                                                    <br><small class="text-muted">({{ $item->qty + 0 }} pcs)</small>
+                                                @else
+                                                    {{ $item->qty }}
+                                                @endif
+                                            </td>
+                                            <td class="text-center">
+                                                @if(!empty($item->unit_name))
+                                                    {{ number_format($item->unit_price, 2) }}
+                                                @else
+                                                    {{ number_format($item->cost_price, 2) }}
+                                                @endif
+                                            </td>
+                                            <td class="text-right">
+                                                @if(!empty($item->unit_name))
+                                                    {{ number_format(($item->unit_price * $item->unit_quantity), 2) }}
+                                                @else
+                                                    {{ number_format(($item->cost_price * $item->qty), 2) }}
+                                                @endif
+                                            </td>
                                         </tr>
                                     @endforeach
                                     </tbody>
@@ -243,9 +282,16 @@
                                             <td>{{ $log->stock->name }}</td>
                                             <td>{{ $log->customer->firstname }} {{ $log->customer->lastname }}</td>
                                             <td>{{ $log->invoice_paper_number }}</td>
-                                            <td>{{ $log->quantity_before }}</td>
+                                            <td>
+                                                @if(!empty($log->unit_name))
+                                                    {{ $log->unit_quantity + 0 }} {{ $log->unit_name }}
+                                                    <br><small class="text-muted">({{ $log->quantity_before + 0 }} pcs)</small>
+                                                @else
+                                                    {{ $log->quantity_before }}
+                                                @endif
+                                            </td>
                                             <td>{{ convert_date2($log->date_added) }}</td>
-                                            <td>{{ $log->store_after == "quantity" ? "Packed" : "Pieces / Yards" }}</td>
+                                            <td>{{ !empty($log->unit_name) ? $log->unit_name : ($log->store_after == "quantity" ? "Packed" : "Pieces / Yards") }}</td>
                                             <td>{{ number_format($log->selling_price,2) }}</td>
                                             <td>{{ $log->user->name }}</td>
                                         </tr>

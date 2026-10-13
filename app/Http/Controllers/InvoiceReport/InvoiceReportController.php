@@ -118,9 +118,9 @@ class InvoiceReportController extends Controller
 
         $lists = InvoiceItem::select('stock_id',
             DB::raw( 'SUM(quantity) as total_qty'),
-            DB::raw( 'SUM(quantity * (selling_price - cost_price)) as total_profit'),
-            DB::raw( 'SUM(quantity * (cost_price)) as total_cost_total'),
-            DB::raw( 'SUM(quantity * (selling_price)) as total_selling_price')
+            DB::raw( 'SUM(total_profit) as total_profit'),
+            DB::raw( 'SUM(total_cost_price) as total_cost_total'),
+            DB::raw( 'SUM(total_selling_price) as total_selling_price')
         )->where('warehousestore_id', getActiveStore()->id)->whereHas('invoice',function($q) use(&$data){
             $q
                 ->whereBetween('invoice_date',[$data['from'],$data['to']])

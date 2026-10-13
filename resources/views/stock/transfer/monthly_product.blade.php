@@ -49,7 +49,13 @@
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $data->stock->name }}</td>
-                                        <td>{{ $data->total_qty }}</td>
+                                        <td>
+                                            @if(\App\Services\StockUnitService::isMulti() && \App\Services\StockUnitService::hasUnits($data->stock_id))
+                                                {{ \App\Services\StockUnitService::breakdownLabel($data->stock_id, $data->total_qty) }} <small class="text-muted">({{ $data->total_qty + 0 }} pcs)</small>
+                                            @else
+                                                {{ $data->total_qty }}
+                                            @endif
+                                        </td>
                                         <td>{{ number_format($data->total_cost_total,2) }}</td>
                                         <td>{{ number_format($data->total_selling_price,2) }}</td>
                                     </tr>

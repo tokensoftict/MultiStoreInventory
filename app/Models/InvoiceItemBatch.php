@@ -75,7 +75,12 @@ class InvoiceItemBatch extends Model
 		'profit',
 		'quantity',
 		'invoice_date',
-		'sales_time'
+		'sales_time',
+        'unit_id',
+        'unit_name',
+        'unit_quantity',
+        'unit_price',
+        'base_quantity'
 	];
 
     public function warehousestore()

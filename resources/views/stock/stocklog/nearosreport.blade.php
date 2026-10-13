@@ -53,7 +53,14 @@
                                     <td>{{ $near->name }}</td>
                                     <td>{{ $near->type }}</td>
                                     <td>{{ $near->reorder_level }}</td>
-                                    <td>{{ $near->available_quantity }}</td>
+                                    <td>
+                                        @if(\App\Services\StockUnitService::isMulti($store->id) && \App\Services\StockUnitService::hasUnits($near->stock_id))
+                                            {{ \App\Services\StockUnitService::breakdownLabel($near->stock_id, $near->available_yard_quantity) }}
+                                            <small class="text-muted">({{ $near->available_yard_quantity + 0 }} pcs)</small>
+                                        @else
+                                            {{ $near->available_quantity }}
+                                        @endif
+                                    </td>
                                     <td>{{ $near->available_yard_quantity }}</td>
                                     <td>
                                         <div class="btn-group">

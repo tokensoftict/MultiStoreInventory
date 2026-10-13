@@ -91,7 +91,12 @@ class InvoiceItem extends Model
 		'total_profit',
 		'discount_type',
 		'discount_amount',
-		'price_category_id'
+		'price_category_id',
+        'unit_id',
+        'unit_name',
+        'unit_quantity',
+        'unit_price',
+        'base_quantity'
 	];
 
     public function warehousestore()

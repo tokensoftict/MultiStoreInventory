@@ -200,6 +200,12 @@ class Stock extends Model
         return $this->belongsTo(ProductCategory::class);
     }
 
+    /** Units for the optional multi-level quantity system (empty for legacy products). */
+    public function units()
+    {
+        return $this->hasMany(ProductUnit::class, 'stock_id')->orderBy('level');
+    }
+
     public function stockbatches()
     {
         return $this->hasMany(Stockbatch::class);

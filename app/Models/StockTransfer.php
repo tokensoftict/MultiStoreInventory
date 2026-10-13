@@ -41,7 +41,7 @@ class StockTransfer extends Model
         'user_id' => 'int',
         'from' => 'int',
         'to' => 'int',
-        'total_price' => 'int',
+        'total_price' => 'float',
     ];
 
     protected $dates = [
@@ -88,9 +88,9 @@ class StockTransfer extends Model
         $items = $this->stock_transfer_items()->get();
         foreach ($items as $item)
         {
-            $from_store = getActualStore($item->product_type, $this->from);
+            $from_store = getActualStore($item->product_type, $this->from, $item->unit_id);
 
-            $to_store = getActualStore($item->product_type, $this->to);
+            $to_store = getActualStore($item->product_type, $this->to, $item->unit_id);
 
             $batches =  $item->stock->getSaleableBatches($from_store,$item->quantity);
 
@@ -100,9 +100,9 @@ class StockTransfer extends Model
 
         foreach ($items as $item)
         {
-            $from_store = getActualStore($item->product_type, $this->from);
+            $from_store = getActualStore($item->product_type, $this->from, $item->unit_id);
 
-            $to_store = getActualStore($item->product_type, $this->to);
+            $to_store = getActualStore($item->product_type, $this->to, $item->unit_id);
 
             $batches =  $item->stock->getSaleableBatches($from_store,$item->quantity);
 
@@ -151,31 +151,84 @@ class StockTransfer extends Model
 
     public static function createStockTransfer($request){
 
-        $qty = $request->get("qty");
-        $stocks = $request->get("stock_id");
-        $type = $request->get('type');
+        $qty = $request->get("qty", []);
+        $stocks = $request->get("stock_id", []);
+        $type = $request->get('type', []);
+        $unit_ids = $request->get('unit_id', []);
 
         $transfer_item = [];
-
         $total = 0;
 
-        foreach ($stocks as $key =>$id)
+        $fromStore = Warehousestore::find($request->from);
+
+        foreach ($stocks as $key => $id)
         {
             $selected_stock = Stock::findorfail($id);
-            $total+=getStockActualSellingPrice($selected_stock, $type[$key]) * $qty[$key];
-            $transfer_item[] = new StockTransferItem(
-                [
+            $unitId = isset($unit_ids[$key]) && !empty($unit_ids[$key]) ? $unit_ids[$key] : null;
+            $productUnit = $unitId ? ProductUnit::where('stock_id', $selected_stock->id)->where('id', $unitId)->first() : null;
+
+            if ($productUnit) {
+                $units = \App\Services\StockUnitService::units($selected_stock->id);
+                $mult = \App\Services\InventoryQuantityService::multiplier($units, $productUnit->id);
+                $unitQty = (float)$qty[$key];
+                $baseQty = round($unitQty * $mult, 4);
+
+                $unitPrice = (float)$productUnit->selling_price;
+                $unitCost = (float)$productUnit->cost_price;
+                if ($unitCost <= 0) {
+                    $topMult = count($units) ? \App\Services\InventoryQuantityService::multiplier($units, $units[0]['id']) : 1;
+                    $unitCost = $topMult > 0 ? ((float)$selected_stock->cost_price / $topMult) * $mult : (float)$selected_stock->cost_price;
+                }
+
+                $perPieceSelling = $mult > 0 ? ($unitPrice / $mult) : $unitPrice;
+                $perPieceCost = $mult > 0 ? ($unitCost / $mult) : $unitCost;
+
+                $lineTotal = $unitPrice * $unitQty;
+                $total += $lineTotal;
+
+                $prodType = $fromStore ? $fromStore->yard_column : 'yard_quantity';
+
+                $transfer_item[] = new StockTransferItem([
                     'stock_id' => $selected_stock->id,
                     'user_id' => auth()->id(),
-                    'product_type' => $type[$key],
+                    'product_type' => $prodType,
                     'from' => $request->from,
                     'to' => $request->to,
-                    'selling_price' => getStockActualSellingPrice($selected_stock, $type[$key]),
-                    'cost_price' => getStockActualCostPrice($selected_stock, $type[$key]),
-                    'quantity' => $qty[$key],
+                    'selling_price' => $perPieceSelling,
+                    'cost_price' => $perPieceCost,
+                    'quantity' => $baseQty,
                     'transfer_date' => $request->transfer_date,
-                ]
-            );
+                    'unit_id' => $productUnit->id,
+                    'unit_name' => $productUnit->name,
+                    'unit_quantity' => $unitQty,
+                    'unit_price' => $unitPrice,
+                    'base_quantity' => $baseQty,
+                ]);
+            } else {
+                $itemType = $type[$key] ?? 'NORMAL';
+                $sellPrice = getStockActualSellingPrice($selected_stock, $itemType);
+                $costPrice = getStockActualCostPrice($selected_stock, $itemType);
+                $lineQty = (float)$qty[$key];
+                $lineTotal = $sellPrice * $lineQty;
+                $total += $lineTotal;
+
+                $transfer_item[] = new StockTransferItem([
+                    'stock_id' => $selected_stock->id,
+                    'user_id' => auth()->id(),
+                    'product_type' => $itemType,
+                    'from' => $request->from,
+                    'to' => $request->to,
+                    'selling_price' => $sellPrice,
+                    'cost_price' => $costPrice,
+                    'quantity' => $lineQty,
+                    'transfer_date' => $request->transfer_date,
+                    'unit_id' => null,
+                    'unit_name' => null,
+                    'unit_quantity' => null,
+                    'unit_price' => null,
+                    'base_quantity' => $lineQty,
+                ]);
+            }
         }
 
         $transfer = StockTransfer::create([
@@ -187,48 +240,103 @@ class StockTransfer extends Model
             'transfer_number' => $request->transfer_number,
             'transfer_date' => $request->transfer_date,
         ]);
-        $transfer->stock_transfer_items() ->saveMany($transfer_item);
-
+        $transfer->stock_transfer_items()->saveMany($transfer_item);
 
         if($request->status == "COMPLETE"){
             return $transfer->complete();
         }
 
-        return redirect()->route('stocktransfer.index')->with('success','stock transfer has ben draft successfully');
+        return redirect()->route('stocktransfer.index')->with('success','stock transfer has been draft successfully');
     }
 
     public static function updateStockTransfer($request, $id){
 
         $transfer = StockTransfer::findorfail($id);
-        $qty = $request->get("qty");
-        $stocks = $request->get("stock_id");
-        $type = $request->get('type');
-        $transfer_item = [];
+        $qty = $request->get("qty", []);
+        $stocks = $request->get("stock_id", []);
+        $type = $request->get('type', []);
+        $unit_ids = $request->get('unit_id', []);
 
+        $transfer_item = [];
         $total = 0;
 
-        foreach ($stocks as $key =>$id)
+        $fromStore = Warehousestore::find($request->from ?: $transfer->from);
+
+        foreach ($stocks as $key => $id)
         {
             $selected_stock = Stock::findorfail($id);
-            $total+=getStockActualSellingPrice($selected_stock, $type[$key]) * $qty[$key];
-            $transfer_item[] = new StockTransferItem(
-                [
+            $unitId = isset($unit_ids[$key]) && !empty($unit_ids[$key]) ? $unit_ids[$key] : null;
+            $productUnit = $unitId ? ProductUnit::where('stock_id', $selected_stock->id)->where('id', $unitId)->first() : null;
+
+            if ($productUnit) {
+                $units = \App\Services\StockUnitService::units($selected_stock->id);
+                $mult = \App\Services\InventoryQuantityService::multiplier($units, $productUnit->id);
+                $unitQty = (float)$qty[$key];
+                $baseQty = round($unitQty * $mult, 4);
+
+                $unitPrice = (float)$productUnit->selling_price;
+                $unitCost = (float)$productUnit->cost_price;
+                if ($unitCost <= 0) {
+                    $topMult = count($units) ? \App\Services\InventoryQuantityService::multiplier($units, $units[0]['id']) : 1;
+                    $unitCost = $topMult > 0 ? ((float)$selected_stock->cost_price / $topMult) * $mult : (float)$selected_stock->cost_price;
+                }
+
+                $perPieceSelling = $mult > 0 ? ($unitPrice / $mult) : $unitPrice;
+                $perPieceCost = $mult > 0 ? ($unitCost / $mult) : $unitCost;
+
+                $lineTotal = $unitPrice * $unitQty;
+                $total += $lineTotal;
+
+                $prodType = $fromStore ? $fromStore->yard_column : 'yard_quantity';
+
+                $transfer_item[] = new StockTransferItem([
                     'stock_id' => $selected_stock->id,
                     'user_id' => auth()->id(),
-                    'product_type' => $type[$key],
-                    'from' => $request->from,
-                    'to' => $request->to,
-                    'selling_price' => getStockActualSellingPrice($selected_stock, $type[$key]),
-                    'cost_price' => getStockActualCostPrice($selected_stock, $type[$key]),
-                    'quantity' => $qty[$key],
+                    'product_type' => $prodType,
+                    'from' => $request->from ?: $transfer->from,
+                    'to' => $request->to ?: $transfer->to,
+                    'selling_price' => $perPieceSelling,
+                    'cost_price' => $perPieceCost,
+                    'quantity' => $baseQty,
                     'transfer_date' => $request->transfer_date,
-                ]
-            );
+                    'unit_id' => $productUnit->id,
+                    'unit_name' => $productUnit->name,
+                    'unit_quantity' => $unitQty,
+                    'unit_price' => $unitPrice,
+                    'base_quantity' => $baseQty,
+                ]);
+            } else {
+                $itemType = $type[$key] ?? 'NORMAL';
+                $sellPrice = getStockActualSellingPrice($selected_stock, $itemType);
+                $costPrice = getStockActualCostPrice($selected_stock, $itemType);
+                $lineQty = (float)$qty[$key];
+                $lineTotal = $sellPrice * $lineQty;
+                $total += $lineTotal;
+
+                $transfer_item[] = new StockTransferItem([
+                    'stock_id' => $selected_stock->id,
+                    'user_id' => auth()->id(),
+                    'product_type' => $itemType,
+                    'from' => $request->from ?: $transfer->from,
+                    'to' => $request->to ?: $transfer->to,
+                    'selling_price' => $sellPrice,
+                    'cost_price' => $costPrice,
+                    'quantity' => $lineQty,
+                    'transfer_date' => $request->transfer_date,
+                    'unit_id' => null,
+                    'unit_name' => null,
+                    'unit_quantity' => null,
+                    'unit_price' => null,
+                    'base_quantity' => $lineQty,
+                ]);
+            }
         }
 
         $transfer->update([
             'status' => "DRAFT",
             'user_id' => auth()->id(),
+            'from' => $request->from ?: $transfer->from,
+            'to' => $request->to ?: $transfer->to,
             'total_price' => $total,
             'transfer_number' => $request->transfer_number,
             'transfer_date' => $request->transfer_date,
@@ -236,10 +344,13 @@ class StockTransfer extends Model
 
         $transfer->stock_transfer_items()->delete();
 
-        $transfer->stock_transfer_items() ->saveMany($transfer_item);
+        $transfer->stock_transfer_items()->saveMany($transfer_item);
 
+        if($request->status == "COMPLETE"){
+            return $transfer->complete();
+        }
 
-        return redirect()->route('stocktransfer.index')->with('success','stock transfer has ben updated successfully');
+        return redirect()->route('stocktransfer.index')->with('success','stock transfer has been updated successfully');
     }
 
     /*

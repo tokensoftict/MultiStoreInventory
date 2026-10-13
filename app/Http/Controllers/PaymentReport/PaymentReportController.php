@@ -98,7 +98,7 @@ class PaymentReportController extends Controller
         $data['stores'] = getMyAccessStore('name_and_id');
 
         $data['expenses'] = Expense::with(['expenses_type','user'])->where('warehousestore_id', $data['warehousestore_id'])->whereBetween('expense_date',[ $data['from'], $data['to']])->get();
-        $data['payments'] = PaymentMethodTable::with(['warehousestore','payment','customer','user','payment_method','invoice'])->where('warehousestore_id', $data['warehousestore_id'])->where('warehousestore_id',getActiveStore()->id)->whereBetween('payment_date', [$data['from'],$data['to']])->orderBy('id','DESC')->get();
+        $data['payments'] = PaymentMethodTable::with(['warehousestore','payment','customer','user','payment_method','invoice'])->where('warehousestore_id', $data['warehousestore_id'])->whereBetween('payment_date', [$data['from'],$data['to']])->orderBy('id','DESC')->get();
 
         $data['title'] = "Income Analysis By Store";
         return view('paymentreport.income_analysis_by_department',$data);
@@ -119,7 +119,7 @@ class PaymentReportController extends Controller
 
         $data['payments'] = PaymentMethodTable::with(['warehousestore','payment','customer','user','payment_method','invoice'])
             ->where("payment_info->bank_id",$data['selected_bank'] )
-            ->where('warehousestore_id', $data['warehousestore_id'])->where('warehousestore_id',getActiveStore()->id)->whereBetween('payment_date', [$data['from'],$data['to']])->orderBy('id','DESC')->get();
+            ->where('warehousestore_id', $data['warehousestore_id'])->whereBetween('payment_date', [$data['from'],$data['to']])->orderBy('id','DESC')->get();
 
         $data['title'] = "Payment Report By Bank Transfer";
         return view('paymentreport.report_by_bank_transfer', $data);

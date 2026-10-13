@@ -65,7 +65,12 @@ class PurchaseOrderItem extends Model
         'selling_price',
 		'added_by',
         'type',
-        'purchase_order_invoice_number'
+        'purchase_order_invoice_number',
+        'unit_id',
+        'unit_name',
+        'unit_quantity',
+        'unit_price',
+        'base_quantity'
 	];
 
 	public function user()

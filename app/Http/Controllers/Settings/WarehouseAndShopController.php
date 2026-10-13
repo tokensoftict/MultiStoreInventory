@@ -37,6 +37,8 @@ class WarehouseAndShopController extends Controller
             $val['logo'] = 'mimes:jpeg,jpg,png,gif|required|max:10000';
         }
 
+        $val['quantity_system'] = 'nullable|in:legacy,multi_level';
+
         $request->validate($val);
 
         $data = $request->only(Warehousestore::$field);
@@ -93,9 +95,27 @@ class WarehouseAndShopController extends Controller
         }
 
 
+        $validate['quantity_system'] = 'nullable|in:legacy,multi_level';
+
         $request->validate($validate);
 
         $data = $request->only(Warehousestore::$field);
+
+        // Switching quantity system is only safe while the store holds no stock,
+        // because the base-piece count reuses the store's yard column.
+        $currentStore = Warehousestore::find($id);
+        if (isset($data['quantity_system']) && $currentStore
+            && $data['quantity_system'] !== ($currentStore->quantity_system ?? 'legacy')) {
+            $hasStock = \DB::table('stockbatches')
+                ->where(function ($q) use ($currentStore) {
+                    $q->where($currentStore->packed_column, '!=', 0)
+                        ->orWhere($currentStore->yard_column, '!=', 0);
+                })->exists();
+            if ($hasStock) {
+                return redirect()->back()->withInput()
+                    ->withErrors(['quantity_system' => 'Quantity system can only be changed when this store has no stock.']);
+            }
+        }
 
         if ($file) {
             $imageName = time().'.'. $request->logo->getClientOriginalExtension();

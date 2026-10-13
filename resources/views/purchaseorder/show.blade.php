@@ -67,13 +67,27 @@
                                             @endphp
                                             @foreach($porder->purchase_order_items as $item)
                                                 @php
-                                                    $alltotal+= $total = $item->qty * $item->cost_price;
+                                                    $itemTotal = !empty($item->unit_name) && $item->unit_price ? ($item->unit_price * $item->unit_quantity) : ($item->qty * $item->cost_price);
+                                                    $alltotal += $itemTotal;
                                                 @endphp
                                                 <tr>
                                                     <td>{{ $item->stock()->get()->first()->name }}</td>
-                                                    <td class="text-center">{{ $item->qty }}</td>
-                                                    <td class="text-center">{{ number_format($item->cost_price,2) }}</td>
-                                                    <td class="text-right">{{ number_format($total,2) }}</td>
+                                                    <td class="text-center">
+                                                        @if(!empty($item->unit_name))
+                                                            {{ $item->unit_quantity + 0 }} {{ $item->unit_name }}
+                                                            <br><small class="text-muted">({{ $item->qty + 0 }} pcs)</small>
+                                                        @else
+                                                            {{ $item->qty }}
+                                                        @endif
+                                                    </td>
+                                                    <td class="text-center">
+                                                        @if(!empty($item->unit_name))
+                                                            {{ number_format($item->unit_price, 2) }}
+                                                        @else
+                                                            {{ number_format($item->cost_price, 2) }}
+                                                        @endif
+                                                    </td>
+                                                    <td class="text-right">{{ number_format($itemTotal, 2) }}</td>
                                                 </tr>
 
                                             @endforeach

@@ -4,7 +4,11 @@ namespace App\Classes;
 use App\Models\Expense;
 use App\Models\Payment;
 use App\Models\PaymentMethodTable;
+use App\Models\QuantityUnit;
+use App\Services\InventoryQuantityService;
+use App\Services\StockUnitService;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class Dashboard
 {
@@ -88,19 +92,68 @@ class Dashboard
 
     /**
      * Get stock items that are at or below their reorder level for the active store.
+     * Supports both legacy single-level and multi-level quantity systems.
      *
      * @return \Illuminate\Support\Collection
      */
     public final function getNearOutOfStockItems()
     {
         $store = getActiveStore();
-        return \DB::table('stockbatches')->selectRaw(
-            "stocks.id as stock_id, stocks.name, SUM(stockbatches." . $store->packed_column . ") as available_quantity, COALESCE(stocks.reorder_level, 5) as reorder_level"
+        if (!$store) {
+            return collect();
+        }
+
+        $isMulti = InventoryQuantityService::usesMultiLevel($store);
+        $qtyColumn = $isMulti ? $store->yard_column : $store->packed_column;
+
+        $stocks = DB::table('stocks')
+            ->selectRaw(
+                "stocks.id as stock_id, stocks.name, COALESCE(stocks.reorder_level, 5) as reorder_level, " .
+                "COALESCE((SELECT SUM(sb." . $qtyColumn . ") FROM stockbatches sb WHERE sb.stock_id = stocks.id), 0) as available_quantity"
             )
-            ->join('stocks', 'stockbatches.stock_id', '=', 'stocks.id')
             ->where('stocks.status', 1)
-            ->whereRaw("(SELECT SUM(sb." . $store->packed_column . ") FROM stockbatches sb WHERE sb.stock_id=stocks.id) <= COALESCE(stocks.reorder_level, 5)")
-            ->groupBy('stocks.id', 'stocks.name', 'stocks.reorder_level')
             ->get();
+
+        $results = collect();
+
+        foreach ($stocks as $stock) {
+            $baseQty = (float)$stock->available_quantity;
+            $reorderLevel = (float)$stock->reorder_level;
+
+            if ($isMulti && StockUnitService::hasUnits($stock->stock_id)) {
+                $units = StockUnitService::unitsForUi($stock->stock_id, $baseQty);
+                $onlyPieces = QuantityUnit::isOnlyPiecesEnabled();
+
+                if ($onlyPieces) {
+                    $topUnit = end($units);
+                    $topMult = 1.0;
+                } else {
+                    $topUnit = count($units) ? $units[0] : null;
+                    $topMult = $topUnit ? (float)$topUnit['multiplier'] : 1.0;
+                }
+
+                $topUnitName = $topUnit ? $topUnit['name'] : 'Pieces';
+                $thresholdPieces = $reorderLevel * $topMult;
+
+                if ($baseQty <= $thresholdPieces) {
+                    $stock->is_multi = true;
+                    $stock->top_unit_name = $topUnitName;
+                    $stock->top_unit_multiplier = $topMult;
+                    $stock->threshold_pieces = $thresholdPieces;
+                    $stock->breakdown_label = StockUnitService::breakdownLabel($stock->stock_id, $baseQty);
+                    $stock->reorder_label = ($reorderLevel + 0) . ' ' . $topUnitName . ($topMult > 1 ? ' (' . ($thresholdPieces + 0) . ' pcs)' : '');
+                    $results->push($stock);
+                }
+            } else {
+                if ($baseQty <= $reorderLevel) {
+                    $stock->is_multi = false;
+                    $stock->breakdown_label = null;
+                    $stock->reorder_label = number_format($reorderLevel);
+                    $results->push($stock);
+                }
+            }
+        }
+
+        return $results;
     }
 }

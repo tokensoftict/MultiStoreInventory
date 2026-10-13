@@ -16,11 +16,11 @@ class UserController extends Controller
 
     public function index()
     {
-        if(auth()->user()->group_id == 1) {
-            $users = User::with(['price_categories', 'userstoremappers'])->get();
-        }else{
-            $users = User::with(['price_categories', 'userstoremappers'])->where('group_id', '>', 1)->get();
+        $users = User::with(['price_categories', 'userstoremappers']);
+        if (auth()->user()->group_id != 1) {
+            $users->where('group_id', '!=', 1);
         }
+        $users = $users->get();
         $data['title'] = "System Users";
         $data['users'] = $users;
         return view('user.list-users', $data);
@@ -30,11 +30,16 @@ class UserController extends Controller
     public function create()
     {
         $data['title'] = "Add new System User";
-        $data['groups'] = Group::where('status', '1')->get(['id', 'name']);
+        $groups = Group::where('status', '1');
+        if (auth()->user()->group_id != 1) {
+            $groups->where('id', '!=', 1);
+        }
+        $data['groups'] = $groups->get(['id', 'name']);
         $data['user'] = new User();
         $data['stores'] = Warehousestore::where('status', 1)->get();
-        $data['mystores'] = \request()->user()->userstoremappers->pluck('warehousestore_id')->toArray();
-        
+        $currentUser = auth()->user() ?: \request()->user();
+        $data['mystores'] = ($currentUser && $currentUser->userstoremappers) ? $currentUser->userstoremappers->pluck('warehousestore_id')->toArray() : [];
+
         $settings = app(\App\Classes\Settings::class);
         $data['active_price_categories'] = [];
         if ($settings->store()->allow_dynamic_pricing ?? false) {
@@ -48,6 +53,17 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
+        if ($request->get('group_id') == 1 && auth()->user()->group_id != 1) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'status' => false,
+                    'msgtype' => 'error',
+                    'msg' => 'Only a System Administrator can create another System Administrator.'
+                ]);
+            }
+            return back()->withInput()->with('error', 'Only a System Administrator can create another System Administrator.');
+        }
+
         $data = $request->all();
 
         $validator = Validator::make($data, User::$rules);
@@ -72,18 +88,18 @@ class UserController extends Controller
         $userdata = $data;
         unset($userdata['_token']);
 
-        $userdata['password'] = bcrypt( $userdata['password']);
+        $userdata['password'] = bcrypt($userdata['password']);
 
-        DB::transaction(function () use ($data, $userdata, &$res, &$request){
+        DB::transaction(function () use ($data, $userdata, &$res, &$request) {
             $new_user = new User();
-            unset($userdata['store'],$userdata['undefined'],$userdata['price_categories']);
+            unset($userdata['store'], $userdata['undefined'], $userdata['price_categories']);
 
             $new_user = $new_user->updateOrCreate($userdata);
 
             $id = $new_user->id;
             $userStore = $request->get('store', []);
 
-            $userStore = collect($userStore)->map(function($store) use(&$id){
+            $userStore = collect($userStore)->map(function ($store) use (&$id) {
                 return [
                     'user_id' => $id,
                     'warehousestore_id' => $store
@@ -113,13 +129,21 @@ class UserController extends Controller
 
     public function edit($id)
     {
-        $user = User::with(['userstoremappers', 'price_categories'])->findorfail($id);
+        $user = User::with(['userstoremappers', 'price_categories'])->findOrFail($id);
+        if ($user->group_id == 1 && auth()->user()->group_id != 1) {
+            return redirect()->route('user.index')->with('error', 'Only a System Administrator can edit a System Administrator.');
+        }
+
         $data['title'] = "Edit System User";
-        $data['groups'] = Group::where('status', '1')->get(['id', 'name']);
+        $groups = Group::where('status', '1');
+        if (auth()->user()->group_id != 1) {
+            $groups->where('id', '!=', 1);
+        }
+        $data['groups'] = $groups->get(['id', 'name']);
         $data['user'] = $user;
         $data['stores'] = Warehousestore::where('status', 1)->get();
         $data['mystores'] = $user->userstoremappers->pluck('warehousestore_id')->toArray();
-        
+
         $settings = app(\App\Classes\Settings::class);
         $data['active_price_categories'] = [];
         if ($settings->store()->allow_dynamic_pricing ?? false) {
@@ -127,13 +151,25 @@ class UserController extends Controller
         }
         $data['my_price_categories'] = $user->price_categories->pluck('id')->toArray();
 
-        return view('user.add-user', $data);
+        return view('user.edit-user', $data);
     }
 
 
 
     public function update(Request $request, $id)
     {
+        $targetUser = User::findOrFail($id);
+        if (($targetUser->group_id == 1 || $request->get('group_id') == 1) && auth()->user()->group_id != 1) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'status' => false,
+                    'msgtype' => 'error',
+                    'msg' => 'Only a System Administrator can manage a System Administrator.'
+                ]);
+            }
+            return back()->withInput()->with('error', 'Only a System Administrator can manage a System Administrator.');
+        }
+
         $res['status'] = false;
         $res['msgtype'] = 'error';
         $res['msg'] = "There was an error updating User";
@@ -159,18 +195,18 @@ class UserController extends Controller
 
         unset($userdata['store'], $userdata['price_categories']);
 
-        if(empty($request->password)){
+        if (empty($request->password)) {
             unset($userdata['password']);
-        }else{
-            $userdata['password'] = bcrypt( $userdata['password']);
+        } else {
+            $userdata['password'] = bcrypt($userdata['password']);
         }
 
 
-        DB::transaction(function () use ($data, $id,$userdata, &$res, &$userStore, &$request) {
+        DB::transaction(function () use ($data, $id, $userdata, &$res, &$userStore, &$request) {
             $new_user = User::find($id);
             $new_user->update($userdata);
 
-            $userStore = collect($userStore)->map(function($store) use(&$id){
+            $userStore = collect($userStore)->map(function ($store) use (&$id) {
                 return [
                     'user_id' => $id,
                     'warehousestore_id' => $store
@@ -200,7 +236,12 @@ class UserController extends Controller
 
     public function toggle($id)
     {
-        $res = parent::toggleState(User::find($id));
+        $targetUser = User::findOrFail($id);
+        if ($targetUser->group_id == 1 && auth()->user()->group_id != 1) {
+            return redirect()->route('user.index')->with('error', 'Only a System Administrator can modify a System Administrator.');
+        }
+
+        $res = parent::toggleState($targetUser);
         if ($res->status == 1)
             return redirect()->route('user.index')->with('success', "User activated successfully");
         else

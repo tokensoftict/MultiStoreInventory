@@ -422,6 +422,11 @@
 
     <script>
 
+        // Multi-level quantity helpers (only used when a product carries units)
+        const BASE_YARD_COLUMN = "{{ getActiveStore()->yard_column }}";
+        function unitOptValue(u) { return BASE_YARD_COLUMN + '__u' + u.id; }
+        function defaultUnit(stock) { return stock.units[stock.units.length - 1]; } // Piece (smallest)
+
         function bindAllTr() {
             $('#appender').find('tr').off('click');
             $('#appender').find('tr').on('click', function () {
@@ -444,32 +449,52 @@
             if (data.stock.type != "Normal" && parseInt(data.stock.available_quantity) == 0 && parseInt(data.stock.available_yard_quantity) > 0) {
                 defaultType = "{{ getActiveStore()->yard_column }}";
             }
+            // Multi-level store: if only pieces is enabled, default to pieces; otherwise require user to pick a unit
+            if (data.stock.multi_level && data.stock.units && data.stock.units.length) {
+                let onlyPieces = (data.stock.units.length === 1) || data.stock.only_pieces;
+                if (onlyPieces) {
+                    defaultType = unitOptValue(defaultUnit(data.stock));
+                } else {
+                    defaultType = "";
+                    var unselectedInput = $('#appender').find('.input-number[data-id="' + data.stock.id + '"]').filter(function () {
+                        return !$(this).closest('tr').find('.product_type').val();
+                    });
+                    if (unselectedInput.length > 0) {
+                        toastr.warning('Please select a unit for "' + data.stock.name + '" in the cart first.');
+                        unselectedInput.closest('tr').find('.product_type').focus();
+                        return;
+                    }
+                }
+            }
 
             // Check if there is already a row for this product with the defaultType
-            var existingInput = $('#appender').find('.input-number[data-id="' + data.stock.id + '"]').filter(function () {
-                return $(this).closest('tr').find('.product_type').val() === defaultType;
-            });
+            if (defaultType) {
+                var existingInput = $('#appender').find('.input-number[data-id="' + data.stock.id + '"]').filter(function () {
+                    return $(this).closest('tr').find('.product_type').val() === defaultType;
+                });
 
-            if (existingInput.length > 0) {
-                var currentVal = parseFloat(existingInput.val());
-                var maxVal = parseFloat(existingInput.attr('max'));
-                if (currentVal < maxVal) {
-                    //existingInput.val(currentVal + 1).change();
-                } else {
-                    //alert('Not enough quantity to add more of ' + data.stock.name);
+                if (existingInput.length > 0) {
+                    var currentVal = parseFloat(existingInput.val());
+                    var maxVal = parseFloat(existingInput.attr('max'));
+                    if (currentVal < maxVal) {
+                        //existingInput.val(currentVal + 1).change();
+                    } else {
+                        //alert('Not enough quantity to add more of ' + data.stock.name);
+                    }
+                    return;
                 }
-            } else {
-                $('#appender').prepend(cartTemplate(data));
-                $('.picture').prop('checked', false);
-                var trId = 'product_' + data.stock.id + '_' + defaultType;
-                $('#appender').find('tr').first().attr('id', trId);
-                $('#' + trId).find('.picture').prop('checked', true);
-                $('#imageThumb').attr('src', $('#' + trId).find('.picture').attr('data-image'));
-                bindIncrement();
-                bindAllTr();
-                bindproductType();
-                calculateTotal();
             }
+
+            $('#appender').prepend(cartTemplate(data));
+            $('.picture').prop('checked', false);
+            var trId = defaultType ? ('product_' + data.stock.id + '_' + defaultType) : ('product_' + data.stock.id + '_pending_' + Date.now());
+            $('#appender').find('tr').first().attr('id', trId);
+            $('#' + trId).find('.picture').prop('checked', true);
+            $('#imageThumb').attr('src', $('#' + trId).find('.picture').attr('data-image'));
+            bindIncrement();
+            bindAllTr();
+            bindproductType();
+            calculateTotal();
         }
 
 
@@ -483,7 +508,18 @@
             let price = 0;
             let found = false;
 
-            if (selectedCategoryId) {
+            let unitOpt = tr.find('.product_type option:selected');
+            let isUnit = !!unitOpt.attr('data-unit-id');
+            if (isUnit) {
+                // multi-level unit price: independent per unit, no category/legacy lookup
+                price = parseFloat(unitOpt.attr('data-price') || 0);
+                found = true;
+            } else if (tr.find('.product_type option[data-unit-id]').length > 0) {
+                price = 0;
+                found = true;
+            }
+
+            if (selectedCategoryId && !found) {
                 let stockPrices = [];
                 try {
                     stockPrices = JSON.parse(input.attr('data-stock-prices') || '[]');
@@ -502,8 +538,10 @@
             if (!found) {
                 if (productType === "{{ getActiveStore()->yard_column }}") {
                     price = parseFloat(input.attr('data-yard-price') || 0);
-                } else {
+                } else if (productType === "{{ getActiveStore()->packed_column }}") {
                     price = parseFloat(input.attr('data-packed-price') || 0);
+                } else {
+                    price = 0;
                 }
             }
 
@@ -524,6 +562,7 @@
                 const price = $(this).parent().parent().find('.input-number');
                 const td_price = $(this).parent().parent().find('.item_price');
                 const newType = $(this).val();
+                if (!newType) return;
                 const stockId = price.attr('data-id');
                 const tr = $(this).closest('tr');
 
@@ -543,9 +582,8 @@
                         calculateTotal();
                         return;
                     } else {
-                        alert('Merging would exceed the available stock limit for this type. Cannot change type.');
-                        // revert dropdown selection
-                        $(this).val(newType === "{{ getActiveStore()->packed_column }}" ? "{{ getActiveStore()->yard_column }}" : "{{ getActiveStore()->packed_column }}");
+                        alert('Merging would exceed the available stock limit for this unit. Cannot change unit.');
+                        $(this).val('');
                         return;
                     }
                 }
@@ -698,8 +736,19 @@
         function wrapItemIncart() {
             const product = [];
             let error_status = false;
+            let unselected_unit = false;
             $('.input-number').each(function (index, elem) {
                 const type = $(this).parent().parent().parent().parent().find('.product_type');
+                let typeVal = type.val();
+                let unitId = null;
+                if (typeVal && typeVal.indexOf('__u') !== -1) {
+                    const parts = typeVal.split('__u');
+                    typeVal = parts[0];
+                    unitId = parts[1];
+                }
+                if (!typeVal) {
+                    unselected_unit = true;
+                }
                 const tr = $(this).closest('tr');
                 const headerCategory = $('#price_category_id').val();
                 const itemCategory = tr.find('.item_price_category').val();
@@ -709,7 +758,8 @@
                     {
                         id: $(this).attr('data-id'),
                         qty: $(this).val(),
-                        type: type.val(),
+                        type: typeVal,
+                        unit_id: unitId,
                         price: $(this).attr('data-price'),
                         cost_price: $(this).attr('data-cost-price'),
                         price_category_id: selectedCategory || null
@@ -719,6 +769,10 @@
                     error_status = true;
                 }
             });
+            if (unselected_unit === true) {
+                alert('Please select a unit for all items in the cart before submitting.');
+                return false;
+            }
             if (error_status === true) {
                 alert('One or more Item in your invoice is out of stock, please cross check before submitting the invoice')
             }
@@ -759,9 +813,38 @@
                 type_select += '</select>';
             }
 
-            if (data.stock.available_quantity == 0 && data.stock.available_yard_quantity > 0) {
+            if (!data.stock.multi_level && data.stock.available_quantity == 0 && data.stock.available_yard_quantity > 0) {
                 data.stock.available_quantity = data.stock.available_yard_quantity;
                 data.stock.selling_price = data.stock.yard_selling_price
+            }
+
+            let isMulti = false;
+            if (data.stock.multi_level && data.stock.units && data.stock.units.length) {
+                let onlyPieces = (data.stock.units.length === 1) || data.stock.only_pieces;
+                if (onlyPieces) {
+                    const du = defaultUnit(data.stock);
+                    type_select = '<select class="form-control product_type">';
+                    data.stock.units.forEach(function (u) {
+                        type_select += '<option ' + (u.id === du.id ? 'selected ' : '') + 'value="' + unitOptValue(u) + '" data-unit-id="' + u.id + '" data-cost-price="' + u.cost_price + '" data-price="' + u.selling_price + '" data-av-qty="' + u.available + '">' + u.name + ' (' + u.available + ' avail.)</option>';
+                    });
+                    type_select += '</select>';
+                    data.stock.available_quantity = du.available;
+                    data.stock.selling_price = du.selling_price;
+                    data.stock.cost_price = du.cost_price;
+                    data.stock.stock_prices = [];
+                } else {
+                    isMulti = true;
+                    type_select = '<select class="form-control product_type">';
+                    type_select += '<option value="" disabled selected>-- Select Unit --</option>';
+                    data.stock.units.forEach(function (u) {
+                        type_select += '<option value="' + unitOptValue(u) + '" data-unit-id="' + u.id + '" data-cost-price="' + u.cost_price + '" data-price="' + u.selling_price + '" data-av-qty="' + u.available + '">' + u.name + ' (' + u.available + ' avail.)</option>';
+                    });
+                    type_select += '</select>';
+                    data.stock.available_quantity = 0;
+                    data.stock.selling_price = 0;
+                    data.stock.cost_price = 0;
+                    data.stock.stock_prices = [];
+                }
             }
 
             let price_category_select = "";
@@ -774,9 +857,9 @@
                 price_category_select += '</select></td>';
             @endif
 
-            let currentPrice = data.stock.selling_price;
+            let currentPrice = isMulti ? 0 : data.stock.selling_price;
             let headerCategory = $('#price_category_id').val();
-            if (headerCategory) {
+            if (headerCategory && !isMulti) {
                 let matched = (data.stock.stock_prices || []).find(function (sp) {
                     return sp.price_category_id == headerCategory;
                 });
@@ -790,11 +873,15 @@
             @else
                 {!! 'return `<tr style="cursor: pointer" id="product_`+data.stock.id+`"><th  class="text-center"><input data-image="`+data.stock.image+`" name="picture" class="picture" value="1" type="radio"></th><th>`+data.stock.name+`<div id="error_`+data.stock.id+`" class="errors alert alert-danger" `+(data[`error`] ? `` : `style="display:none;"`)+`>`+(data[`error`] ? data[`error`] : ``)+`</div>`+`</th><td><div class="col-md-4"><div class="input-group"> <span class="input-group-btn input-group-sm"> <button  data-field="quant[1]" type="button" class="btn btn-danger btn-number minus" data-type="minus"> <i class="fa fa-minus"></i></button></span><input class="form-control text-center input-number"  data-id="`+data.stock.id+`" data-packed-price="`+data.stock.selling_price+`" data-yard-price="`+data.stock.yard_selling_price+`" data-stock-prices=\'`+JSON.stringify(data.stock.stock_prices || [])+`\' data-price="`+currentPrice+`" data-cost-price="`+data.stock.cost_price+`" style="width:100px;display: block;" required="" max="`+data.stock.available_quantity+`" min="0.01" step="0.01" type="number" value="1"> <span class="input-group-btn"> <button type="button" class="btn btn-primary btn-number plus" data-type="plus"><i class="fa fa-plus"></i> </button> </span></div></div><td>`+type_select+`</td>`+price_category_select+`<th class="text-right item_price"><span class="item_text_price form-control" value="`+currentPrice+`">`+formatMoney(currentPrice)+`</span></th><th class="text-right item_total">`+formatMoney(currentPrice)+`</th><td class="text-right"> <a href="#" onclick="return removeItem(this);" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i></a></td></tr>`;' !!}
             @endif
-            }
+        }
 
         function ProcessInvoice(btn) {
 
             const stock = wrapItemIncart();
+
+            if (stock === false) {
+                return false;
+            }
 
             if (stock.length === 0) {
                 alert('You can not submit an empty cart, please add product to continue');

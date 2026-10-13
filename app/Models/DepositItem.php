@@ -50,7 +50,7 @@ class DepositItem extends Model
 		'deposit_id' => 'int',
 		'stock_id' => 'int',
 		'warehousestore_id' => 'int',
-		'quantity' => 'int',
+		'quantity' => 'float',
 		'customer_id' => 'int',
 		'added_by' => 'int',
 		'cost_price' => 'float',
@@ -59,7 +59,11 @@ class DepositItem extends Model
 		'total_cost_price' => 'float',
 		'total_selling_price' => 'float',
 		'total_profit' => 'float',
-		'discount_amount' => 'float'
+		'discount_amount' => 'float',
+		'unit_id' => 'int',
+		'unit_quantity' => 'float',
+		'unit_price' => 'float',
+		'base_quantity' => 'float',
 	];
 
 	protected $dates = [
@@ -86,7 +90,12 @@ class DepositItem extends Model
 		'total_selling_price',
 		'total_profit',
 		'discount_type',
-		'discount_amount'
+		'discount_amount',
+		'unit_id',
+		'unit_name',
+		'unit_quantity',
+		'unit_price',
+		'base_quantity',
 	];
 
 	public function customer()

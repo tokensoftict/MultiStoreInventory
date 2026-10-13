@@ -47,7 +47,11 @@ class StockTransferItem extends Model
 		'to' => 'int',
 		'selling_price' => 'float',
 		'cost_price' => 'float',
-		'quantity' => 'int'
+		'quantity' => 'int',
+		'unit_id' => 'int',
+		'unit_quantity' => 'float',
+		'unit_price' => 'float',
+		'base_quantity' => 'float',
 	];
 
 	protected $dates = [
@@ -64,8 +68,18 @@ class StockTransferItem extends Model
 		'selling_price',
 		'cost_price',
 		'quantity',
-		'transfer_date'
+		'transfer_date',
+		'unit_id',
+		'unit_name',
+		'unit_quantity',
+		'unit_price',
+		'base_quantity',
 	];
+
+	public function product_unit()
+	{
+		return $this->belongsTo(ProductUnit::class, 'unit_id');
+	}
 
     public function store_from()
     {

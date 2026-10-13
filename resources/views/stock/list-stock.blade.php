@@ -27,6 +27,10 @@
                         @if(config('app.dont_show_all_product'))
                             <x-search-component placeholder="Search for available products.."/>
                         @endif
+                        @php
+                            $isMultiStore = \App\Services\StockUnitService::isMulti();
+                            $activeQtyUnits = $isMultiStore ? \App\Models\QuantityUnit::activeUnits() : collect();
+                        @endphp
                         <table class="table table-bordered table-responsive @if(config('app.dont_show_all_product') === FALSE) convert-data-table  @endif table-striped" style="font-size: 12px">
                             <thead>
                             <tr>
@@ -35,10 +39,16 @@
                                 <th>Product Type</th>
                                 <th>Category</th>
                                 <th>Manufacturer</th>
+                                @if(!empty($isMultiStore))
+                                    @foreach($activeQtyUnits as $aqu)
+                                        <th>{{ $aqu->name }} Selling Price</th>
+                                    @endforeach
+                                @else
                                 <th>Selling Price</th>
                                 <th>Cost Price</th>
                                 <th>Yard Selling Price</th>
                                 <th>Yard Cost Price</th>
+                                @endif
                                 <th>Last Updated</th>
                                 <th>Action</th>
                             </tr>
@@ -78,10 +88,22 @@
                                     <td>{{ array_search($stock->type,config('stock_type_name.'.config('app.store'))) }}</td>
                                     <td>{{ $stock->product_category ?  $stock->product_category->name : "No Category" }}</td>
                                     <td>{{ $stock->manufacturer ?  $stock->manufacturer->name : "No Manufacturer" }}</td>
+                                    @if(!empty($isMultiStore))
+                                        @php
+                                            $unitByLevel = [];
+                                            if (\App\Services\StockUnitService::hasUnits($stock->id)) {
+                                                foreach (\App\Services\StockUnitService::unitsForUi($stock->id) as $uu) { $unitByLevel[$uu['level']] = $uu; }
+                                            }
+                                        @endphp
+                                        @foreach($activeQtyUnits as $aqu)
+                                            <td>@php $pu = $unitByLevel[$aqu->level] ?? null; @endphp@if($pu){{ number_format($pu['selling_price'],2) }}<br><small class="text-muted">cost {{ number_format($pu['cost_price'],2) }}</small>@else - @endif</td>
+                                        @endforeach
+                                    @else
                                     <td>{{ number_format($stock->selling_price,2) }}</td>
                                     <td>{{ number_format($stock->cost_price,2) }}</td>
                                     <td>{{ number_format($stock->yard_selling_price,2) }}</td>
                                     <td>{{ number_format($stock->yard_cost_price,2) }}</td>
+                                    @endif
                                     <td>{{ $stock->last_updated ? $stock->last_updated->name  : ""}}</td>
                                     <td>
                                         <div class="btn-group">

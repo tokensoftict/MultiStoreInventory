@@ -21,6 +21,11 @@
                     @endif
                     <div class="panel-heading">
                         {{ $title }}
+                        @if(userCanView('stocktransfer.add_transfer'))
+                            <span class="pull-right">
+                                <a href="{{ route('stocktransfer.add_transfer') }}" class="btn btn-primary btn-sm" style="margin-top: -5px;"><i class="fa fa-plus"></i> New Stock Transfer</a>
+                            </span>
+                        @endif
                     </div>
                     <div class="panel-body">
                        <x-stock-transfer-component :lists="$transfers"/>

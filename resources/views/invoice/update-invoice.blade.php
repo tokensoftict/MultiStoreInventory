@@ -170,22 +170,77 @@
                                         </thead>
                                         <tbody id="appender">
                                         @foreach($invoice->invoice_items as $items)
+@php
+    $isMulti = \App\Services\StockUnitService::isMulti();
+    $ml = ($isMulti && \App\Services\StockUnitService::hasUnits($items->stock_id))
+        ? \App\Services\StockUnitService::unitsForUi($items->stock_id, (float)$items->stock->available_yard_quantity + (float)$items->quantity)
+        : null;
+    $selUnit = null;
+    if ($ml) {
+        if (!empty($items->unit_id)) {
+            $selUnit = collect($ml)->firstWhere('id', (int)$items->unit_id);
+        }
+        if (!$selUnit) {
+            if ($items->store === getActiveStore()->packed_column) {
+                $selUnit = collect($ml)->first();
+            } else {
+                $selUnit = collect($ml)->last();
+            }
+        }
+        if (!$selUnit && \App\Models\QuantityUnit::isOnlyPiecesEnabled()) {
+            $selUnit = collect($ml)->last();
+        }
+    }
+    $itemUnitQty = !is_null($items->unit_quantity) ? $items->unit_quantity : $items->quantity;
+    $itemUnitPrice = !is_null($items->unit_price) ? $items->unit_price : ($selUnit ? $selUnit['selling_price'] : $items->selling_price);
+    $itemCostPrice = $selUnit ? $selUnit['cost_price'] : $items->cost_price;
+    $itemUnitId = $selUnit ? $selUnit['id'] : $items->unit_id;
+@endphp
+@if($ml && $selUnit)
+     <tr style="cursor: pointer" id="product_{{ $items->stock->id }}_{{ getActiveStore()->yard_column }}__u{{ $itemUnitId }}">
+         <th class="text-center"><input data-image="{{ $items->stock->image }}" name="picture" class="picture" value="1" type="radio"></th>
+         <th>{{ $items->stock->name }}<div id="error_{{ $items->stock->id }}" class="errors alert alert-danger" style="display:none;"></div></th>
+         <td><div class="col-md-4"><div class="input-group"> <span class="input-group-btn input-group-sm"> <button data-field="quant[1]" type="button" class="btn btn-danger btn-number minus" data-type="minus"> <i class="fa fa-minus"></i></button></span><input class="form-control text-center input-number" data-invoice-item-id="{{ $items->id }}" data-id="{{ $items->stock->id }}" data-packed-price="0" data-yard-price="0" data-stock-prices="[]" data-cost-price="{{ $itemCostPrice }}" data-price="{{ $itemUnitPrice }}" style="width:100px;display: block;" required="" max="{{ $selUnit['available'] }}" min="0.01" step="0.01" type="number" value="{{ $itemUnitQty }}"> <span class="input-group-btn"> <button type="button" class="btn btn-primary btn-number plus" data-type="plus"><i class="fa fa-plus"></i> </button> </span></div></div></td>
+         <td>
+             <select class="form-control product_type">
+                 @foreach($ml as $u)
+                     <option value="{{ getActiveStore()->yard_column }}__u{{ $u['id'] }}" {{ (int)$u['id'] === (int)$itemUnitId ? 'selected' : '' }} data-unit-id="{{ $u['id'] }}" data-cost-price="{{ $u['cost_price'] }}" data-price="{{ $u['selling_price'] }}" data-av-qty="{{ $u['available'] }}">{{ $u['name'] }} ({{ $u['available'] }} avail.)</option>
+                 @endforeach
+             </select>
+         </td>
+         @if(!empty($active_price_categories) && count($active_price_categories) > 0)
+         <td>
+             <select class="form-control item_price_category">
+                 <option value="default">Default</option>
+                 @foreach($active_price_categories as $pc)
+                     <option value="{{ $pc->id }}" {{ $items->price_category_id == $pc->id ? "selected" : "" }}>{{ $pc->name }}</option>
+                 @endforeach
+             </select>
+         </td>
+         @endif
+         <th class="text-right item_price">
+             @if($settings['allow_edit_price'] == "Yes")
+                  <input type="text" step="0.00000001" class="item_text_price form-control" style="width: 100px; display: inline-block;" value="{{ number_format($itemUnitPrice, 2) }}">
+             @else
+                 <span type="text" step="0.00000001" class="item_text_price form-control" style="width: 100px; display: inline-block;" value="{{ $itemUnitPrice }}">{{ money($itemUnitPrice) }}</span>
+             @endif
+         </th>
+         <th class="text-right item_total">{{ number_format($items->total_selling_price ?: ($itemUnitQty * $itemUnitPrice),2) }}</th>
+         <td class="text-right"> <a href="#" onclick="return removeItem(this);" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i></a></td>
+     </tr>
+@else
                                              <tr style="cursor: pointer" id="product_{{  $items->stock->id }}">
                                                  <th  class="text-center"><input data-image="{{ $items->stock->image }}" name="picture" class="picture" value="1" type="radio"></th>
                                                  <th>{{ $items->stock->name }}<div id="error_{{ $items->stock->id }}" class="errors alert alert-danger" style="display:none;"></div></th>
-                                                  <td><div class="col-md-4"><div class="input-group"> <span class="input-group-btn input-group-sm"> <button  data-field="quant[1]" type="button" class="btn btn-danger btn-number minus" data-type="minus"> <i class="fa fa-minus"></i></button></span><input class="form-control text-center input-number" data-invoice-item-id="{{ $items->id }}"  data-id="{{ $items->stock->id }}" data-packed-price="{{ $items->stock->selling_price }}" data-yard-price="{{ $items->stock->yard_selling_price }}" data-stock-prices="{{ json_encode($items->stock->stockPrices) }}" data-cost-price="{{ ($items->quantity % 1 != 0 && $items->quantity > 0) ? ($items->cost_price / $items->quantity) : $items->cost_price }}" data-price="{{ ($items->quantity % 1 != 0 && $items->quantity > 0) ? ($items->selling_price / $items->quantity) : $items->selling_price }}" style="width:100px;display: block;" required="" max="{{ $items->store == "quantity" ? $items->stock->available_quantity + $items->quantity  :  $items->stock->available_yard_quantity+ $items->quantity }}" min="0.01" step="0.01" type="number" value="{{ $items->quantity }}"> <span class="input-group-btn"> <button type="button" class="btn btn-primary btn-number plus" data-type="plus"><i class="fa fa-plus"></i> </button> </span></div></div>
+                                                  <td><div class="col-md-4"><div class="input-group"> <span class="input-group-btn input-group-sm"> <button  data-field="quant[1]" type="button" class="btn btn-danger btn-number minus" data-type="minus"> <i class="fa fa-minus"></i></button></span><input class="form-control text-center input-number" data-invoice-item-id="{{ $items->id }}"  data-id="{{ $items->stock->id }}" data-packed-price="{{ $items->stock->selling_price }}" data-yard-price="{{ $items->stock->yard_selling_price }}" data-stock-prices="{{ json_encode($items->stock->stockPrices) }}" data-cost-price="{{ $items->cost_price }}" data-price="{{ $items->selling_price }}" style="width:100px;display: block;" required="" max="{{ $items->store == getActiveStore()->packed_column ? $items->stock->available_quantity + $items->quantity : $items->stock->available_yard_quantity + $items->quantity }}" min="0.01" step="0.01" type="number" value="{{ $items->quantity }}"> <span class="input-group-btn"> <button type="button" class="btn btn-primary btn-number plus" data-type="plus"><i class="fa fa-plus"></i> </button> </span></div></div>
                                                  <td>
                                                      <select class="form-control product_type {{ $items->stock->type }}">
-                                                         @if($items->stock->type == "PACKED")
-                                                             @if($items->store == getActiveStore()->packed_column)
-                                                                 <option value="{{ getActiveStore()->packed_column }}" {{ $items->store == getActiveStore()->packed_column ? "selected" : "" }} data-cost-price="{{  $items->stock->cost_price }}" data-price="{{ $items->stock->selling_price }}" data-av-qty="{{ $items->stock->available_quantity+ $items->quantity }}">Packed</option>
-                                                                 <option value="{{ getActiveStore()->yard_column }}" {{ $items->store == getActiveStore()->yard_column ? "selected" : "" }} data-cost-price="{{  $items->stock->yard_cost_price }}" data-price="{{ $items->stock->yard_selling_price }}" data-av-qty="{{ $items->stock->available_yard_quantity }}">Pieces / Yards</option>
-                                                             @else
-                                                                 <option value="{{ getActiveStore()->packed_column }}" data-cost-price="{{  $items->stock->cost_price }}" data-price="{{ $items->stock->selling_price }}" data-av-qty="{{ $items->stock->available_quantity }}">Packed</option>
-                                                                 <option value="{{ getActiveStore()->yard_column }}" data-cost-price="{{  $items->stock->yard_cost_price }}" selected data-price="{{ $items->stock->yard_selling_price }}" data-av-qty="{{ $items->stock->available_yard_quantity+ $items->quantity }}">Pieces / Yards</option>
-                                                             @endif
+                                                         @if($items->store == getActiveStore()->packed_column)
+                                                             <option value="{{ getActiveStore()->packed_column }}" selected data-cost-price="{{  $items->stock->cost_price }}" data-price="{{ $items->stock->selling_price }}" data-av-qty="{{ $items->stock->available_quantity+ $items->quantity }}">Packed</option>
+                                                             <option value="{{ getActiveStore()->yard_column }}" data-cost-price="{{  $items->stock->yard_cost_price }}" data-price="{{ $items->stock->yard_selling_price }}" data-av-qty="{{ $items->stock->available_yard_quantity }}">Pieces / Yards</option>
                                                          @else
-                                                             <option value="{{ getActiveStore()->packed_column }}" {{ $items->store == getActiveStore()->packed_column ? "selected" : "" }} data-cost-price="{{  $items->stock->cost_price }}" data-price="{{ $items->stock->selling_price }}" data-av-qty="{{ $items->stock->available_quantity+ $items->quantity }}">Packed</option>
+                                                             <option value="{{ getActiveStore()->packed_column }}" data-cost-price="{{  $items->stock->cost_price }}" data-price="{{ $items->stock->selling_price }}" data-av-qty="{{ $items->stock->available_quantity }}">Packed</option>
+                                                             <option value="{{ getActiveStore()->yard_column }}" selected data-cost-price="{{  $items->stock->yard_cost_price }}" data-price="{{ $items->stock->yard_selling_price }}" data-av-qty="{{ $items->stock->available_yard_quantity+ $items->quantity }}">Pieces / Yards</option>
                                                          @endif
                                                      </select>
                                                  </td>
@@ -209,6 +264,7 @@
                                                  <th class="text-right item_total">{{ number_format($items->total_selling_price,2) }}</th>
                                                  <td class="text-right"> <a href="#" onclick="return removeItem(this);" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i></a></td>
                                              </tr>
+                                         @endif
                                         @endforeach
                                         </tbody>
                                         <tfoot>
@@ -418,6 +474,11 @@
 
     <script>
 
+        // Multi-level quantity helpers (only used when a product carries units)
+        const BASE_YARD_COLUMN = "{{ getActiveStore()->yard_column }}";
+        function unitOptValue(u) { return BASE_YARD_COLUMN + '__u' + u.id; }
+        function defaultUnit(stock) { return stock.units[stock.units.length - 1]; } // Piece (smallest)
+
         function bindAllTr(){
             $('#appender').find('tr').off('click');
             $('#appender').find('tr').on('click',function(){
@@ -441,31 +502,52 @@
                 defaultType = "{{ getActiveStore()->yard_column }}";
             }
 
-            // Check if there is already a row for this product with the defaultType
-            var existingInput = $('#appender').find('.input-number[data-id="' + data.stock.id + '"]').filter(function() {
-                return $(this).closest('tr').find('.product_type').val() === defaultType;
-            });
-
-            if (existingInput.length > 0) {
-                var currentVal = parseFloat(existingInput.val());
-                var maxVal = parseFloat(existingInput.attr('max'));
-                if (currentVal < maxVal) {
-                    //existingInput.val(currentVal + 1).change();
+            // Multi-level store: if only pieces is enabled, default to pieces; otherwise require user to pick a unit
+            if (data.stock.multi_level && data.stock.units && data.stock.units.length) {
+                let onlyPieces = (data.stock.units.length === 1) || data.stock.only_pieces;
+                if (onlyPieces) {
+                    defaultType = unitOptValue(defaultUnit(data.stock));
                 } else {
-                    alert('Not enough quantity to add more of ' + data.stock.name);
+                    defaultType = "";
+                    var unselectedInput = $('#appender').find('.input-number[data-id="' + data.stock.id + '"]').filter(function() {
+                        return !$(this).closest('tr').find('.product_type').val();
+                    });
+                    if (unselectedInput.length > 0) {
+                        toastr.warning('Please select a unit for "' + data.stock.name + '" in the cart first.');
+                        unselectedInput.closest('tr').find('.product_type').focus();
+                        return;
+                    }
                 }
-            } else {
-                $('#appender').prepend(cartTemplate(data));
-                $('.picture').prop('checked',false);
-                var trId = 'product_' + data.stock.id + '_' + defaultType;
-                $('#appender').find('tr').first().attr('id', trId);
-                $('#'+trId).find('.picture').prop('checked', true);
-                $('#imageThumb').attr('src', $('#'+trId).find('.picture').attr('data-image'));
-                bindIncrement();
-                bindAllTr();
-                bindproductType();
-                calculateTotal();
             }
+
+            // Check if there is already a row for this product with the defaultType
+            if (defaultType) {
+                var existingInput = $('#appender').find('.input-number[data-id="' + data.stock.id + '"]').filter(function() {
+                    return $(this).closest('tr').find('.product_type').val() === defaultType;
+                });
+
+                if (existingInput.length > 0) {
+                    var currentVal = parseFloat(existingInput.val());
+                    var maxVal = parseFloat(existingInput.attr('max'));
+                    if (currentVal < maxVal) {
+                        //existingInput.val(currentVal + 1).change();
+                    } else {
+                        alert('Not enough quantity to add more of ' + data.stock.name);
+                    }
+                    return;
+                }
+            }
+
+            $('#appender').prepend(cartTemplate(data));
+            $('.picture').prop('checked',false);
+            var trId = defaultType ? ('product_' + data.stock.id + '_' + defaultType) : ('product_' + data.stock.id + '_pending_' + Date.now());
+            $('#appender').find('tr').first().attr('id', trId);
+            $('#'+trId).find('.picture').prop('checked', true);
+            $('#imageThumb').attr('src', $('#'+trId).find('.picture').attr('data-image'));
+            bindIncrement();
+            bindAllTr();
+            bindproductType();
+            calculateTotal();
         }
 
 
@@ -479,7 +561,18 @@
             let price = 0;
             let found = false;
             
-            if (selectedCategoryId) {
+            let unitOpt = tr.find('.product_type option:selected');
+            let isUnit = !!unitOpt.attr('data-unit-id');
+            if (isUnit) {
+                // multi-level unit price: independent per unit, no category/legacy lookup
+                price = parseFloat(unitOpt.attr('data-price') || 0);
+                found = true;
+            } else if (tr.find('.product_type option[data-unit-id]').length > 0) {
+                price = 0;
+                found = true;
+            }
+
+            if (selectedCategoryId && !found) {
                 let stockPrices = [];
                 try {
                     stockPrices = JSON.parse(input.attr('data-stock-prices') || '[]');
@@ -498,8 +591,10 @@
             if (!found) {
                 if (productType === "{{ getActiveStore()->yard_column }}") {
                     price = parseFloat(input.attr('data-yard-price') || 0);
-                } else {
+                } else if (productType === "{{ getActiveStore()->packed_column }}") {
                     price = parseFloat(input.attr('data-packed-price') || 0);
+                } else {
+                    price = 0;
                 }
             }
             
@@ -521,6 +616,7 @@
                 const price = $(this).parent().parent().find('.input-number');
                 const td_price = $(this).parent().parent().find('.item_price');
                 const newType = $(this).val();
+                if (!newType) return;
                 const stockId = price.attr('data-id');
                 const tr = $(this).closest('tr');
 
@@ -540,9 +636,8 @@
                         calculateTotal();
                         return;
                     } else {
-                        alert('Merging would exceed the available stock limit for this type. Cannot change type.');
-                        // revert dropdown selection
-                        $(this).val(newType === "{{ getActiveStore()->packed_column }}" ? "{{ getActiveStore()->yard_column }}" : "{{ getActiveStore()->packed_column }}");
+                        alert('Merging would exceed the available stock limit for this unit. Cannot change unit.');
+                        $(this).val('');
                         return;
                     }
                 }
@@ -696,8 +791,19 @@
         function wrapItemIncart(){
             const  product = [];
             let error_status = false;
+            let unselected_unit = false;
             $('.input-number').each(function(index, elem){
                 const type = $(this).parent().parent().parent().parent().find('.product_type');
+                let typeVal = type.val();
+                if (!typeVal) {
+                    unselected_unit = true;
+                }
+                let unitId = null;
+                if (typeVal && typeVal.indexOf('__u') !== -1) {
+                    const parts = typeVal.split('__u');
+                    typeVal = parts[0];
+                    unitId = parts[1];
+                }
                 const tr = $(this).closest('tr');
                 const headerCategory = $('#price_category_id').val();
                 const itemCategory = tr.find('.item_price_category').val();
@@ -707,7 +813,8 @@
                     {
                         id: $(this).attr('data-id'),
                         qty: $(this).val(),
-                        type: type.val(),
+                        type: typeVal,
+                        unit_id: unitId,
                         price : $(this).attr('data-price'),
                         invoice_item_id : $(this).attr('data-invoice-item-id'),
                         cost_price : $(this).attr('data-cost-price'),
@@ -718,6 +825,10 @@
                     error_status = true;
                 }
             });
+            if (unselected_unit === true) {
+                alert('Please select a unit for all items in the cart before submitting.');
+                return false;
+            }
             if(error_status === true){
                 alert('One or more Item in your invoice is out of stock, please cross check before submitting the invoice')
             }
@@ -763,9 +874,38 @@
                 type_select +='</select>';
             }
 
-            if(data.stock.available_quantity == 0 && data.stock.available_yard_quantity >0){
+            if(!data.stock.multi_level && data.stock.available_quantity == 0 && data.stock.available_yard_quantity >0){
                 data.stock.available_quantity = data.stock.available_yard_quantity;
                 data.stock.selling_price = data.stock.yard_selling_price
+            }
+
+            let isMulti = false;
+            if (data.stock.multi_level && data.stock.units && data.stock.units.length) {
+                let onlyPieces = (data.stock.units.length === 1) || data.stock.only_pieces;
+                if (onlyPieces) {
+                    const du = defaultUnit(data.stock);
+                    type_select = '<select class="form-control product_type">';
+                    data.stock.units.forEach(function (u) {
+                        type_select += '<option ' + (u.id === du.id ? 'selected ' : '') + 'value="' + unitOptValue(u) + '" data-unit-id="' + u.id + '" data-cost-price="' + u.cost_price + '" data-price="' + u.selling_price + '" data-av-qty="' + u.available + '">' + u.name + ' (' + u.available + ' avail.)</option>';
+                    });
+                    type_select += '</select>';
+                    data.stock.available_quantity = du.available;
+                    data.stock.selling_price = du.selling_price;
+                    data.stock.cost_price = du.cost_price;
+                    data.stock.stock_prices = [];
+                } else {
+                    isMulti = true;
+                    type_select = '<select class="form-control product_type">';
+                    type_select += '<option value="" disabled selected>-- Select Unit --</option>';
+                    data.stock.units.forEach(function (u) {
+                        type_select += '<option value="' + unitOptValue(u) + '" data-unit-id="' + u.id + '" data-cost-price="' + u.cost_price + '" data-price="' + u.selling_price + '" data-av-qty="' + u.available + '">' + u.name + ' (' + u.available + ' avail.)</option>';
+                    });
+                    type_select += '</select>';
+                    data.stock.available_quantity = 0;
+                    data.stock.selling_price = 0;
+                    data.stock.cost_price = 0;
+                    data.stock.stock_prices = [];
+                }
             }
 
             let price_category_select = "";
@@ -778,9 +918,9 @@
                 price_category_select += '</select></td>';
             @endif
 
-            let currentPrice = data.stock.selling_price;
+            let currentPrice = isMulti ? 0 : data.stock.selling_price;
             let headerCategory = $('#price_category_id').val();
-            if (headerCategory) {
+            if (headerCategory && !isMulti) {
                 let matched = (data.stock.stock_prices || []).find(function(sp) {
                     return sp.price_category_id == headerCategory;
                 });
@@ -817,6 +957,10 @@
             }
 
             const stock = wrapItemIncart();
+
+            if (stock === false) {
+                return false;
+            }
 
             if(stock.length === 0){
                 alert('You can not submit an empty cart, please add product to continue');

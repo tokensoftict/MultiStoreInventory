@@ -20,6 +20,7 @@
                                 <th></th>
                                 <th>Name</th>
                                 <th>Type</th>
+                                <th>Quantity System</th>
                                 <th>Address Line 1</th>
                                 <th>Status</th>
                                 <th>Default</th>
@@ -35,6 +36,7 @@
                                     </td>
                                     <td>{{ $warehouse_and_shop->name }}</td>
                                     <td>{{ $warehouse_and_shop->type }}</td>
+                                    <td>{!! ($warehouse_and_shop->quantity_system ?? 'legacy') == 'multi_level' ? (\App\Models\QuantityUnit::activeUnits()->pluck('name')->implode(' &rarr; ') ?: 'Multi-Level') : 'Carton &rarr; Pieces' !!}</td>
                                     <td>{{ $warehouse_and_shop->first_address }}</td>
                                     <td>{!! $warehouse_and_shop->status == 1 ? label("Active","success") : label("Inactive","danger") !!}</td>
                                     <td>{!! $warehouse_and_shop->default == 1 ? label("Default","success") : "" !!}</td>
@@ -107,6 +109,16 @@
                                 <div class="form-group">
                                     <label>Footer Notes</label>
                                     <input type="text" value="{{ old('footer_notes') }}"   class="form-control" name="footer_notes" placeholder="Footer Notes"/>
+                                </div>
+                                <div class="form-group">
+                                    <label>Quantity System</label>
+                                    <select class="form-control" name="quantity_system">
+                                        <option value="legacy" {{ old('quantity_system','legacy') == 'legacy' ? 'selected' : '' }}>Standard (Carton &rarr; Pieces)</option>
+                                        <option value="multi_level" {{ old('quantity_system') == 'multi_level' ? 'selected' : '' }}>Multi-level (Carton &rarr; Packet &rarr; Piece)</option>
+                                    </select>
+                                    @if ($errors->has('quantity_system'))
+                                        <label class="error" style="display: inline-block;">{{ $errors->first('quantity_system') }}</label>
+                                    @endif
                                 </div>
                                 <div class="pull-left">
                                     <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>

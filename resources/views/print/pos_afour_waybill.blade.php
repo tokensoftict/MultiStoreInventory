@@ -119,7 +119,14 @@
             <tr>
                 <td>{{ $loop->iteration }}</td>
                 <td align="left" class="text-left">{{ $item->stock->name }}</td>
-                <td align="center" class="text-center">{{ $item->quantity }}</td>
+                <td align="center" class="text-center">
+                    @if(!empty($item->unit_name))
+                        {{ $item->unit_quantity + 0 }} {{ $item->unit_name }}
+                        <br><small style="font-size: 8pt; color: #555;">({{ $item->quantity + 0 }} pcs)</small>
+                    @else
+                        {{ $item->quantity }} {{ $item->store == "yard_quantity" ? "pcs" : "carton" }}
+                    @endif
+                </td>
             </tr>
         @endforeach
         </tbody>

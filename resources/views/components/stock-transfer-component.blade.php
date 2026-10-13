@@ -9,7 +9,7 @@
             <th>To</th>
             <th>Status</th>
             <th>Date</th>
-            <th>Total Cost Price</th>
+            <th>Total Amount</th>
             <th>By</th>
             <th>Action</th>
         </tr>

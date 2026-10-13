@@ -164,7 +164,7 @@ class Deposit extends Model
 
     public static function calculateDepositTotal($validationReports)
     {
-        $stocks = $validationReports['data'];
+        $stocks = isset($validationReports['data']) ? $validationReports['data'] : $validationReports;
 
         $depositTotal = [];
 
@@ -173,13 +173,17 @@ class Deposit extends Model
         $total_deposit_total_profit = 0;
 
         foreach ($stocks as $key=>$stock) {
+            $isUnitLine = !empty($stock['prods']['unit_id']);
+            $sellingPrice = $isUnitLine ? (float)$stock['prods']['unit_price'] * (float)$stock['prods']['unit_qty'] : (float)$stock['prods']['price'] * (float)$stock['prods']['qty'];
+            $costPrice = $isUnitLine ? (float)$stock['prods']['unit_cost'] * (float)$stock['prods']['unit_qty'] : (float)$stock['prods']['cost_price'] * (float)$stock['prods']['qty'];
+            $profit = $sellingPrice - $costPrice;
 
-            $depositTotal[$key]['total_selling_price']  =  $stock['prods']['price'] * $stock['prods']['qty'];
-            $depositTotal[$key]['total_cost_price']  =  $stock['prods']['cost_price'] * $stock['prods']['qty'];
-            $depositTotal[$key]['total_profit'] =  $depositTotal[$key]['total_selling_price'] -  $depositTotal[$key]['total_cost_price'];
-            $total_deposit_total_selling += $depositTotal[$key]['total_selling_price'];
-            $total_deposit_total_cost += $depositTotal[$key]['total_cost_price'] ;
-            $total_deposit_total_profit+=$depositTotal[$key]['total_profit'];
+            $depositTotal[$key]['total_selling_price'] = $sellingPrice;
+            $depositTotal[$key]['total_cost_price'] = $costPrice;
+            $depositTotal[$key]['total_profit'] = $profit;
+            $total_deposit_total_selling += $sellingPrice;
+            $total_deposit_total_cost += $costPrice;
+            $total_deposit_total_profit += $profit;
         }
 
         return [
@@ -191,18 +195,20 @@ class Deposit extends Model
 
     public static function preparedepositItemData($validationReports, $customer_id, $status, $deposit_date,$sales_time, $deposit)
     {
-        $stocks = $validationReports['data'];
+        $stocks = isset($validationReports['data']) ? $validationReports['data'] : $validationReports;
 
         $depositItems = [];
         foreach ($stocks as $key=>$stock) {
+            $isUnitLine = !empty($stock['prods']['unit_id']);
+            $unitSelling = $isUnitLine ? (float)$stock['prods']['unit_price'] : (float)$stock['prods']['price'];
+            $unitCost = $isUnitLine ? (float)$stock['prods']['unit_cost'] : (float)$stock['prods']['cost_price'];
+            $total_selling_price = $isUnitLine ? (float)$stock['prods']['unit_price'] * (float)$stock['prods']['unit_qty'] : (float)$stock['prods']['price'] * (float)$stock['prods']['qty'];
+            $total_cost_price = $isUnitLine ? (float)$stock['prods']['unit_cost'] * (float)$stock['prods']['unit_qty'] : (float)$stock['prods']['cost_price'] * (float)$stock['prods']['qty'];
+            $total_profit = $total_selling_price - $total_cost_price;
 
-            $total_selling_price  =  $stock['prods']['price'] * $stock['prods']['qty'];
-            $total_cost_price  =  $stock['prods']['cost_price'] * $stock['prods']['qty'];
-            $total_profit =   $total_selling_price -  $total_cost_price;
-
-            $depositItems[$key] =  new DepositItem([
+            $depositItems[$key] = new DepositItem([
                 'deposit_id'=> $deposit->id,
-                'stock_id'=>$key,
+                'stock_id'=>$stock['stock']->id,
                 'quantity'=>$stock['prods']['qty'],
                 'customer_id'=>$customer_id,
                 'department'=> auth()->user()->department,
@@ -212,14 +218,19 @@ class Deposit extends Model
                 'deposit_date' =>$deposit_date,
                 'store' => $stock['prods']['type'],
                 'deposit_time' =>$sales_time,
-                'cost_price'=>($deposit->sub_total < 0 ? -($stock['prods']['cost_price']) : ($stock['prods']['cost_price'])),
-                'selling_price' =>($deposit->sub_total < 0 ? -($stock['prods']['price']) : ($stock['prods']['price'])),
-                'profit'=>($deposit->sub_total < 0 ? ($stock['prods']['price'] - $stock['prods']['cost_price']) : ($stock['prods']['price'] - $stock['prods']['cost_price'])),
+                'cost_price'=>($deposit->sub_total < 0 ? -($unitCost) : ($unitCost)),
+                'selling_price' =>($deposit->sub_total < 0 ? -($unitSelling) : ($unitSelling)),
+                'profit'=>($deposit->sub_total < 0 ? -($unitSelling - $unitCost) : ($unitSelling - $unitCost)),
                 'total_selling_price' =>($deposit->sub_total < 0 ? -$total_selling_price : $total_selling_price),
                 'total_cost_price' => ($deposit->sub_total < 0 ? -$total_cost_price : $total_cost_price),
                 'total_profit'=>($deposit->sub_total < 0 ? -$total_profit : $total_profit),
                 'discount_type'=>'none',
                 'discount_amount'=>0,
+                'unit_id' => $isUnitLine ? $stock['prods']['unit_id'] : null,
+                'unit_name' => $isUnitLine ? $stock['prods']['unit_name'] : null,
+                'unit_quantity' => $isUnitLine ? $stock['prods']['unit_qty'] : null,
+                'unit_price' => $isUnitLine ? $stock['prods']['unit_price'] : null,
+                'base_quantity' => $isUnitLine ? $stock['prods']['qty'] : null,
             ]);
 
         }
@@ -234,32 +245,48 @@ class Deposit extends Model
         $errors = [];
         $prods = [];
 
-        $product_ids =  array_column($products,'id');
-        foreach ($products as $product){
-            $prods[$product['id']] = $product;
+        // Multi-level stores: convert unit lines to base pieces
+        list($products, $unitErrors) = \App\Services\StockUnitService::normalizeInvoiceProducts($products);
+        if (count($unitErrors) > 0) {
+            $status = true;
+            $errors = $errors + $unitErrors;
         }
 
-        $stocks = Stock::whereIn('id',$product_ids)->get();
+        foreach ($products as $product){
+            $key = \App\Services\StockUnitService::rowKey($product);
+            $prods[$key] = $product;
+        }
 
-        foreach ($stocks as $stock) {
+        $product_ids = array_column($products,'id');
+        $stocks = Stock::whereIn('id',$product_ids)->get()->keyBy('id');
 
-            $report[$stock->id]['batches'] =  [];
-            $report[$stock->id]['stock'] = $stock;
-            $report[$stock->id]['prods'] = $prods[$stock->id];
-
-
-            if($prods[$stock->id]['type'] === "yard_quantity"){
-                if(app(Settings::class)->get('allow_selling_below_cost_price') == "0" and (float)$stock->yard_cost_price >= (float)$prods[$stock->id]['price']){
-                    $status = true;
-                    $errors[$stock->id] = $stock->name." can not be sell under cost price ".number_format($stock->yard_cost_price,2 );
-                }
+        foreach ($prods as $key => $prod) {
+            if (!isset($stocks[$prod['id']])) {
+                continue;
             }
+            $stock = $stocks[$prod['id']];
+            $report[$key]['batches'] = [];
+            $report[$key]['stock'] = $stock;
+            $report[$key]['prods'] = $prod;
 
-
-            if($prods[$stock->id]['type'] === "quantity"){
-                if(app(Settings::class)->get('allow_selling_below_cost_price') == "0" and (float)$stock->cost_price >= (float)$prods[$stock->id]['price']){
+            if (!empty($prod['unit_id'])) {
+                if (app(Settings::class)->get('allow_selling_below_cost_price') == "0" and (float)$prod['unit_cost'] >= (float)$prod['unit_price']) {
                     $status = true;
-                    $errors[$stock->id] = $stock->name." can not be sell under cost price ".number_format($stock->cost_price,2 );
+                    $errors[$prod['id']] = $stock->name . " can not be sell under cost price " . number_format($prod['unit_cost'], 2);
+                }
+            } else {
+                if ($prod['type'] === "yard_quantity") {
+                    if (app(Settings::class)->get('allow_selling_below_cost_price') == "0" and (float)$stock->yard_cost_price >= (float)$prod['price']) {
+                        $status = true;
+                        $errors[$stock->id] = $stock->name . " can not be sell under cost price " . number_format($stock->yard_cost_price, 2);
+                    }
+                }
+
+                if ($prod['type'] === "quantity") {
+                    if (app(Settings::class)->get('allow_selling_below_cost_price') == "0" and (float)$stock->cost_price >= (float)$prod['price']) {
+                        $status = true;
+                        $errors[$stock->id] = $stock->name . " can not be sell under cost price " . number_format($stock->cost_price, 2);
+                    }
                 }
             }
         }
@@ -273,20 +300,17 @@ class Deposit extends Model
             $deposit->deposit_items()->delete();
         }
 
-
         $totals = self::calculateDepositTotal($reports);
-
 
         $deposit->customer_id = $request->get('customer_id');
         $deposit->status = $request->get('status');
-        $deposit->sub_total = $totals['total_invoice_total_selling'];
+        $deposit->sub_total = $totals['total_deposit_total_selling'];
         $deposit->total_amount_paid = 0;
-        $deposit->total_profit = $totals['total_invoice_total_profit'];
-        $deposit->total_cost = $totals['total_invoice_total_cost'];
+        $deposit->total_profit = $totals['total_deposit_total_profit'];
+        $deposit->total_cost = $totals['total_deposit_total_cost'];
         $deposit->last_updated_by = auth()->id();
 
         $deposit->update();
-
 
         $invoice_items_data = self::preparedepositItemData(
             $reports,
@@ -299,11 +323,15 @@ class Deposit extends Model
 
         foreach ($invoice_items_data as $key=>$invoice_items_datum){
             $deposit
-                ->invoice_items()
+                ->deposit_items()
                 ->save($invoice_items_datum);
         }
 
-
         return $deposit;
+    }
+
+    public function invoice_items()
+    {
+        return $this->deposit_items();
     }
 }

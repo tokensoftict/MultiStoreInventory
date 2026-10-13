@@ -203,6 +203,13 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
                 Route::put('update', ['as' => 'update', 'uses' => 'StoreSettings@update']);
             });
 
+            Route::prefix('quantity_unit')->as('quantity_unit.')->group(function () {
+                Route::get('', ['as' => 'index', 'uses' => 'QuantityUnitController@index', 'custom_label' => 'Quantity Units', 'visible' => true]);
+                Route::get('{id}/edit', ['as' => 'edit', 'uses' => 'QuantityUnitController@edit']);
+                Route::get('{id}/toggle', ['as' => 'toggle', 'uses' => 'QuantityUnitController@toggle']);
+                Route::put('{id}', ['as' => 'update', 'uses' => 'QuantityUnitController@update']);
+            });
+
         });
         Route::prefix('CustomerManager')->namespace('CustomerManager')->group(function () {
 

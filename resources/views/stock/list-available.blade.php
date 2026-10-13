@@ -24,20 +24,35 @@
                             <x-search-component placeholder="Search for available products.."/>
                         @endif
 
+                        @php
+                            $isMultiStore = \App\Services\StockUnitService::isMulti();
+                            $activeQtyUnits = $isMultiStore ? \App\Models\QuantityUnit::activeUnits() : collect();
+                        @endphp
                         <table class="table table-bordered table-responsive table-striped @if(config('app.dont_show_all_product') === FALSE) convert-data-table  @endif" style="font-size: 12px">
                             <thead>
                             <tr>
                                 <th>#</th>
                                 <th>Name</th>
                                 <th>Product Type</th>
+                                @if(!empty($isMultiStore))
+                                <th>{{ $store->name }} Quantity</th>
+                                @foreach($activeQtyUnits as $aqu)
+                                    <th>{{ $aqu->name }} Selling Price</th>
+                                @endforeach
+                                @else
                                 <th>{{ $store->name }} Quantity</th>
                                 <th>{{ $store->name }} Yards Quantity</th>
                                 <th>Selling Price</th>
                                 <th>Cost Price</th>
                                 <th>Yard Selling Price</th>
                                 <th>Yard Cost Price</th>
+                                @endif
+                                @if(!empty($isMultiStore))
+                                <th>Total (Cost / Selling)</th>
+                                @else
                                 <th>Total Cost</th>
                                 <th>Total Selling</th>
+                                @endif
                                 <th>Action</th>
                             </tr>
                             </thead>
@@ -74,14 +89,43 @@
                                         @endif
                                     </td>
                                     <td>{{ $batch->stock->type }}</td>
+                                    @if($isMultiStore)
+                                        @php $mlUnits = \App\Services\StockUnitService::hasUnits($batch->stock_id) ? \App\Services\StockUnitService::unitsForUi($batch->stock_id) : null; @endphp
+                                        <td>
+                                            @if($mlUnits)
+                                                {{ \App\Services\StockUnitService::breakdownLabel($batch->stock_id, $batch->stock->available_yard_quantity) }} <!-- <small class="text-muted">({{ $batch->stock->available_yard_quantity + 0 }} pcs)</small> -->
+                                            @else
+                                                {{ $batch->stock->available_quantity }} / {{ $batch->stock->available_yard_quantity }}
+                                            @endif
+                                        </td>
+                                        @php $unitByLevel = []; if ($mlUnits) { foreach ($mlUnits as $uu) { $unitByLevel[$uu['level']] = $uu; } } @endphp
+                                        @foreach($activeQtyUnits as $aqu)
+                                            <td>@php $pu = $unitByLevel[$aqu->level] ?? null; @endphp@if($pu){{ number_format($pu['selling_price'],2) }}<br><small class="text-muted">cost {{ number_format($pu['cost_price'],2) }}</small>@else - @endif</td>
+                                        @endforeach
+                                    @else
                                     <td>{{ $batch->stock->available_quantity }}</td>
-                                    <td>{{ $batch->stock->available_yard_quantity }}</td>
+                                    <td>@if(\App\Services\StockUnitService::isMulti() && \App\Services\StockUnitService::hasUnits($batch->stock_id)){{ \App\Services\StockUnitService::breakdownLabel($batch->stock_id, $batch->stock->available_yard_quantity) }} <small class="text-muted">({{ $batch->stock->available_yard_quantity + 0 }} pcs)</small>@else{{ $batch->stock->available_yard_quantity }}@endif</td>
                                     <td>{{ number_format($batch->stock->selling_price,2) }}</td>
                                     <td>{{ number_format($batch->stock->cost_price,2) }}</td>
                                     <td>{{ number_format($batch->stock->yard_selling_price,2) }}</td>
                                     <td>{{ number_format($batch->stock->yard_cost_price,2) }}</td>
-                                    <td>{{ number_format(($batch->stock->cost_price * $batch->stock->available_quantity),2) }}</td>
-                                    <td>{{ number_format(($batch->stock->selling_price * $batch->stock->available_quantity),2) }}</td>
+                                    @endif
+                                    @if($isMultiStore)
+                                        <td>
+                                            @if($mlUnits)
+                                                @php $mlVal = \App\Services\StockUnitService::valuation($batch->stock_id, $batch->stock->available_yard_quantity); @endphp
+                                                @foreach(\App\Services\StockUnitService::valuationBreakdown($batch->stock_id, $batch->stock->available_yard_quantity) as $vr)
+                                                    <div>{{ $vr['name'] }} ({{ $vr['quantity'] + 0 }}): {{ number_format($vr['cost'],2) }} / {{ number_format($vr['selling'],2) }}</div>
+                                                @endforeach
+                                                <div style="border-top:1px solid #ddd;"><strong>Total: {{ number_format($mlVal[0],2) }} / {{ number_format($mlVal[1],2) }}</strong></div>
+                                            @else
+                                                {{ number_format(($batch->stock->cost_price * $batch->stock->available_quantity),2) }} / {{ number_format(($batch->stock->selling_price * $batch->stock->available_quantity),2) }}
+                                            @endif
+                                        </td>
+                                    @else
+                                    <td>@if(\App\Services\StockUnitService::isMulti() && \App\Services\StockUnitService::hasUnits($batch->stock_id)){{ number_format(\App\Services\StockUnitService::valuation($batch->stock_id, $batch->stock->available_yard_quantity)[0],2) }}@else{{ number_format(($batch->stock->cost_price * $batch->stock->available_quantity),2) }}@endif</td>
+                                    <td>@if(\App\Services\StockUnitService::isMulti() && \App\Services\StockUnitService::hasUnits($batch->stock_id)){{ number_format(\App\Services\StockUnitService::valuation($batch->stock_id, $batch->stock->available_yard_quantity)[1],2) }}@else{{ number_format(($batch->stock->selling_price * $batch->stock->available_quantity),2) }}@endif</td>
+                                    @endif
                                     <td>
                                         <div class="btn-group">
                                             <button data-toggle="dropdown" class="btn btn-success dropdown-toggle btn-xs" type="button" aria-expanded="false">Action <span class="caret"></span></button>
@@ -107,13 +151,51 @@
                                 <td></td>
                                 <td></td>
                                 <td></td>
+                                @if(!empty($isMultiStore))
+                                    @for($i = 0; $i < count($activeQtyUnits); $i++)
+                                        <td></td>
+                                    @endfor
+                                @else
                                 <td></td>
                                 <td></td>
                                 <td></td>
                                 <td></td>
                                 <td></td>
+                                @endif
+                                @if(!empty($isMultiStore))
+                                @php
+                                    // overall worth per unit level (Carton / Packet / Piece) across all listed products
+                                    $mlTotals = [];
+                                    $mlGrandCost = 0;
+                                    $mlGrandSell = 0;
+                                    foreach ($batches as $tb) {
+                                        if (!\App\Services\StockUnitService::hasUnits($tb->stock_id)) {
+                                            $mlGrandCost += $tb->stock->cost_price * $tb->stock->available_quantity;
+                                            $mlGrandSell += $tb->stock->selling_price * $tb->stock->available_quantity;
+                                            continue;
+                                        }
+                                        foreach (\App\Services\StockUnitService::valuationBreakdown($tb->stock_id, $tb->stock->available_yard_quantity) as $tr) {
+                                            $lv = $tr['level'];
+                                            if (!isset($mlTotals[$lv])) { $mlTotals[$lv] = ['name' => $tr['name'], 'quantity' => 0, 'cost' => 0, 'selling' => 0]; }
+                                            $mlTotals[$lv]['quantity'] += $tr['quantity'];
+                                            $mlTotals[$lv]['cost'] += $tr['cost'];
+                                            $mlTotals[$lv]['selling'] += $tr['selling'];
+                                            $mlGrandCost += $tr['cost'];
+                                            $mlGrandSell += $tr['selling'];
+                                        }
+                                    }
+                                    ksort($mlTotals);
+                                @endphp
+                                <th>
+                                    @foreach($mlTotals as $mt)
+                                        <div>{{ $mt['name'] }} ({{ $mt['quantity'] + 0 }}): {{ money($mt['cost']) }} / {{ money($mt['selling']) }}</div>
+                                    @endforeach
+                                    <div style="border-top:1px solid #ddd;">Total: {{ money($mlGrandCost) }} / {{ money($mlGrandSell) }}</div>
+                                </th>
+                                @else
                                 <th>{{ money($total_available_cost) }}</th>
                                 <th>{{ money($total_available_selling) }}</th>
+                                @endif
                                 <td></td>
                             </tr>
                             </tfoot>

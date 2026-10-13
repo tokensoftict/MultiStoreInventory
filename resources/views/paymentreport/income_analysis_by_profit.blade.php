@@ -53,6 +53,7 @@
                                         <th>#</th>
                                         <th>Invoice / Receipt Number</th>
                                         <th>Sub Total</th>
+                                        <th>Total Cost</th>
                                         <th>Total Paid</th>
                                         <th>Total Profit</th>
                                     </tr>
@@ -60,17 +61,22 @@
                                     <tbody>
                                     @php
                                         $total_=0;
+                                        $total_cost=0;
+                                        $total_sub=0;
                                         $totalProfit = 0;
                                     @endphp
                                     @forelse($invoices as $invoice)
                                         @php
                                             $total_+=$invoice->total_profit;
+                                            $total_cost+=$invoice->total_cost;
+                                            $total_sub+=$invoice->sub_total;
                                             $tt_payment+=$invoice->total_profit;
                                         @endphp
                                         <tr>
                                             <td>{{ $loop->iteration }}</td>
                                             <td>{{ $invoice->invoice_number }}</td>
                                             <td>{{ number_format($invoice->sub_total,2) }}</td>
+                                            <td>{{ number_format($invoice->total_cost,2) }}</td>
                                             <td>{{ number_format($invoice->total_amount_paid,2) }}</td>
                                             <td>{{ number_format($invoice->total_profit,2) }}</td>
                                         </tr>
@@ -83,7 +89,8 @@
                                     <tr>
                                         <th></th>
                                         <th></th>
-                                        <th></th>
+                                        <th>{{ number_format($total_sub,2) }}</th>
+                                        <th>{{ number_format($total_cost,2) }}</th>
                                         <th>Total</th>
                                         <th>{{ number_format($total_,2) }}</th>
                                     </tr>
@@ -187,6 +194,14 @@
                                 <h3>Analysis</h3>
                                 <table class="table table-striped table-bordered dataTable" id="DataTables_Table_3">
                                     <tbody>
+                                    <tr>
+                                        <td>Total Selling (Sub Total)</td>
+                                        <th>{{ number_format($total_sub,2) }}</th>
+                                    </tr>
+                                    <tr>
+                                        <td>Total Cost</td>
+                                        <th>{{ number_format($total_cost,2) }}</th>
+                                    </tr>
                                     <tr>
                                         <td>Total Profit</td>
                                         <th>{{ number_format($totalProfit,2) }}</th>
