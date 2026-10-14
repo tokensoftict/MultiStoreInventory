@@ -502,7 +502,18 @@ class StockController extends Controller
         if ($request->method() == "POST") {
             set_time_limit(0);
             ini_set('memory_limit', '1024M');
-            Excel::import(new importStockWithMultipleSheet(), request()->file('excel_file'));
+            try {
+                if (\App\Services\StockUnitService::isMulti()) {
+                    DB::transaction(function () {
+                        Excel::import(new importStockWithMultipleSheet(), request()->file('excel_file'));
+                    });
+                } else {
+                    Excel::import(new importStockWithMultipleSheet(), request()->file('excel_file'));
+                }
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                return redirect()->route('stock.import_new_stock')
+                    ->with('error', 'Import cancelled, nothing was saved. ' . implode(' ', $e->validator->errors()->all()));
+            }
             return redirect()->route('stock.import_new_stock')->with('success', 'New Stock has been Imported Successfully!');
         }
 

@@ -26,13 +26,25 @@ class ExportStockMultiSheet  implements WithMultipleSheets
 
         $productTypes = collect($productTypes);
 
-        return [
-           "Stocks" =>  new CurrentStockExport(),
+        $multiLevel = \App\Services\StockUnitService::isMulti();
+
+        $sheets = [
+           "Stocks" =>  $multiLevel ? new MultiLevelStockExport() : new CurrentStockExport(),
            "Manufacturer" => new StockExportEssentials($headings, $manufacturer, "Manufacturer"),
            "Suppliers" => new StockExportEssentials($headings, $suppliers, "Suppliers"),
            "Product Category" => new StockExportEssentials($headings, $category, "Product Category"),
            "Product Types" => new StockExportEssentials($headings, $productTypes, "Product Types"),
         ];
+
+        if ($multiLevel) {
+            $sheets["Instructions"] = new StockExportEssentials(
+                [],
+                collect(\App\Services\MultiLevelStockSheet::instructions()),
+                "Instructions"
+            );
+        }
+
+        return $sheets;
 
     }
 }

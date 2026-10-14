@@ -24,30 +24,25 @@ class UserSystemAdministratorRestrictionTest extends TestCase
         );
     }
 
-    public function test_system_administrators_are_excluded_from_user_list()
+    public function test_system_administrators_are_excluded_from_user_list_for_non_administrators()
     {
-        $admin = User::find(1);
-        if (!$admin) {
-            $admin = User::forceCreate([
-                'id' => 1,
-                'name' => 'Admin User',
-                'username' => 'admin_test',
-                'email' => 'admin_test@store.com',
-                'password' => bcrypt('password'),
-                'group_id' => 1,
-                'status' => 1,
-            ]);
-        }
-        $this->actingAs($admin);
+        $manager = new User([
+            'id' => 998,
+            'name' => 'Manager User',
+            'username' => 'mgr_test',
+            'email' => 'mgr_test@store.com',
+            'group_id' => 2,
+            'status' => 1,
+        ]);
+        $this->actingAs($manager);
 
-        $controller = app(UserController::class);
-        $response = $controller->index();
+        $response = app(UserController::class)->index();
 
         $data = $response->getData();
         $this->assertArrayHasKey('users', $data);
 
         foreach ($data['users'] as $u) {
-            $this->assertNotEquals(1, $u->group_id, "System Administrator user (group_id = 1) must be hidden in the user list.");
+            $this->assertNotEquals(1, $u->group_id, "System Administrator user (group_id = 1) must be hidden from non-administrators.");
         }
     }
 

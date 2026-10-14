@@ -12,7 +12,7 @@ class importStockWithMultipleSheet implements WithMultipleSheets
     public function sheets(): array
     {
        return [
-            0 => new ImportNewStock()
+            0 => \App\Services\StockUnitService::isMulti() ? new ImportNewMultiLevelStock() : new ImportNewStock()
        ];
     }
 }
