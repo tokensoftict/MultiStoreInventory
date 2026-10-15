@@ -56,9 +56,24 @@
                                             <label style="font-size: 12px">Name</label><br />
                                             <label style="font-size: 15px">{{ $convert_stock->name }}</label>
                                         </div>
+                                        @php
+                                            $isMultiAdjust = \App\Services\StockUnitService::isMulti();
+                                            $adjustUnits = $isMultiAdjust ? \App\Services\StockUnitService::units($convert_stock->id) : [];
+                                            $adjustBreakdown = [];
+                                            if ($adjustUnits) {
+                                                foreach (\App\Services\InventoryQuantityService::breakdown($adjustUnits, $convert_stock->available_yard_quantity) as $b) {
+                                                    $adjustBreakdown[$b['level']] = $b['quantity'];
+                                                }
+                                            }
+                                        @endphp
                                         <div class="form-group">
                                             <label style="font-size: 12px">Available Quantity</label><br />
-                                            <label style="font-size: 15px">{{ $convert_stock->available_quantity }}</label>
+                                            @if($isMultiAdjust && $adjustUnits)
+                                                <label style="font-size: 15px">{{ \App\Services\StockUnitService::breakdownLabel($convert_stock->id, $convert_stock->available_yard_quantity) }}</label>
+                                                <small class="text-muted">({{ $convert_stock->available_yard_quantity + 0 }} pcs)</small>
+                                            @else
+                                                <label style="font-size: 15px">{{ $convert_stock->available_quantity }}</label>
+                                            @endif
                                         </div>
                                         <div class="form-group">
                                             <label style="font-size: 12px">Selling Price</label><br />
@@ -74,14 +89,27 @@
                                             <label style="font-size: 12px">Name</label><br />
                                             <label style="font-size: 15px">{{ $convert_stock->name }}</label>
                                         </div>
+                                        @if(!$isMultiAdjust)
                                         <div class="form-group">
                                             <label style="font-size: 12px">Available Yards Quantity</label><br />
-                                            <label
-                                                style="font-size: 15px;">{{ $convert_stock->available_yard_quantity }}</label>
+                                            <label style="font-size: 15px;">{{ $convert_stock->available_yard_quantity }}</label>
                                         </div>
+                                        @endif
                                     </div>
                                     <div class="col-sm-6">
 
+                                        @if($isMultiAdjust && $adjustUnits)
+                                            @foreach($adjustUnits as $adjustUnit)
+                                                <div class="form-group">
+                                                    <label style="font-size: 12px">Enter New {{ $adjustUnit['name'] }} Quantity</label><br />
+                                                    <input type="number" min="0" step="any" value="{{ $adjustBreakdown[$adjustUnit['level']] ?? 0 }}"
+                                                        class="form-control" name="units_qty[{{ $adjustUnit['level'] }}]" placeholder="New {{ $adjustUnit['name'] }} Quantity" />
+                                                </div>
+                                            @endforeach
+                                            <p class="text-muted" style="font-size: 12px">The new stock level is the total of all units entered above.</p>
+                                        @elseif($isMultiAdjust)
+                                            <div class="alert alert-warning">This product has no units defined yet. Edit the product and set its units before adjusting quantity.</div>
+                                        @else
                                         <div class="form-group">
                                             <label style="font-size: 12px">Enter New Packed Quantity</label><br />
                                             <input type="number" value="{{ $convert_stock->available_quantity }}"
@@ -92,6 +120,7 @@
                                             <input type="number" value="{{ $convert_stock->available_yard_quantity }}"
                                                 class="form-control" name="yard_qty" placeholder="New Yard Quantity" />
                                         </div>
+                                        @endif
 
                                         @if($stock->expiry == "1")
                                             <div class="form-group">

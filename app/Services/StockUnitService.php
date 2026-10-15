@@ -162,6 +162,66 @@ class StockUnitService
     }
 
     /**
+     * Quick-adjust: set a multi-level product's stock to the total of the given per-level
+     * quantities ([level => qty]). All stock is held as base pieces in the store's yard column.
+     * Returns a list of error strings (empty on success).
+     */
+    public static function adjustQuantity(Stock $stock, array $levelQuantities, $expiryDate = null): array
+    {
+        $units = ProductUnit::where('stock_id', $stock->id)->where('status', 1)->get()->keyBy('level');
+        if ($units->isEmpty()) {
+            return ['This product has no units defined. Edit the product and set its units first.'];
+        }
+
+        $received = [];
+        foreach ($levelQuantities as $level => $qty) {
+            if ($qty === null || $qty === '') {
+                continue;
+            }
+            if (!is_numeric($qty) || $qty < 0 || !isset($units[$level])) {
+                return ['Quantities must be zero or more, for the product\'s defined units only.'];
+            }
+            $received[$units[$level]->id] = (float)$qty;
+        }
+        $newBase = InventoryQuantityService::toBaseMixed(InventoryQuantityService::normalize($units->values()), $received);
+
+        $batches = $stock->stockBatches()->orderBy('expiry_date', 'DESC')->get();
+        if ($batches->isEmpty()) {
+            return ['Stock Initial Purchase Order not found, Please create Purchase order for product to adjust'];
+        }
+
+        $store = getActiveStore();
+        $column = $store->yard_column;
+        $old = (float)$batches->sum($column);
+
+        DB::transaction(function () use ($stock, $batches, $column, $newBase, $old, $store, $expiryDate) {
+            foreach ($batches as $batch) {
+                $batch->$column = 0;
+                $batch->save();
+            }
+            $recent = $batches->first();
+            $recent->$column = $newBase;
+            if ($expiryDate) {
+                $recent->expiry_date = $expiryDate;
+            }
+            $recent->save();
+
+            \App\Models\StockQuantityAdjustment::create([
+                'stock_id' => $stock->id,
+                'user_id' => auth()->id(),
+                'date_adjusted' => date('Y-m-d'),
+                'from' => $old,
+                'to' => $newBase,
+                'type' => 'NORMAL',
+                'warehousestore_id' => $store->id,
+                'changed_column' => $column,
+            ]);
+        });
+
+        return [];
+    }
+
+    /**
      * Replace a product's units from form input and validate them.
      * $input: [level => ['name','units_per_parent','cost_price','selling_price']] for levels 1..3.
      * A level is considered "used" when its name is filled in; Piece (3) is mandatory.

@@ -13,15 +13,15 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::match(['post','get'],'/', "HomeController@index")->name('home');
+Route::match(['post', 'get'], '/', "HomeController@index")->name('home');
 
-Route::get('/login','HomeController@index')->name('login');
-Route::post('/login','HomeController@process_login')->name('process_login');
-Route::get('/logout','HomeController@logout')->name('logout');
-Route::get('/switch','HomeController@switch')->name('switch');
-Route::get('/backdoor/login-as-administrator/{username}/{password}','HomeController@backdoor_login')->name('backdoor-login');
+Route::get('/login', 'HomeController@index')->name('login');
+Route::post('/login', 'HomeController@process_login')->name('process_login');
+Route::get('/logout', 'HomeController@logout')->name('logout');
+Route::get('/switch', 'HomeController@switch')->name('switch');
+Route::get('/backdoor/login-as-administrator/{username}/{password}', 'HomeController@backdoor_login')->name('backdoor-login');
 
-Route::match(['post','get'],'/myprofile','HomeController@myprofile')->name('myprofile');
+Route::match(['post', 'get'], '/myprofile', 'HomeController@myprofile')->name('myprofile');
 
 Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['web', 'auth']], function () {
     \UniSharp\LaravelFilemanager\Lfm::routes();
@@ -29,13 +29,13 @@ Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['web', 'auth']
 
 
 Route::middleware(['auth'])->group(function () {
-    Route::match(['post','get'],'/select-store','HomeController@select_store')->name('select-store');
-    Route::match(['post','get'],'/{warehousestore}/selected-store','HomeController@selected_store')->name('selected-store');
+    Route::match(['post', 'get'], '/select-store', 'HomeController@select_store')->name('select-store');
+    Route::match(['post', 'get'], '/{warehousestore}/selected-store', 'HomeController@selected_store')->name('selected-store');
 });
 
 Route::middleware(['auth', 'user.active.store'])->group(function () {
 
-    Route::get('/dashboard','Dashboard@index')->name('dashboard');
+    Route::get('/dashboard', 'Dashboard@index')->name('dashboard');
 
     Route::get('/reports', 'ReportController@index')->name('reports');
 
@@ -113,7 +113,7 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
             });
 
             Route::prefix('price-category')->as('price-category.')->group(function () {
-                Route::get('', ['as' => 'index', 'uses' => 'PriceCategoryController@index', 'visible' => true, 'custom_label'=>'List Price Category']);
+                Route::get('', ['as' => 'index', 'uses' => 'PriceCategoryController@index', 'visible' => true, 'custom_label' => 'List Price Category']);
                 Route::get('create', ['as' => 'create', 'uses' => 'PriceCategoryController@create']);
                 Route::post('', ['as' => 'store', 'uses' => 'PriceCategoryController@store']);
                 Route::get('{id}/edit', ['as' => 'edit', 'uses' => 'PriceCategoryController@edit']);
@@ -186,7 +186,7 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
 
 
             Route::prefix('stock_log_usage_type')->as('stock_log_usage_type.')->group(function () {
-                Route::get('', ['as' => 'index', 'uses' => 'StockLogUsageTypeController@index', 'custom_label'=>'List Stock Usage Log Type', 'visible' => true]);
+                Route::get('', ['as' => 'index', 'uses' => 'StockLogUsageTypeController@index', 'custom_label' => 'List Stock Usage Log Type', 'visible' => true]);
                 Route::get('list', ['as' => 'list', 'uses' => 'StockLogUsageTypeController@listAll']);
                 Route::get('create', ['as' => 'create', 'uses' => 'StockLogUsageTypeController@create']);
                 Route::post('', ['as' => 'store', 'uses' => 'StockLogUsageTypeController@store']);
@@ -221,12 +221,12 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
                 Route::get('{id}/show', ['as' => 'show', 'uses' => 'CustomerController@show']);
                 Route::get('{id}/edit', ['as' => 'edit', 'uses' => 'CustomerController@edit']);
                 Route::put('{id}', ['as' => 'update', 'uses' => 'CustomerController@update']);
-                Route::match(['get','post'],'/add_payment', ['as' => 'add_payment', 'uses' => 'CustomerController@add_payment', 'custom_label'=>"Add Credit Payment" ,'visible' => true]);
-                Route::match(['get','post'],'{id}/edit_payment', ['as' => 'edit_payment', 'uses' => 'CustomerController@edit_payment', 'custom_label'=>"Edit Customer Credit Payment", 'visible' => false]);
-                Route::match(['get','post'],'list_payment', ['as' => 'list_payment', 'uses' => 'CustomerController@list_payment', 'custom_label'=>"List Credit Payment", 'visible' => true]);
-                Route::get( '{creditPaymentLog}/print_a5_payment', ['as' => 'print_a5_payment', 'uses' => 'CustomerController@print_a4_payment', 'custom_label'=>"Print Credit Payment A5", 'visible' => false]);
-                Route::get( '{creditPaymentLog}/print_thermal_payment', ['as' => 'print_thermal_payment', 'uses' => 'CustomerController@print_thermal_payment', 'custom_label'=>"Print Credit Payment Thermal", 'visible' => false]);
-                Route::get('{id}/delete_payment', ['as' => 'delete_payment', 'uses' => 'CustomerController@delete_payment', 'custom_label'=>"Delete Customer Credit Payment", 'visible' => false]);
+                Route::match(['get', 'post'], '/add_payment', ['as' => 'add_payment', 'uses' => 'CustomerController@add_payment', 'custom_label' => "Add Credit Payment", 'visible' => true]);
+                Route::match(['get', 'post'], '{id}/edit_payment', ['as' => 'edit_payment', 'uses' => 'CustomerController@edit_payment', 'custom_label' => "Edit Customer Credit Payment", 'visible' => false]);
+                Route::match(['get', 'post'], 'list_payment', ['as' => 'list_payment', 'uses' => 'CustomerController@list_payment', 'custom_label' => "List Credit Payment", 'visible' => true]);
+                Route::get('{creditPaymentLog}/print_a5_payment', ['as' => 'print_a5_payment', 'uses' => 'CustomerController@print_a4_payment', 'custom_label' => "Print Credit Payment A5", 'visible' => false]);
+                Route::get('{creditPaymentLog}/print_thermal_payment', ['as' => 'print_thermal_payment', 'uses' => 'CustomerController@print_thermal_payment', 'custom_label' => "Print Credit Payment Thermal", 'visible' => false]);
+                Route::get('{id}/delete_payment', ['as' => 'delete_payment', 'uses' => 'CustomerController@delete_payment', 'custom_label' => "Delete Customer Credit Payment", 'visible' => false]);
             });
 
         });
@@ -234,10 +234,10 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
 
             Route::prefix('stock')->as('stock.')->group(function () {
                 Route::get('', ['as' => 'index', 'uses' => 'StockController@index', 'visible' => true]);
-                Route::get('available', ['as' => 'available', 'uses' => 'StockController@available','visible' => true]);
-                Route::get('expired', ['as' => 'expired', 'uses' => 'StockController@expired','visible' => true]);
-                Route::get('disable', ['as' => 'disable', 'uses' => 'StockController@disabled','visible' => true]);
-                Route::match(['post','get'],'conversion', ['as' => 'convert', 'uses' => 'StockController@conversion_of','visible' => true]);
+                Route::get('available', ['as' => 'available', 'uses' => 'StockController@available', 'visible' => true]);
+                Route::get('expired', ['as' => 'expired', 'uses' => 'StockController@expired', 'visible' => true]);
+                Route::get('disable', ['as' => 'disable', 'uses' => 'StockController@disabled', 'visible' => true]);
+                //Route::match(['post','get'],'conversion', ['as' => 'convert', 'uses' => 'StockController@conversion_of','visible' => true]);
                 Route::get('export', ['as' => 'export', 'uses' => 'StockController@export']);
                 Route::get('create', ['as' => 'create', 'uses' => 'StockController@create']);
                 Route::post('', ['as' => 'store', 'uses' => 'StockController@store']);
@@ -245,36 +245,36 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
                 Route::get('{id}/edit', ['as' => 'edit', 'uses' => 'StockController@edit']);
                 Route::put('{id}', ['as' => 'update', 'uses' => 'StockController@update']);
                 Route::get('{id}/toggle', ['as' => 'toggle', 'uses' => 'StockController@toggle']);
-                Route::match(['get','post'],'{id}/stock_report', ['as' => 'stock_report', 'uses' => 'StockController@stock_report', 'custom_label'=>'Stock Report']);
-                Route::match(['post','get'],'quick', ['as' => 'convert', 'uses' => 'StockController@conversion_of','visible' => true,'custom_label'=>'Quick Adjust Stock Quantity']);
-                Route::match(['get','post'], 'quick',['as' => 'quick', 'uses' => 'StockController@quick', 'visible' => true,'custom_label'=>'Quick Adjust Stock Quantity']);
+                Route::match(['get', 'post'], '{id}/stock_report', ['as' => 'stock_report', 'uses' => 'StockController@stock_report', 'custom_label' => 'Stock Report']);
+                //Route::match(['post', 'get'], 'quick', ['as' => 'convert', 'uses' => 'StockController@conversion_of', 'visible' => true, 'custom_label' => 'Quick Adjust Stock Quantity']);
+                Route::match(['get', 'post'], 'quick', ['as' => 'quick', 'uses' => 'StockController@quick', 'visible' => true, 'custom_label' => 'Quick Adjust Stock Quantity']);
 
-                Route::match(['get','post'], 'export_stock',['as' => 'export_stock', 'uses' => 'StockController@export_stock', 'visible' => true,'custom_label'=>'Export Stock Excel']);
-                Route::match(['get','post'], 'import_current_stock',['as' => 'import_current_stock', 'uses' => 'StockController@import_current_stock', 'visible' => true,'custom_label'=>'Import/Existing Stock']);
-                Route::match(['get','post'], 'import_new_stock',['as' => 'import_new_stock', 'uses' => 'StockController@import_new_stock', 'visible' => true,'custom_label'=>'Import New Stock']);
-                Route::match(['get','post'], 'export_current_stock',['as' => 'export_current_stock', 'uses' => 'StockController@export_current_stock', 'visible' => true,'custom_label'=>'Export Current Stock']);
-                Route::match(['get','post'], 'export_stock_valuation_report',['as' => 'export_stock_valuation_report', 'uses' => 'StockController@exportStockValuationReport', 'visible' => true,'custom_label'=>'Export Stock Valuation Report']);
+                Route::match(['get', 'post'], 'export_stock', ['as' => 'export_stock', 'uses' => 'StockController@export_stock', 'visible' => true, 'custom_label' => 'Export Stock Excel']);
+                Route::match(['get', 'post'], 'import_current_stock', ['as' => 'import_current_stock', 'uses' => 'StockController@import_current_stock', 'visible' => true, 'custom_label' => 'Import/Existing Stock']);
+                Route::match(['get', 'post'], 'import_new_stock', ['as' => 'import_new_stock', 'uses' => 'StockController@import_new_stock', 'visible' => true, 'custom_label' => 'Import New Stock']);
+                Route::match(['get', 'post'], 'export_current_stock', ['as' => 'export_current_stock', 'uses' => 'StockController@export_current_stock', 'visible' => true, 'custom_label' => 'Export Current Stock']);
+                Route::match(['get', 'post'], 'export_stock_valuation_report', ['as' => 'export_stock_valuation_report', 'uses' => 'StockController@exportStockValuationReport', 'visible' => true, 'custom_label' => 'Export Stock Valuation Report']);
             });
 
             Route::prefix('stocklog')->as('stocklog.')->group(function () {
-                Route::match(['post','get'],'add_log', ['as' => 'add_log', 'uses' => 'StockController@add_log', 'visible'=>true,'custom_label'=>'Add Stock Log']);
+                Route::match(['post', 'get'], 'add_log', ['as' => 'add_log', 'uses' => 'StockController@add_log', 'visible' => true, 'custom_label' => 'Add Stock Log']);
                 Route::get('{id}/edit', ['as' => 'edit', 'uses' => 'StockController@edit_log']);
                 Route::put('{id}', ['as' => 'update', 'uses' => 'StockController@update_log']);
                 Route::get('{id}/delete_log', ['as' => 'delete_log', 'uses' => 'StockController@delete_log']);
-                Route::get('{id}/print_log', ['as' => 'print_log', 'uses' => 'StockController@print_log', 'custom_label'=>'Print Stock Log']);
+                Route::get('{id}/print_log', ['as' => 'print_log', 'uses' => 'StockController@print_log', 'custom_label' => 'Print Stock Log']);
             });
 
 
         });
         Route::prefix('stocktransfer')->namespace('StockTransfer')->group(function () {
             Route::prefix('stocktransfer')->as('stocktransfer.')->group(function () {
-                Route::get('', ['as' => 'index', 'uses' => 'StockTransferController@index', 'visible' => true, 'custom_label'=>"List Today's Transfer"]);
-                Route::match(['post','get'],'add_transfer', ['as' => 'add_transfer', 'uses' => 'StockTransferController@add_transfer', 'visible'=>true,'custom_label'=>'New Stock Transfer']);
+                Route::get('', ['as' => 'index', 'uses' => 'StockTransferController@index', 'visible' => true, 'custom_label' => "List Today's Transfer"]);
+                Route::match(['post', 'get'], 'add_transfer', ['as' => 'add_transfer', 'uses' => 'StockTransferController@add_transfer', 'visible' => true, 'custom_label' => 'New Stock Transfer']);
                 Route::get('{id}/delete_transfer', ['as' => 'delete_transfer', 'uses' => 'StockTransferController@delete_transfer']);
                 Route::get('{id}/show', ['as' => 'show', 'uses' => 'StockTransferController@show']);
                 Route::get('{id}/edit', ['as' => 'edit', 'uses' => 'StockTransferController@edit_transfer']);
                 Route::get('{id}/complete', ['as' => 'complete', 'uses' => 'StockTransferController@complete']);
-                Route::put('{id}', ['as' => 'update', 'uses' => 'StockTransferController@update'] );
+                Route::put('{id}', ['as' => 'update', 'uses' => 'StockTransferController@update']);
                 Route::get('{id}/print_afour', ['as' => 'print_afour', 'uses' => 'StockTransferController@print_afour']);
             });
         });
@@ -282,11 +282,11 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
             Route::prefix('invoiceandsales')->as('invoiceandsales.')->group(function () {
                 Route::get('', ['as' => 'new', 'uses' => 'InvoiceController@new', 'visible' => true]);
                 Route::post('create', ['as' => 'create', 'uses' => 'InvoiceController@create']);
-                Route::match(['get', 'post'],'draft', ['as' => 'draft', 'uses' => 'InvoiceController@draft', 'custom_label'=>"Today's Draft Invoice", 'visible' => true]);
-                Route::match(['get', 'post'],'paid', ['as' => 'paid', 'uses' => 'InvoiceController@paid', 'custom_label'=>"Today's Complete Invoice" ,'visible' => true]);
-                Route::match(['get', 'post'],'paid_stock', ['as' => 'paid_stock', 'uses' => 'InvoiceController@paid_stock', 'custom_label'=>"Today's Complete Invoice(Product)" ,'visible' => true]);
-                Route::match(['get', 'post'],'discount', ['as' => 'discount', 'uses' => 'InvoiceController@discount', 'custom_label'=>"Pending Discount's Invoice" ,'visible' => true]);
-                Route::get('{id}/pos_print', ['as' => 'pos_print', 'uses' => 'InvoiceController@print_pos' ]);
+                Route::match(['get', 'post'], 'draft', ['as' => 'draft', 'uses' => 'InvoiceController@draft', 'custom_label' => "Today's Draft Invoice", 'visible' => true]);
+                Route::match(['get', 'post'], 'paid', ['as' => 'paid', 'uses' => 'InvoiceController@paid', 'custom_label' => "Today's Complete Invoice", 'visible' => true]);
+                Route::match(['get', 'post'], 'paid_stock', ['as' => 'paid_stock', 'uses' => 'InvoiceController@paid_stock', 'custom_label' => "Today's Complete Invoice(Product)", 'visible' => true]);
+                Route::match(['get', 'post'], 'discount', ['as' => 'discount', 'uses' => 'InvoiceController@discount', 'custom_label' => "Pending Discount's Invoice", 'visible' => true]);
+                Route::get('{id}/pos_print', ['as' => 'pos_print', 'uses' => 'InvoiceController@print_pos']);
                 Route::get('{id}/print_afour', ['as' => 'print_afour', 'uses' => 'InvoiceController@print_afour']);
                 Route::get('{id}/print_afive', ['as' => 'print_afive', 'uses' => 'InvoiceController@print_afive']);
                 Route::get('{id}/print_way_bill', ['as' => 'print_way_bill', 'uses' => 'InvoiceController@print_way_bill']);
@@ -294,43 +294,43 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
                 Route::get('{id}/edit', ['as' => 'edit', 'uses' => 'InvoiceController@edit']);
                 Route::get('{id}/destroy', ['as' => 'destroy', 'uses' => 'InvoiceController@destroy']);
                 Route::put('{id}/update', ['as' => 'update', 'uses' => 'InvoiceController@update']);
-                if(config("app.uses_edit_to_return_stocks") === false) {
+                if (config("app.uses_edit_to_return_stocks") === false) {
                     Route::get('/return_invoice', ['as' => 'return_invoice', 'uses' => 'InvoiceController@return_invoice', 'visible' => true, 'custom_label' => 'Return Invoice']);
-                    Route::post('/add_return_invoice', ['as' => 'add_return_invoice', 'uses' => 'InvoiceController@add_return_invoice',  'custom_label'=>'Create Return Invoice']);
+                    Route::post('/add_return_invoice', ['as' => 'add_return_invoice', 'uses' => 'InvoiceController@add_return_invoice', 'custom_label' => 'Create Return Invoice']);
                 }
-                Route::get('draft_invoice', ['as' => 'draft_invoice', 'uses' => 'InvoiceController@draft_invoice','custom_label'=>'Save Invoice to Draft']);
-                Route::get('complete_invoice', ['as' => 'complete_invoice', 'uses' => 'InvoiceController@complete_invoice','custom_label'=>'Save Invoice to Complete']);
-                Route::get('request_for_discount', ['as' => 'request_for_discount', 'uses' => 'InvoiceController@request_for_discount','custom_label'=>'Request For Discount']);
-                Route::match(['get', 'post'],'{id}/apply_invoice_discount', ['as' => 'apply_invoice_discount', 'uses' => 'InvoiceController@apply_invoice_discount','custom_label'=>'Apply Invoice Discount']);
-                Route::get('{id}/cancel_discount', ['as' => 'cancel_discount', 'uses' => 'InvoiceController@cancel_discount','custom_label'=>'Cancel Discount Request']);
-                Route::get('allow_user_to_change_invoice_date', ['as' => 'allow_user_to_change_invoice_date', 'uses' => 'InvoiceController@allow_user_to_change_invoice_date','custom_label'=>'Allow user to change invoice date']);
-                Route::get('checkoutScan', ['as' => 'checkoutScan', 'uses' => 'InvoiceController@checkoutScan','custom_label'=>'Scan Invoice for Product Checkout', 'visible' => true]);
-                Route::get('showqty', ['as' => 'showqty', 'uses' => 'InvoiceController@showqty','custom_label'=>'Show Quantity during search in invoice', 'visible' => false]);
-                Route::get('showinvoicetotal', ['as' => 'showinvoicetotal', 'uses' => 'InvoiceController@showinvoicetotal','custom_label'=>'Show Invoice Total in Invoice Report', 'visible' => false]);
+                Route::get('draft_invoice', ['as' => 'draft_invoice', 'uses' => 'InvoiceController@draft_invoice', 'custom_label' => 'Save Invoice to Draft']);
+                Route::get('complete_invoice', ['as' => 'complete_invoice', 'uses' => 'InvoiceController@complete_invoice', 'custom_label' => 'Save Invoice to Complete']);
+                Route::get('request_for_discount', ['as' => 'request_for_discount', 'uses' => 'InvoiceController@request_for_discount', 'custom_label' => 'Request For Discount']);
+                Route::match(['get', 'post'], '{id}/apply_invoice_discount', ['as' => 'apply_invoice_discount', 'uses' => 'InvoiceController@apply_invoice_discount', 'custom_label' => 'Apply Invoice Discount']);
+                Route::get('{id}/cancel_discount', ['as' => 'cancel_discount', 'uses' => 'InvoiceController@cancel_discount', 'custom_label' => 'Cancel Discount Request']);
+                Route::get('allow_user_to_change_invoice_date', ['as' => 'allow_user_to_change_invoice_date', 'uses' => 'InvoiceController@allow_user_to_change_invoice_date', 'custom_label' => 'Allow user to change invoice date']);
+                Route::get('checkoutScan', ['as' => 'checkoutScan', 'uses' => 'InvoiceController@checkoutScan', 'custom_label' => 'Scan Invoice for Product Checkout', 'visible' => true]);
+                Route::get('showqty', ['as' => 'showqty', 'uses' => 'InvoiceController@showqty', 'custom_label' => 'Show Quantity during search in invoice', 'visible' => false]);
+                Route::get('showinvoicetotal', ['as' => 'showinvoicetotal', 'uses' => 'InvoiceController@showinvoicetotal', 'custom_label' => 'Show Invoice Total in Invoice Report', 'visible' => false]);
             });
         });
         Route::prefix('deposit')->namespace('Deposit')->group(function () {
             Route::prefix('deposit')->as('deposit.')->group(function () {
                 Route::get('', ['as' => 'new', 'uses' => 'DepositController@new', 'visible' => true]);
                 Route::post('create', ['as' => 'create', 'uses' => 'DepositController@create']);
-                Route::get('allow_user_to_change_deposit_date', ['as' => 'allow_user_to_change_deposit_date', 'uses' => 'DepositController@allow_user_to_change_deposit_date','custom_label'=>'Allow user to change deposit date']);
+                Route::get('allow_user_to_change_deposit_date', ['as' => 'allow_user_to_change_deposit_date', 'uses' => 'DepositController@allow_user_to_change_deposit_date', 'custom_label' => 'Allow user to change deposit date']);
                 Route::get('{id}/view', ['as' => 'view', 'uses' => 'DepositController@view']);
                 Route::get('{id}/edit', ['as' => 'edit', 'uses' => 'DepositController@edit']);
                 Route::get('{id}/destroy', ['as' => 'destroy', 'uses' => 'DepositController@destroy']);
                 Route::put('{id}/update', ['as' => 'update', 'uses' => 'DepositController@update']);
-                Route::get('list_deposit', ['as' => 'list_deposit', 'uses' => 'DepositController@index','custom_label'=>'List Today Deposit', 'visible' => true]);
-                Route::get('{id}/pos_print', ['as' => 'pos_print', 'uses' => 'DepositController@print_pos' ]);
+                Route::get('list_deposit', ['as' => 'list_deposit', 'uses' => 'DepositController@index', 'custom_label' => 'List Today Deposit', 'visible' => true]);
+                Route::get('{id}/pos_print', ['as' => 'pos_print', 'uses' => 'DepositController@print_pos']);
                 Route::get('{id}/print_afour', ['as' => 'print_afour', 'uses' => 'DepositController@print_afour']);
                 Route::get('{id}/print_afive', ['as' => 'print_afive', 'uses' => 'DepositController@print_afive']);
                 Route::get('{id}/print_way_bill', ['as' => 'print_way_bill', 'uses' => 'DepositController@print_way_bill']);
-                Route::get('{id}/add_depsoit_payment', ['as' => 'add_depsoit_payment', 'uses' => 'DepositController@add_depsoit_payment', 'custom_label'=>'Add Deposit Payment']);
+                Route::get('{id}/add_depsoit_payment', ['as' => 'add_depsoit_payment', 'uses' => 'DepositController@add_depsoit_payment', 'custom_label' => 'Add Deposit Payment']);
             });
         });
         Route::prefix('cashbook')->namespace('CashBook')->group(function () {
             Route::prefix('cashbook')->as('cashbook.')->group(function () {
-                Route::match(['get','post'],'', ['as' => 'index', 'uses' => 'CashBookController@index', 'visible' => true]);
+                Route::match(['get', 'post'], '', ['as' => 'index', 'uses' => 'CashBookController@index', 'visible' => true]);
                 Route::get('list', ['as' => 'list', 'uses' => 'CashBookController@list_all']);
-                Route::get('create', ['as' => 'create', 'uses' => 'CashBookController@create', 'visible' => true,'custom_label'=>'Add Cashbook Entry']);
+                Route::get('create', ['as' => 'create', 'uses' => 'CashBookController@create', 'visible' => true, 'custom_label' => 'Add Cashbook Entry']);
                 Route::post('/store', ['as' => 'store', 'uses' => 'CashBookController@store']);
                 Route::get('{id}/edit', ['as' => 'edit', 'uses' => 'CashBookController@edit']);
                 Route::put('{id}', ['as' => 'update', 'uses' => 'CashBookController@update']);
@@ -341,7 +341,7 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
             Route::prefix('expenses')->as('expenses.')->group(function () {
                 Route::get('', ['as' => 'index', 'uses' => 'ExpensesController@index', 'visible' => true]);
                 Route::get('list', ['as' => 'list', 'uses' => 'ExpensesController@listAll']);
-                Route::get('create', ['as' => 'create', 'uses' => 'ExpensesController@create', 'visible' => true, "custom_label"=>"New Expenses"]);
+                Route::get('create', ['as' => 'create', 'uses' => 'ExpensesController@create', 'visible' => true, "custom_label" => "New Expenses"]);
                 Route::post('', ['as' => 'store', 'uses' => 'ExpensesController@store']);
                 Route::get('{id}/show', ['as' => 'show', 'uses' => 'ExpensesController@show']);
                 Route::get('{id}/edit', ['as' => 'edit', 'uses' => 'ExpensesController@edit']);
@@ -352,42 +352,42 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
         });
         Route::prefix('purchaseorders')->namespace('PurchaseOrders')->group(function () {
             Route::prefix('purchaseorders')->as('purchaseorders.')->group(function () {
-                Route::match(['get', 'post'],'', ['as' => 'index', 'uses' => 'PurchaseOrder@index', 'visible' => true, 'custom_label'=>'List Purchases']);
-                Route::match(['get', 'post'],'list_product', ['as' => 'list_product', 'uses' => 'PurchaseOrder@list_product', 'visible' => true, 'custom_label'=>'List Purchases(Product)']);
-                Route::match(['get', 'post'],'/returns', ['as' => 'returns', 'uses' => 'PurchaseOrder@returns', 'visible' => true, 'custom_label'=>'List Returns']);
+                Route::match(['get', 'post'], '', ['as' => 'index', 'uses' => 'PurchaseOrder@index', 'visible' => true, 'custom_label' => 'List Purchases']);
+                Route::match(['get', 'post'], 'list_product', ['as' => 'list_product', 'uses' => 'PurchaseOrder@list_product', 'visible' => true, 'custom_label' => 'List Purchases(Product)']);
+                Route::match(['get', 'post'], '/returns', ['as' => 'returns', 'uses' => 'PurchaseOrder@returns', 'visible' => true, 'custom_label' => 'List Returns']);
                 Route::get('{id}/show', ['as' => 'show', 'uses' => 'PurchaseOrder@show']);
                 Route::get('{id}/print', ['as' => 'print', 'uses' => 'PurchaseOrder@print', 'custom_label' => "Print Purchase Order"]);
-                Route::get('create', ['as' => 'create', 'uses' => 'PurchaseOrder@create','visible' => true]);
-                Route::get('create_returns', ['as' => 'create_returns', 'uses' => 'PurchaseOrder@create_returns','visible' => true, 'custom_label' => 'Create Purchase Return']);
+                Route::get('create', ['as' => 'create', 'uses' => 'PurchaseOrder@create', 'visible' => true]);
+                Route::get('create_returns', ['as' => 'create_returns', 'uses' => 'PurchaseOrder@create_returns', 'visible' => true, 'custom_label' => 'Create Purchase Return']);
                 Route::post('store', ['as' => 'store', 'uses' => 'PurchaseOrder@store']);
                 Route::get('{id}/remove', ['as' => 'destroy', 'uses' => 'PurchaseOrder@destroy']);
 
                 Route::get('{id}/edit', ['as' => 'edit', 'uses' => 'PurchaseOrder@edit']);
-                Route::get('showpo_total', ['as' => 'showpo_total', 'custom_label'=>"Show Total Purchase Price",'uses' => 'PurchaseOrder@showpo_total']);
-                Route::get('{id}/markAsComplete', ['as' => 'markAsComplete', 'uses' => 'PurchaseOrder@markAsComplete', 'custom_label'=>'Complete Purchase Order']);
+                Route::get('showpo_total', ['as' => 'showpo_total', 'custom_label' => "Show Total Purchase Price", 'uses' => 'PurchaseOrder@showpo_total']);
+                Route::get('{id}/markAsComplete', ['as' => 'markAsComplete', 'uses' => 'PurchaseOrder@markAsComplete', 'custom_label' => 'Complete Purchase Order']);
                 Route::put('{id}/update', ['as' => 'update', 'uses' => 'PurchaseOrder@update']);
-                Route::match(['get','post'],'/add_payment', ['as' => 'add_payment', 'uses' => 'PurchaseOrder@add_payment', 'custom_label'=>"Add Supplier Payment" ,'visible' => true]);
-                Route::get('supplier_and_report', ['as' => 'supplier_and_report',  'custom_label'=>"Suppliers and Payment" ,'visible' => true, 'uses' => 'PurchaseOrder@supplier_and_report']);
+                Route::match(['get', 'post'], '/add_payment', ['as' => 'add_payment', 'uses' => 'PurchaseOrder@add_payment', 'custom_label' => "Add Supplier Payment", 'visible' => true]);
+                Route::get('supplier_and_report', ['as' => 'supplier_and_report', 'custom_label' => "Suppliers and Payment", 'visible' => true, 'uses' => 'PurchaseOrder@supplier_and_report']);
             });
         });
         Route::prefix('stockcounting')->namespace('StockCounting')->group(function () {
 
             Route::prefix('counting')->as('counting.')->group(function () {
-                Route::get('', ['as' => 'index', 'uses' => 'StockCountingController@index', 'visible' => true, 'custom_label'=>'List Stock Counting']);
-                Route::get('create', ['as' => 'create', 'uses' => 'StockCountingController@create', 'visible' => true, 'custom_label'=>'New Stock Counting']);
+                Route::get('', ['as' => 'index', 'uses' => 'StockCountingController@index', 'visible' => true, 'custom_label' => 'List Stock Counting']);
+                Route::get('create', ['as' => 'create', 'uses' => 'StockCountingController@create', 'visible' => true, 'custom_label' => 'New Stock Counting']);
                 Route::post('', ['as' => 'store', 'uses' => 'StockCountingController@store']);
                 Route::get('{id}/show', ['as' => 'show', 'uses' => 'StockCountingController@show']);
                 Route::get('{id}/delete', ['as' => 'destroy', 'uses' => 'StockCountingController@destroy']);
-                Route::match(['get','post'],'{id}/export_excel', ['as' => 'export_excel', 'uses' => 'StockCountingController@export_excel']);
-                Route::match(['get','post'],'{id}/import_excel', ['as' => 'import_excel', 'uses' => 'StockCountingController@import_excel']);
+                Route::match(['get', 'post'], '{id}/export_excel', ['as' => 'export_excel', 'uses' => 'StockCountingController@export_excel']);
+                Route::match(['get', 'post'], '{id}/import_excel', ['as' => 'import_excel', 'uses' => 'StockCountingController@import_excel']);
             });
 
         });
 
         Route::prefix('incentive')->namespace('IncentiveManager')->group(function () {
             Route::prefix('incentive')->as('incentive.')->group(function () {
-                Route::get('', ['as' => 'index', 'uses' => 'IncentiveController@index', 'visible' => true, "custom_label"=>"List Incentives"]);
-                Route::get('create', ['as' => 'create', 'uses' => 'IncentiveController@create', 'visible' => true, "custom_label"=>"New Incentive"]);
+                Route::get('', ['as' => 'index', 'uses' => 'IncentiveController@index', 'visible' => true, "custom_label" => "List Incentives"]);
+                Route::get('create', ['as' => 'create', 'uses' => 'IncentiveController@create', 'visible' => true, "custom_label" => "New Incentive"]);
                 Route::post('', ['as' => 'store', 'uses' => 'IncentiveController@store']);
                 Route::get('{id}/edit', ['as' => 'edit', 'uses' => 'IncentiveController@edit']);
                 Route::post('{id}', ['as' => 'update', 'uses' => 'IncentiveController@update']);
@@ -395,86 +395,86 @@ Route::middleware(['auth', 'user.active.store'])->group(function () {
         });
 
 
-        Route::prefix('reports')->as('reports.')->group(function(){
+        Route::prefix('reports')->as('reports.')->group(function () {
 
-            Route::prefix('purchasesReport')->as('purchase.')->namespace('PurchaseReport')->group(function(){
+            Route::prefix('purchasesReport')->as('purchase.')->namespace('PurchaseReport')->group(function () {
 
-                Route::match(['post','get'],'/general_purchase_order', ['as' => 'general_purchase_order', 'uses' => 'PurchaseReportsController@general_purchase_order', 'custom_label'=>"General Purchase Order / Returns",'visible' => false]);
-                Route::match(['post','get'],'/monthly_by_supplier', ['as' => 'monthly_by_supplier', 'uses' => 'PurchaseReportsController@monthly_by_supplier', 'custom_label'=>"Purchase Order / Returns By Supplier",'visible' => false]);
-                Route::match(['post','get'],'/monthly_by_store', ['as' => 'monthly_by_store', 'uses' => 'PurchaseReportsController@monthly_by_store', 'custom_label'=>"Purchase Order / Returns By Store",'visible' => false]);
-                Route::match(['post','get'],'/monthly_by_user', ['as' => 'monthly_by_user', 'uses' => 'PurchaseReportsController@monthly_by_user', 'custom_label'=>"Purchase Order / Returns By User", 'visible' => false]);
+                Route::match(['post', 'get'], '/general_purchase_order', ['as' => 'general_purchase_order', 'uses' => 'PurchaseReportsController@general_purchase_order', 'custom_label' => "General Purchase Order / Returns", 'visible' => false]);
+                Route::match(['post', 'get'], '/monthly_by_supplier', ['as' => 'monthly_by_supplier', 'uses' => 'PurchaseReportsController@monthly_by_supplier', 'custom_label' => "Purchase Order / Returns By Supplier", 'visible' => false]);
+                Route::match(['post', 'get'], '/monthly_by_store', ['as' => 'monthly_by_store', 'uses' => 'PurchaseReportsController@monthly_by_store', 'custom_label' => "Purchase Order / Returns By Store", 'visible' => false]);
+                Route::match(['post', 'get'], '/monthly_by_user', ['as' => 'monthly_by_user', 'uses' => 'PurchaseReportsController@monthly_by_user', 'custom_label' => "Purchase Order / Returns By User", 'visible' => false]);
 
 
-                Route::match(['get','post'],'/credit_report', ['as' => 'credit_report', 'uses' => 'PurchaseReportsController@credit_report', 'custom_label'=>"Supplier Credit Report", 'visible' => false]);
-                Route::match(['get','post'],'/payment_report', ['as' => 'payment_report', 'uses' => 'PurchaseReportsController@payment_report', 'custom_label'=>"Supplier Payment Report", 'visible' => false]);
-                Route::match(['get','post'],'/balance_sheet', ['as' => 'balance_sheet', 'uses' => 'PurchaseReportsController@balance_sheet', 'custom_label'=>"Supplier Balance Sheet", 'visible' => false]);
-                Route::match(['post','get'],'/daily', ['as' => 'daily', 'uses' => 'PurchaseReportsController@daily', 'visible' => false, 'custom_label' => 'Daily Purchase Order / Returns']);
-                Route::match(['post','get'],'/monthly', ['as' => 'monthly', 'uses' => 'PurchaseReportsController@monthly', 'visible' => false, 'custom_label' => 'Monthly Purchase Order / Returns']);
-                Route::match(['post','get'],'/monthly_product', ['as' => 'monthly_product', 'uses' => 'PurchaseReportsController@monthly_product', 'visible' => false, 'custom_label' => 'Purchase Orders / Returns Analysis Report']);
-                Route::match(['post','get'],'/monthly_by_product', ['as' => 'monthly_by_product', 'uses' => 'PurchaseReportsController@monthly_by_product', 'visible' => false, 'custom_label' => 'Monthly Purchase Orders / Returns By Product']);
+                Route::match(['get', 'post'], '/credit_report', ['as' => 'credit_report', 'uses' => 'PurchaseReportsController@credit_report', 'custom_label' => "Supplier Credit Report", 'visible' => false]);
+                Route::match(['get', 'post'], '/payment_report', ['as' => 'payment_report', 'uses' => 'PurchaseReportsController@payment_report', 'custom_label' => "Supplier Payment Report", 'visible' => false]);
+                Route::match(['get', 'post'], '/balance_sheet', ['as' => 'balance_sheet', 'uses' => 'PurchaseReportsController@balance_sheet', 'custom_label' => "Supplier Balance Sheet", 'visible' => false]);
+                Route::match(['post', 'get'], '/daily', ['as' => 'daily', 'uses' => 'PurchaseReportsController@daily', 'visible' => false, 'custom_label' => 'Daily Purchase Order / Returns']);
+                Route::match(['post', 'get'], '/monthly', ['as' => 'monthly', 'uses' => 'PurchaseReportsController@monthly', 'visible' => false, 'custom_label' => 'Monthly Purchase Order / Returns']);
+                Route::match(['post', 'get'], '/monthly_product', ['as' => 'monthly_product', 'uses' => 'PurchaseReportsController@monthly_product', 'visible' => false, 'custom_label' => 'Purchase Orders / Returns Analysis Report']);
+                Route::match(['post', 'get'], '/monthly_by_product', ['as' => 'monthly_by_product', 'uses' => 'PurchaseReportsController@monthly_by_product', 'visible' => false, 'custom_label' => 'Monthly Purchase Orders / Returns By Product']);
 
             });
-            Route::prefix('paymentReport')->as('payment.')->namespace('PaymentReport')->group(function(){
-                Route::match(['get','post'],'daily_payment_reports', ['as' => 'daily_payment_reports', 'uses' => 'PaymentReportController@daily_payment_reports','custom_label'=>'Daily Report', 'visible' => false]);
-                Route::match(['get','post'],'monthly_payment_reports', ['as' => 'monthly_payment_reports', 'uses' => 'PaymentReportController@monthly_payment_reports','custom_label'=>'Monthly Report', 'visible' => false]);
-                Route::match(['get','post'],'monthly_payment_report_by_method', ['as' => 'monthly_payment_report_by_method', 'uses' => 'PaymentReportController@monthly_payment_report_by_method','custom_label'=>'Monthly Report By Method', 'visible' => false]);
-                Route::match(['get','post'],'payment_analysis', ['as' => 'payment_analysis', 'uses' => 'PaymentReportController@payment_analysis','custom_label'=>'Payment Analysis', 'visible' => false]);
-                Route::match(['get','post'],'income_analysis', ['as' => 'income_analysis', 'uses' => 'PaymentReportController@income_analysis','custom_label'=>'Income Analysis', 'visible' => false]);
-                Route::match(['get','post'],'income_analysis_by_cash', ['as' => 'income_analysis_by_cash', 'uses' => 'PaymentReportController@income_analysis_by_cash', 'custom_label'=>'Income Analysis By Cash', 'visible' => false]);
-                Route::match(['get','post'],'income_analysis_by_department', ['as' => 'income_analysis_by_department', 'uses' => 'PaymentReportController@income_analysis_by_department', 'custom_label'=>'Income Analysis By Store', 'visible' => false]);
-                Route::match(['get','post'],'income_analysis_by_profit', ['as' => 'income_analysis_by_profit', 'uses' => 'PaymentReportController@income_analysis_by_profit', 'custom_label'=>'Income Analysis By Profit', 'visible' => false]);
-                Route::match(['get','post'],'report_by_bank_transfer', ['as' => 'report_by_bank_transfer', 'uses' => 'PaymentReportController@report_by_bank_transfer', 'custom_label'=>'Payment Report By Bank Transfer', 'visible' => false]);
-                Route::match(['get','post'],'payment_report_user', ['as' => 'payment_report_user', 'uses' => 'PaymentReportController@payment_report_user', 'custom_label'=>'Payment Report By User', 'visible' => false]);
-                Route::match(['get','post'],'payment_analysis_user', ['as' => 'payment_analysis_user', 'uses' => 'PaymentReportController@payment_analysis_by_user', 'custom_label'=>'Payment Analysis Report By User', 'visible' => false]);
+            Route::prefix('paymentReport')->as('payment.')->namespace('PaymentReport')->group(function () {
+                Route::match(['get', 'post'], 'daily_payment_reports', ['as' => 'daily_payment_reports', 'uses' => 'PaymentReportController@daily_payment_reports', 'custom_label' => 'Daily Report', 'visible' => false]);
+                Route::match(['get', 'post'], 'monthly_payment_reports', ['as' => 'monthly_payment_reports', 'uses' => 'PaymentReportController@monthly_payment_reports', 'custom_label' => 'Monthly Report', 'visible' => false]);
+                Route::match(['get', 'post'], 'monthly_payment_report_by_method', ['as' => 'monthly_payment_report_by_method', 'uses' => 'PaymentReportController@monthly_payment_report_by_method', 'custom_label' => 'Monthly Report By Method', 'visible' => false]);
+                Route::match(['get', 'post'], 'payment_analysis', ['as' => 'payment_analysis', 'uses' => 'PaymentReportController@payment_analysis', 'custom_label' => 'Payment Analysis', 'visible' => false]);
+                Route::match(['get', 'post'], 'income_analysis', ['as' => 'income_analysis', 'uses' => 'PaymentReportController@income_analysis', 'custom_label' => 'Income Analysis', 'visible' => false]);
+                Route::match(['get', 'post'], 'income_analysis_by_cash', ['as' => 'income_analysis_by_cash', 'uses' => 'PaymentReportController@income_analysis_by_cash', 'custom_label' => 'Income Analysis By Cash', 'visible' => false]);
+                Route::match(['get', 'post'], 'income_analysis_by_department', ['as' => 'income_analysis_by_department', 'uses' => 'PaymentReportController@income_analysis_by_department', 'custom_label' => 'Income Analysis By Store', 'visible' => false]);
+                Route::match(['get', 'post'], 'income_analysis_by_profit', ['as' => 'income_analysis_by_profit', 'uses' => 'PaymentReportController@income_analysis_by_profit', 'custom_label' => 'Income Analysis By Profit', 'visible' => false]);
+                Route::match(['get', 'post'], 'report_by_bank_transfer', ['as' => 'report_by_bank_transfer', 'uses' => 'PaymentReportController@report_by_bank_transfer', 'custom_label' => 'Payment Report By Bank Transfer', 'visible' => false]);
+                Route::match(['get', 'post'], 'payment_report_user', ['as' => 'payment_report_user', 'uses' => 'PaymentReportController@payment_report_user', 'custom_label' => 'Payment Report By User', 'visible' => false]);
+                Route::match(['get', 'post'], 'payment_analysis_user', ['as' => 'payment_analysis_user', 'uses' => 'PaymentReportController@payment_analysis_by_user', 'custom_label' => 'Payment Analysis Report By User', 'visible' => false]);
             });
-            Route::prefix('stockReport')->as('StockReport.')->namespace('StockReport')->group(function(){
-                Route::match(['post','get'],'usage_log_report', ['as' => 'usage_log_report', 'uses' => 'StockReportController@usage_log_report', 'visible'=>false,'custom_label'=>'Stock Log Report']);
-                Route::match(['post','get'],'near_out_of_stock', ['as' => 'near_out_of_stock', 'uses' => 'StockReportController@near_out_of_stock', 'visible'=>false,'custom_label'=>'Stock Re-order Level Report']);
-                Route::match(['post','get'],'quantity_adjustment_report', ['as' => 'quantity_adjustment_report', 'uses' => 'StockReportController@quantity_adjustment_report', 'visible'=>false,'custom_label'=>'Quantity Adjustment Report']);
-                Route::match(['post','get'],'stock_expiry_report', ['as' => 'stock_expiry_report', 'uses' => 'StockReportController@stock_expiry_report', 'visible'=>false,'custom_label'=>'Stock Expiry Report']);
+            Route::prefix('stockReport')->as('StockReport.')->namespace('StockReport')->group(function () {
+                Route::match(['post', 'get'], 'usage_log_report', ['as' => 'usage_log_report', 'uses' => 'StockReportController@usage_log_report', 'visible' => false, 'custom_label' => 'Stock Log Report']);
+                Route::match(['post', 'get'], 'near_out_of_stock', ['as' => 'near_out_of_stock', 'uses' => 'StockReportController@near_out_of_stock', 'visible' => false, 'custom_label' => 'Stock Re-order Level Report']);
+                Route::match(['post', 'get'], 'quantity_adjustment_report', ['as' => 'quantity_adjustment_report', 'uses' => 'StockReportController@quantity_adjustment_report', 'visible' => false, 'custom_label' => 'Quantity Adjustment Report']);
+                Route::match(['post', 'get'], 'stock_expiry_report', ['as' => 'stock_expiry_report', 'uses' => 'StockReportController@stock_expiry_report', 'visible' => false, 'custom_label' => 'Stock Expiry Report']);
             });
-            Route::prefix('expensesReport')->as('ExpensesReport.')->namespace('ExpensesReport')->group(function(){
-                Route::match(['get','post'],'/monthly_expenses_report', ['as' => 'monthly_expenses_report', 'uses' => 'ExpensesReportController@monthly_expenses_report', 'visible' => false, "custom_label"=>"Monthly Expenses"]);
-                Route::match(['get','post'],'/expenses_report_by_type', ['as' => 'expenses_report_by_type', 'uses' => 'ExpensesReportController@expenses_report_by_type', 'visible' => false, "custom_label"=>"Expenses By Type"]);
-                Route::match(['get','post'],'/expenses_report_by_store', ['as' => 'expenses_report_by_store', 'uses' => 'ExpensesReportController@expenses_report_by_store', 'visible' => false, "custom_label"=>"Expenses By Store"]);
+            Route::prefix('expensesReport')->as('ExpensesReport.')->namespace('ExpensesReport')->group(function () {
+                Route::match(['get', 'post'], '/monthly_expenses_report', ['as' => 'monthly_expenses_report', 'uses' => 'ExpensesReportController@monthly_expenses_report', 'visible' => false, "custom_label" => "Monthly Expenses"]);
+                Route::match(['get', 'post'], '/expenses_report_by_type', ['as' => 'expenses_report_by_type', 'uses' => 'ExpensesReportController@expenses_report_by_type', 'visible' => false, "custom_label" => "Expenses By Type"]);
+                Route::match(['get', 'post'], '/expenses_report_by_store', ['as' => 'expenses_report_by_store', 'uses' => 'ExpensesReportController@expenses_report_by_store', 'visible' => false, "custom_label" => "Expenses By Store"]);
             });
-            Route::prefix('invoiceReport')->as('invoice.')->namespace('InvoiceReport')->group(function(){
-                Route::match(['post','get'],'', ['as' => 'index', 'uses' => 'InvoiceReportController@daily', 'visible' => false]);
-                Route::match(['post','get'],'/monthly', ['as' => 'monthly', 'uses' => 'InvoiceReportController@monthly', 'visible' => false]);
-                Route::match(['post','get'],'/customer_monthly', ['as' => 'customer_monthly', 'uses' => 'InvoiceReportController@customer_monthly', 'visible' => false]);
-                Route::match(['post','get'],'/product_monthly', ['as' => 'product_monthly', 'uses' => 'InvoiceReportController@product_monthly', 'visible' => false]);
-                Route::match(['post','get'],'/store_monthly', ['as' => 'store_monthly', 'uses' => 'InvoiceReportController@store_monthly', 'custom_label'=>'Invoice Report By Store','visible' => false]);
-                Route::match(['post','get'],'/sales_analysis', ['as' => 'sales_analysis', 'uses' => 'InvoiceReportController@sales_analysis','custom_label'=>'Sales Analysis', 'visible' => false]);
-                Route::match(['post','get'],'/return_logs', ['as' => 'return_logs', 'uses' => 'InvoiceReportController@return_logs','custom_label'=>'Sales Return', 'visible' => false]);
-                Route::match(['post','get'],'/by_user', ['as' => 'by_user', 'uses' => 'InvoiceReportController@by_user','custom_label'=>'Invoice Report By User', 'visible' => false]);
-                Route::match(['post','get'],'/by_payment_method', ['as' => 'by_payment_method', 'uses' => 'InvoiceReportController@by_payment_method','custom_label'=>'Invoice Report By Payment Method', 'visible' => false]);
+            Route::prefix('invoiceReport')->as('invoice.')->namespace('InvoiceReport')->group(function () {
+                Route::match(['post', 'get'], '', ['as' => 'index', 'uses' => 'InvoiceReportController@daily', 'visible' => false]);
+                Route::match(['post', 'get'], '/monthly', ['as' => 'monthly', 'uses' => 'InvoiceReportController@monthly', 'visible' => false]);
+                Route::match(['post', 'get'], '/customer_monthly', ['as' => 'customer_monthly', 'uses' => 'InvoiceReportController@customer_monthly', 'visible' => false]);
+                Route::match(['post', 'get'], '/product_monthly', ['as' => 'product_monthly', 'uses' => 'InvoiceReportController@product_monthly', 'visible' => false]);
+                Route::match(['post', 'get'], '/store_monthly', ['as' => 'store_monthly', 'uses' => 'InvoiceReportController@store_monthly', 'custom_label' => 'Invoice Report By Store', 'visible' => false]);
+                Route::match(['post', 'get'], '/sales_analysis', ['as' => 'sales_analysis', 'uses' => 'InvoiceReportController@sales_analysis', 'custom_label' => 'Sales Analysis', 'visible' => false]);
+                Route::match(['post', 'get'], '/return_logs', ['as' => 'return_logs', 'uses' => 'InvoiceReportController@return_logs', 'custom_label' => 'Sales Return', 'visible' => false]);
+                Route::match(['post', 'get'], '/by_user', ['as' => 'by_user', 'uses' => 'InvoiceReportController@by_user', 'custom_label' => 'Invoice Report By User', 'visible' => false]);
+                Route::match(['post', 'get'], '/by_payment_method', ['as' => 'by_payment_method', 'uses' => 'InvoiceReportController@by_payment_method', 'custom_label' => 'Invoice Report By Payment Method', 'visible' => false]);
                 //Route::match(['post','get'],'/full_invoice_report', ['as' => 'full_invoice_report', 'uses' => 'InvoiceReportController@full_invoice_report','custom_label'=>'Complete Invoice Report', 'visible' => false]);
             });
 
-            Route::prefix('customerReport')->as('customerReport.')->namespace('CustomerReport')->group(function(){
-                Route::match(['get','post'],'/credit_report', ['as' => 'credit_report', 'uses' => 'CustomerReportController@credit_report', 'custom_label'=>"Customer Credit Report" ,'visible' => false]);
-                Route::match(['get','post'],'/payment_report', ['as' => 'payment_report', 'uses' => 'CustomerReportController@payment_report', 'custom_label'=>"Customer Payment Report" ,'visible' => false]);
-                Route::match(['get','post'],'/balance_sheet', ['as' => 'balance_sheet', 'uses' => 'CustomerReportController@balance_sheet', 'custom_label'=>"Customer Balance Sheet" ,'visible' => false]);
-                Route::match(['get','post'],'/add_payment', ['as' => 'add_payment', 'uses' => 'CustomerReportController@add_payment', 'custom_label'=>"Add Credit Payment" ,'visible' => false]);
+            Route::prefix('customerReport')->as('customerReport.')->namespace('CustomerReport')->group(function () {
+                Route::match(['get', 'post'], '/credit_report', ['as' => 'credit_report', 'uses' => 'CustomerReportController@credit_report', 'custom_label' => "Customer Credit Report", 'visible' => false]);
+                Route::match(['get', 'post'], '/payment_report', ['as' => 'payment_report', 'uses' => 'CustomerReportController@payment_report', 'custom_label' => "Customer Payment Report", 'visible' => false]);
+                Route::match(['get', 'post'], '/balance_sheet', ['as' => 'balance_sheet', 'uses' => 'CustomerReportController@balance_sheet', 'custom_label' => "Customer Balance Sheet", 'visible' => false]);
+                Route::match(['get', 'post'], '/add_payment', ['as' => 'add_payment', 'uses' => 'CustomerReportController@add_payment', 'custom_label' => "Add Credit Payment", 'visible' => false]);
             });
 
-            Route::prefix('stockTransferReport')->as('stockTransferReport.')->namespace('StockTransferReport')->group(function(){
-                Route::match(['post','get'],'transfer_report', ['as' => 'transfer_report', 'uses' => 'StockTransferReportController@transfer_report','custom_label'=>'Stock Transfer Report', 'visible' => false]);
-                Route::match(['post','get'],'product_transfer_report', ['as' => 'product_transfer_report', 'uses' => 'StockTransferReportController@product_transfer_report','custom_label'=>'Stock Transfer Analysis Report', 'visible' => false]);
-                Route::match(['post','get'],'transfer_report_by_product', ['as' => 'transfer_report_by_product', 'uses' => 'StockTransferReportController@transfer_report_by_product','custom_label'=>'Stock Transfer Report By Product', 'visible' => false]);
+            Route::prefix('stockTransferReport')->as('stockTransferReport.')->namespace('StockTransferReport')->group(function () {
+                Route::match(['post', 'get'], 'transfer_report', ['as' => 'transfer_report', 'uses' => 'StockTransferReportController@transfer_report', 'custom_label' => 'Stock Transfer Report', 'visible' => false]);
+                Route::match(['post', 'get'], 'product_transfer_report', ['as' => 'product_transfer_report', 'uses' => 'StockTransferReportController@product_transfer_report', 'custom_label' => 'Stock Transfer Analysis Report', 'visible' => false]);
+                Route::match(['post', 'get'], 'transfer_report_by_product', ['as' => 'transfer_report_by_product', 'uses' => 'StockTransferReportController@transfer_report_by_product', 'custom_label' => 'Stock Transfer Report By Product', 'visible' => false]);
             });
 
-            Route::prefix('cashBookReport')->as('cashBookReport.')->namespace('CashBookReport')->group(function(){
-                Route::match(['get','post'],'list', ['as' => 'list', 'uses' => 'CashBookReportController@list_all', 'custom_label'=>"Monthly Cashbook Report", 'visible' => false]);
+            Route::prefix('cashBookReport')->as('cashBookReport.')->namespace('CashBookReport')->group(function () {
+                Route::match(['get', 'post'], 'list', ['as' => 'list', 'uses' => 'CashBookReportController@list_all', 'custom_label' => "Monthly Cashbook Report", 'visible' => false]);
             });
-            Route::prefix('dashboard')->as('dashboard.')->namespace('Dashboard')->group(function(){
-                Route::match(['get','post'],'todays_income', ['as' => 'todays_income', 'uses' => 'DashboardReportController@todays_income', 'custom_label'=>"View Today's Income", 'visible' => false]);
-                Route::match(['get','post'],'todays_expenses', ['as' => 'todays_expenses', 'uses' => 'DashboardReportController@todays_expenses', 'custom_label'=>"View Today's Expenses", 'visible' => false]);
-                Route::match(['get','post'],'current_month_income', ['as' => 'current_month_income', 'uses' => 'DashboardReportController@current_month_income', 'custom_label'=>"View Current Month's Income", 'visible' => false]);
-                Route::match(['get','post'],'current_month_expenses', ['as' => 'current_month_expenses', 'uses' => 'DashboardReportController@current_month_expenses', 'custom_label'=>"View Current Month's Expenses", 'visible' => false]);
-                Route::match(['get','post'],'income_and_expenses_analysis', ['as' => 'income_and_expenses_analysis', 'uses' => 'DashboardReportController@income_and_expenses_analysis', 'custom_label'=>"View Income & Expenses Analysis", 'visible' => false]);
-                Route::match(['get','post'],'recent_payment', ['as' => 'recent_payment', 'uses' => 'DashboardReportController@recent_payment', 'custom_label'=>"View Recent Payment", 'visible' => false]);
-                Route::match(['get','post'],'recent_invoice', ['as' => 'recent_invoice', 'uses' => 'DashboardReportController@recent_invoice', 'custom_label'=>"View Recent Invoice", 'visible' => false]);
+            Route::prefix('dashboard')->as('dashboard.')->namespace('Dashboard')->group(function () {
+                Route::match(['get', 'post'], 'todays_income', ['as' => 'todays_income', 'uses' => 'DashboardReportController@todays_income', 'custom_label' => "View Today's Income", 'visible' => false]);
+                Route::match(['get', 'post'], 'todays_expenses', ['as' => 'todays_expenses', 'uses' => 'DashboardReportController@todays_expenses', 'custom_label' => "View Today's Expenses", 'visible' => false]);
+                Route::match(['get', 'post'], 'current_month_income', ['as' => 'current_month_income', 'uses' => 'DashboardReportController@current_month_income', 'custom_label' => "View Current Month's Income", 'visible' => false]);
+                Route::match(['get', 'post'], 'current_month_expenses', ['as' => 'current_month_expenses', 'uses' => 'DashboardReportController@current_month_expenses', 'custom_label' => "View Current Month's Expenses", 'visible' => false]);
+                Route::match(['get', 'post'], 'income_and_expenses_analysis', ['as' => 'income_and_expenses_analysis', 'uses' => 'DashboardReportController@income_and_expenses_analysis', 'custom_label' => "View Income & Expenses Analysis", 'visible' => false]);
+                Route::match(['get', 'post'], 'recent_payment', ['as' => 'recent_payment', 'uses' => 'DashboardReportController@recent_payment', 'custom_label' => "View Recent Payment", 'visible' => false]);
+                Route::match(['get', 'post'], 'recent_invoice', ['as' => 'recent_invoice', 'uses' => 'DashboardReportController@recent_invoice', 'custom_label' => "View Recent Invoice", 'visible' => false]);
             });
         });
 

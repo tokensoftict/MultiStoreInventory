@@ -469,15 +469,26 @@ class StockController extends Controller
         $data['stocks'] = Stock::where('status', 1)->get();
         $data['stock'] = null;
 
-        if (($request->method() == "POST") && isset($request->yard_qty)) {
+        if (($request->method() == "POST") && $request->has('units_qty') && \App\Services\StockUnitService::isMulti()) {
+            $stock = Stock::findOrFail($request->stock_id);
+            $expiry = null;
+            if ($stock->expiry == 1 && $request->filled('expiry_date')) {
+                $expiry = \Carbon\Carbon::createFromFormat('d/m/Y', $request->expiry_date)->format('Y-m-d');
+            }
+            $errors = \App\Services\StockUnitService::adjustQuantity($stock, (array)$request->get('units_qty'), $expiry);
+            if ($errors) {
+                return redirect()->route('stock.quick')->with('error', implode(' ', $errors));
+            }
+            return redirect()->route('stock.quick')->with('success', 'Stock Quantity has been adjusted successfully!');
+        } else if (($request->method() == "POST") && isset($request->yard_qty)) {
             return Stock::adjustStockQuantity($request);
         } else if (($request->method() == "POST") && !isset($request->yard_qty)) {
             $data['convert_stock'] = Stock::find($request->select_stock);
             if (!$data['convert_stock'])
-                redirect()->route('stock.quick')->with('error', 'Stock selected not found, Please check if you have selected a stock');
+                return redirect()->route('stock.quick')->with('error', 'Stock selected not found, Please check if you have selected a stock');
             $countBatch = $data['convert_stock']->stockBatches()->orderBy("expiry_date", "DESC")->count();
             if ($countBatch == 0)
-                redirect()->route('stock.quick')->with('error', 'Stock Initial Purchase Order not found, Please create Purchase order for product to adjust');
+                return redirect()->route('stock.quick')->with('error', 'Stock Initial Purchase Order not found, Please create Purchase order for product to adjust');
             $data['stock'] = $data['convert_stock'];
         }
 
