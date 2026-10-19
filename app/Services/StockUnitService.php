@@ -284,10 +284,7 @@ class StockUnitService
         if (!isset($levels[$baseLevel])) {
             return ['The ' . ($baseUnit->name ?? 'base unit') . ' is required.'];
         }
-        $hasActivePackaging = count($activeLevels) > 1;
-        if ($hasActivePackaging && count($levels) < 2) {
-            return ['Define at least one packaging unit larger than the ' . ($baseUnit->name ?? 'base unit') . '.'];
-        }
+        // Packaging units (cartons, packets) are optional: a single product may use only the base unit.
 
         $errors = [];
         $chain = array_keys($levels); // ascending levels, e.g. [1,2,3] or [2,3] or [1,3]

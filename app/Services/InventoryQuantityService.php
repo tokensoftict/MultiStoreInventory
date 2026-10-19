@@ -149,8 +149,8 @@ class InventoryQuantityService
     public static function validateUnits(array $units): array
     {
         $errors = [];
-        if (count($units) < 2) {
-            return ['At least two units (e.g. Packet and Piece) are required.'];
+        if (count($units) < 1) {
+            return ['At least one unit (the base unit) is required.'];
         }
 
         $ids = array_column($units, 'id');
