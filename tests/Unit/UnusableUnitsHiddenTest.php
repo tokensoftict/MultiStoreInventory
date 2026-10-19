@@ -66,4 +66,22 @@ class UnusableUnitsHiddenTest extends TestCase
             DB::rollBack();
         }
     }
+
+    public function test_pieces_with_zero_selling_price_is_hidden()
+    {
+        DB::beginTransaction();
+        try {
+            // Pieces defined with selling_price 0 - only Cartons and Packets priced
+            $stock = $this->stock([
+                1 => ['name' => 'Cartons', 'cost_price' => 600, 'selling_price' => 800],
+                2 => ['name' => 'Packets', 'units_per_parent' => 10, 'cost_price' => 50, 'selling_price' => 80],
+                3 => ['name' => 'Pieces', 'units_per_parent' => 10, 'cost_price' => 5, 'selling_price' => 0],
+            ]);
+            $units = StockUnitService::unitsForUi($stock->id, 234);
+            $this->assertEquals(['Cartons', 'Packets'], array_column($units, 'name'));
+            $this->assertNotContains('Pieces', array_column($units, 'name'));
+        } finally {
+            DB::rollBack();
+        }
+    }
 }

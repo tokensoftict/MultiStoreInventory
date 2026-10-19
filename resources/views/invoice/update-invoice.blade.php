@@ -204,7 +204,9 @@
          <td>
              <select class="form-control product_type">
                  @foreach($ml as $u)
-                     <option value="{{ getActiveStore()->yard_column }}__u{{ $u['id'] }}" {{ (int)$u['id'] === (int)$itemUnitId ? 'selected' : '' }} data-unit-id="{{ $u['id'] }}" data-cost-price="{{ $u['cost_price'] }}" data-price="{{ $u['selling_price'] }}" data-av-qty="{{ $u['available'] }}">{{ $u['name'] }} ({{ $u['available'] }} avail.)</option>
+                     @if((float)$u['selling_price'] > 0 || (int)$u['id'] === (int)$itemUnitId)
+                         <option value="{{ getActiveStore()->yard_column }}__u{{ $u['id'] }}" {{ (int)$u['id'] === (int)$itemUnitId ? 'selected' : '' }} data-unit-id="{{ $u['id'] }}" data-cost-price="{{ $u['cost_price'] }}" data-price="{{ $u['selling_price'] }}" data-av-qty="{{ $u['available'] }}">{{ $u['name'] }} ({{ $u['available'] }} avail.)</option>
+                     @endif
                  @endforeach
              </select>
          </td>
@@ -477,7 +479,12 @@
         // Multi-level quantity helpers (only used when a product carries units)
         const BASE_YARD_COLUMN = "{{ getActiveStore()->yard_column }}";
         function unitOptValue(u) { return BASE_YARD_COLUMN + '__u' + u.id; }
-        function defaultUnit(stock) { return stock.units[stock.units.length - 1]; } // Piece (smallest)
+        function defaultUnit(stock) {
+            var valid = (stock.units || []).filter(function (u) {
+                return u.selling_price !== null && u.selling_price !== '' && parseFloat(u.selling_price) > 0;
+            });
+            return valid.length ? valid[valid.length - 1] : null;
+        }
 
         function bindAllTr(){
             $('#appender').find('tr').off('click');
@@ -503,10 +510,16 @@
             }
 
             // Multi-level store: if only pieces is enabled, default to pieces; otherwise require user to pick a unit
+            if (data.stock.multi_level && data.stock.units) {
+                data.stock.units = data.stock.units.filter(function (u) {
+                    return u.selling_price !== null && u.selling_price !== '' && parseFloat(u.selling_price) > 0;
+                });
+            }
             if (data.stock.multi_level && data.stock.units && data.stock.units.length) {
                 let onlyPieces = (data.stock.units.length === 1) || data.stock.only_pieces;
                 if (onlyPieces) {
-                    defaultType = unitOptValue(defaultUnit(data.stock));
+                    const du = defaultUnit(data.stock);
+                    defaultType = du ? unitOptValue(du) : "";
                 } else {
                     defaultType = "";
                     var unselectedInput = $('#appender').find('.input-number[data-id="' + data.stock.id + '"]').filter(function() {
@@ -880,25 +893,34 @@
             }
 
             let isMulti = false;
+            if (data.stock.multi_level && data.stock.units) {
+                data.stock.units = data.stock.units.filter(function (u) {
+                    return u.selling_price !== null && u.selling_price !== '' && parseFloat(u.selling_price) > 0;
+                });
+            }
             if (data.stock.multi_level && data.stock.units && data.stock.units.length) {
                 let onlyPieces = (data.stock.units.length === 1) || data.stock.only_pieces;
                 if (onlyPieces) {
                     const du = defaultUnit(data.stock);
                     type_select = '<select class="form-control product_type">';
                     data.stock.units.forEach(function (u) {
-                        type_select += '<option ' + (u.id === du.id ? 'selected ' : '') + 'value="' + unitOptValue(u) + '" data-unit-id="' + u.id + '" data-cost-price="' + u.cost_price + '" data-price="' + u.selling_price + '" data-av-qty="' + u.available + '">' + u.name + ' (' + u.available + ' avail.)</option>';
+                        if (u.selling_price !== null && u.selling_price !== '' && parseFloat(u.selling_price) > 0) {
+                            type_select += '<option ' + (du && u.id === du.id ? 'selected ' : '') + 'value="' + unitOptValue(u) + '" data-unit-id="' + u.id + '" data-cost-price="' + u.cost_price + '" data-price="' + u.selling_price + '" data-av-qty="' + u.available + '">' + u.name + ' (' + u.available + ' avail.)</option>';
+                        }
                     });
                     type_select += '</select>';
-                    data.stock.available_quantity = du.available;
-                    data.stock.selling_price = du.selling_price;
-                    data.stock.cost_price = du.cost_price;
+                    data.stock.available_quantity = du ? du.available : 0;
+                    data.stock.selling_price = du ? du.selling_price : 0;
+                    data.stock.cost_price = du ? du.cost_price : 0;
                     data.stock.stock_prices = [];
                 } else {
                     isMulti = true;
                     type_select = '<select class="form-control product_type">';
                     type_select += '<option value="" disabled selected>-- Select Unit --</option>';
                     data.stock.units.forEach(function (u) {
-                        type_select += '<option value="' + unitOptValue(u) + '" data-unit-id="' + u.id + '" data-cost-price="' + u.cost_price + '" data-price="' + u.selling_price + '" data-av-qty="' + u.available + '">' + u.name + ' (' + u.available + ' avail.)</option>';
+                        if (u.selling_price !== null && u.selling_price !== '' && parseFloat(u.selling_price) > 0) {
+                            type_select += '<option value="' + unitOptValue(u) + '" data-unit-id="' + u.id + '" data-cost-price="' + u.cost_price + '" data-price="' + u.selling_price + '" data-av-qty="' + u.available + '">' + u.name + ' (' + u.available + ' avail.)</option>';
+                        }
                     });
                     type_select += '</select>';
                     data.stock.available_quantity = 0;

@@ -86,10 +86,11 @@ class StockUnitService
         $out = [];
         foreach ($rows as $idx => $row) {
             $isBase = $idx === $lastIdx;
-            $usable = $isBase
-                || in_array((int)$row->id, array_map('intval', $keepUnitIds), true)
-                || ((float)$row->selling_price > 0
-                    && ($row->parent_unit_id === null || (float)$row->units_per_parent > 0));
+            $hasPrice = $row->selling_price !== null && $row->selling_price !== '' && (float)$row->selling_price > 0;
+            $isKept = in_array((int)$row->id, array_map('intval', $keepUnitIds), true);
+            $hasConversion = ($row->parent_unit_id === null || (float)$row->units_per_parent > 0);
+
+            $usable = $isKept || ($hasPrice && ($isBase || $hasConversion));
             if (!$usable) {
                 continue;
             }

@@ -334,7 +334,12 @@
         // Multi-level quantity helpers (only used when a product carries units)
         const BASE_YARD_COLUMN = "{{ getActiveStore()->yard_column }}";
         function unitOptValue(u) { return BASE_YARD_COLUMN + '__u' + u.id; }
-        function defaultUnit(stock) { return stock.units[stock.units.length - 1]; } // Piece (smallest)
+        function defaultUnit(stock) {
+            var valid = (stock.units || []).filter(function (u) {
+                return u.selling_price !== null && u.selling_price !== '' && parseFloat(u.selling_price) > 0;
+            });
+            return valid.length ? valid[valid.length - 1] : null;
+        }
 
         function bindAllTr(){
             $('#appender').find('tr').off('click');
@@ -357,10 +362,16 @@
             if (data.stock.type != "Normal" && parseInt(data.stock.available_quantity) == 0 && parseInt(data.stock.available_yard_quantity) > 0) {
                 defaultType = "{{ getActiveStore()->yard_column }}";
             }
+            if (data.stock.multi_level && data.stock.units) {
+                data.stock.units = data.stock.units.filter(function (u) {
+                    return u.selling_price !== null && u.selling_price !== '' && parseFloat(u.selling_price) > 0;
+                });
+            }
             if (data.stock.multi_level && data.stock.units && data.stock.units.length) {
                 let onlyPieces = (data.stock.units.length === 1) || data.stock.only_pieces;
                 if (onlyPieces) {
-                    defaultType = unitOptValue(defaultUnit(data.stock));
+                    const du = defaultUnit(data.stock);
+                    defaultType = du ? unitOptValue(du) : "";
                 } else {
                     defaultType = "";
                 }
@@ -625,25 +636,34 @@
             let currentCost = data.stock.cost_price;
             let currentMax = data.stock.available_quantity;
 
+            if (data.stock.multi_level && data.stock.units) {
+                data.stock.units = data.stock.units.filter(function (u) {
+                    return u.selling_price !== null && u.selling_price !== '' && parseFloat(u.selling_price) > 0;
+                });
+            }
             if (data.stock.multi_level && data.stock.units && data.stock.units.length) {
                 let onlyPieces = (data.stock.units.length === 1) || data.stock.only_pieces;
                 if (onlyPieces) {
                     const du = defaultUnit(data.stock);
-                    defaultType = unitOptValue(du);
+                    defaultType = du ? unitOptValue(du) : "pending";
                     type_select = '<select class="form-control product_type">';
                     data.stock.units.forEach(function (u) {
-                        type_select += '<option ' + (u.id === du.id ? 'selected ' : '') + 'value="' + unitOptValue(u) + '" data-unit-id="' + u.id + '" data-cost-price="' + u.cost_price + '" data-price="' + u.selling_price + '" data-av-qty="' + u.available + '">' + u.name + ' (' + u.available + ' avail.)</option>';
+                        if (u.selling_price !== null && u.selling_price !== '' && parseFloat(u.selling_price) > 0) {
+                            type_select += '<option ' + (du && u.id === du.id ? 'selected ' : '') + 'value="' + unitOptValue(u) + '" data-unit-id="' + u.id + '" data-cost-price="' + u.cost_price + '" data-price="' + u.selling_price + '" data-av-qty="' + u.available + '">' + u.name + ' (' + u.available + ' avail.)</option>';
+                        }
                     });
                     type_select += '</select>';
-                    currentMax = du.available;
-                    currentPrice = du.selling_price;
-                    currentCost = du.cost_price;
+                    currentMax = du ? du.available : 0;
+                    currentPrice = du ? du.selling_price : 0;
+                    currentCost = du ? du.cost_price : 0;
                 } else {
                     defaultType = "pending";
                     type_select = '<select class="form-control product_type">';
                     type_select += '<option value="" disabled selected>-- Select Unit --</option>';
                     data.stock.units.forEach(function (u) {
-                        type_select += '<option value="' + unitOptValue(u) + '" data-unit-id="' + u.id + '" data-cost-price="' + u.cost_price + '" data-price="' + u.selling_price + '" data-av-qty="' + u.available + '">' + u.name + ' (' + u.available + ' avail.)</option>';
+                        if (u.selling_price !== null && u.selling_price !== '' && parseFloat(u.selling_price) > 0) {
+                            type_select += '<option value="' + unitOptValue(u) + '" data-unit-id="' + u.id + '" data-cost-price="' + u.cost_price + '" data-price="' + u.selling_price + '" data-av-qty="' + u.available + '">' + u.name + ' (' + u.available + ' avail.)</option>';
+                        }
                     });
                     type_select += '</select>';
                     currentMax = 0;
