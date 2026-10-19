@@ -66,8 +66,14 @@ class StockUnitService
         return self::$unitCache[$stockId];
     }
 
-    /** Units with prices and multipliers, for the front end. */
-    public static function unitsForUi($stockId, $baseQuantity = null): array
+    /**
+     * Units with prices and multipliers, for the front end.
+     * A packaging unit (anything above the base piece) is only offered when it is really usable:
+     * it has a selling price and, when it sits inside another unit, a conversion. Multipliers are
+     * always computed on the full chain so hiding a unit never changes quantity maths.
+     * $keepUnitIds forces specific unit ids to stay (e.g. the unit already saved on a document line).
+     */
+    public static function unitsForUi($stockId, $baseQuantity = null, array $keepUnitIds = []): array
     {
         $activeLevels = \App\Models\QuantityUnit::activeUnits()->pluck('level')->toArray();
         $rows = ProductUnit::where('stock_id', $stockId)
@@ -76,8 +82,17 @@ class StockUnitService
             ->orderBy('level')
             ->get();
         $units = InventoryQuantityService::normalize($rows);
+        $lastIdx = count($rows) - 1;
         $out = [];
-        foreach ($rows as $row) {
+        foreach ($rows as $idx => $row) {
+            $isBase = $idx === $lastIdx;
+            $usable = $isBase
+                || in_array((int)$row->id, array_map('intval', $keepUnitIds), true)
+                || ((float)$row->selling_price > 0
+                    && ($row->parent_unit_id === null || (float)$row->units_per_parent > 0));
+            if (!$usable) {
+                continue;
+            }
             $mult = InventoryQuantityService::multiplier($units, $row->id);
             $out[] = [
                 'id' => $row->id,
@@ -90,6 +105,31 @@ class StockUnitService
             ];
         }
         return $out;
+    }
+
+    /** Stock label split only across the units a product actually sells in, e.g. "5 Pieces". */
+    public static function usableBreakdownLabel($stockId, $baseQuantity): string
+    {
+        $units = self::unitsForUi($stockId);
+        if (!$units) {
+            return self::breakdownLabel($stockId, $baseQuantity);
+        }
+        usort($units, function ($a, $b) {
+            return $b['multiplier'] <=> $a['multiplier'];
+        });
+        $remaining = (float)$baseQuantity;
+        $parts = [];
+        $last = count($units) - 1;
+        foreach ($units as $i => $u) {
+            if ($i === $last) {
+                $qty = round($remaining, 4);
+            } else {
+                $qty = floor(round($remaining / $u['multiplier'], 6));
+                $remaining = round($remaining - $qty * $u['multiplier'], 4);
+            }
+            $parts[] = (floor($qty) == $qty ? (int)$qty : $qty) . ' ' . $u['name'];
+        }
+        return implode(', ', $parts);
     }
 
     public static function hasUnits($stockId): bool

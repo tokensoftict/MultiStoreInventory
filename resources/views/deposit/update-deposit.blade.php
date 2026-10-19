@@ -169,14 +169,14 @@
 @php
     $isMulti = \App\Services\StockUnitService::isMulti();
     $ml = ($isMulti && \App\Services\StockUnitService::hasUnits($items->stock_id))
-        ? \App\Services\StockUnitService::unitsForUi($items->stock_id, (float)$items->stock->available_yard_quantity + (float)$items->quantity)
+        ? \App\Services\StockUnitService::unitsForUi($items->stock_id, (float)$items->stock->available_yard_quantity + (float)$items->quantity, !empty($items->unit_id) ? [(int)$items->unit_id] : [])
         : null;
     $selUnit = null;
     if ($ml) {
         if (!empty($items->unit_id)) {
             $selUnit = collect($ml)->firstWhere('id', (int)$items->unit_id);
         }
-        if (!$selUnit && \App\Models\QuantityUnit::isOnlyPiecesEnabled()) {
+        if (!$selUnit && (count($ml) === 1 || \App\Models\QuantityUnit::isOnlyPiecesEnabled())) {
             $selUnit = collect($ml)->last();
         }
     }

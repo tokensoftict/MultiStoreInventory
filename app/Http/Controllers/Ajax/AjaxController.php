@@ -76,7 +76,7 @@ class AjaxController extends Controller
                 $stockArray['stock']['base_quantity'] = $base;
                 $stockArray['stock']['units'] = \App\Services\StockUnitService::unitsForUi($stock->stock_id, $base);
                 $stockArray['stock']['only_pieces'] = \App\Models\QuantityUnit::isOnlyPiecesEnabled();
-                $stockArray['stock']['stock_label'] = \App\Services\StockUnitService::breakdownLabel($stock->stock_id, $base);
+                $stockArray['stock']['stock_label'] = \App\Services\StockUnitService::usableBreakdownLabel($stock->stock_id, $base);
             }
             return $stockArray;
         });
@@ -128,7 +128,7 @@ class AjaxController extends Controller
                 $stockArray['stock']['base_quantity'] = $base;
                 $stockArray['stock']['units'] = \App\Services\StockUnitService::unitsForUi($stock->stock_id, $base);
                 $stockArray['stock']['only_pieces'] = \App\Models\QuantityUnit::isOnlyPiecesEnabled();
-                $stockArray['stock']['stock_label'] = \App\Services\StockUnitService::breakdownLabel($stock->stock_id, $base);
+                $stockArray['stock']['stock_label'] = \App\Services\StockUnitService::usableBreakdownLabel($stock->stock_id, $base);
             }
             return $stockArray;
         });
@@ -218,7 +218,7 @@ class AjaxController extends Controller
                 $item['base_quantity'] = $base;
                 $item['units'] = \App\Services\StockUnitService::unitsForUi($stock->stock_id, $base);
                 $item['only_pieces'] = \App\Models\QuantityUnit::isOnlyPiecesEnabled();
-                $item['stock_label'] = \App\Services\StockUnitService::breakdownLabel($stock->stock_id, $base);
+                $item['stock_label'] = \App\Services\StockUnitService::usableBreakdownLabel($stock->stock_id, $base);
             }
 
             $result[] = $item;

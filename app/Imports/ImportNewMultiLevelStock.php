@@ -94,49 +94,93 @@ class ImportNewMultiLevelStock implements ToModel, WithHeadingRow
         return $value !== null && trim((string)$value) !== '';
     }
 
+    /** A cell that carries information: not blank and not just a zero. */
+    private function meaningful($value): bool
+    {
+        return $this->filled($value) && !(is_numeric($value) && (float)$value == 0.0);
+    }
+
     /**
      * Turn the row's unit columns into [saveUnits input, quantities by level, errors].
-     * The base unit is always used; a packaging unit is used when any of its cells is filled.
+     *
+     * Packaging units (Cartons, Packets...) are optional per product:
+     *  - a packaging unit whose cells are all blank/zero is skipped, so single products can be
+     *    imported with only the base unit (Pieces) filled;
+     *  - a packaging unit needs a conversion (its "per parent" cell) unless it is the first/largest
+     *    unit the product uses; if the conversion is missing and nothing else is entered for it
+     *    (no quantity), it is skipped instead of failing the import;
+     *  - a packaging unit that has an opening quantity but no conversion is a real error, because
+     *    the quantity cannot be turned into pieces.
      */
     private function readUnits(array $row): array
     {
         $input = [];
         $quantities = [];
         $errors = [];
+        $types = [MultiLevelStockSheet::COST, MultiLevelStockSheet::SELLING, MultiLevelStockSheet::QTY, MultiLevelStockSheet::PER_PARENT];
 
+        // 1. gather candidate levels
+        $candidates = [];
         foreach (MultiLevelStockSheet::levels() as $level) {
             $cols = $level['columns'];
-            $cell = function ($type) use ($row, $cols) {
-                return isset($cols[$type]) ? ($row[$cols[$type]['key']] ?? null) : null;
-            };
-
+            $cells = [];
+            foreach ($types as $type) {
+                $cells[$type] = isset($cols[$type]) ? ($row[$cols[$type]['key']] ?? null) : null;
+                if ($this->filled($cells[$type]) && !is_numeric($cells[$type])) {
+                    $errors[] = "{$cols[$type]['heading']} must be a number.";
+                }
+            }
             $used = $level['is_base'];
-            foreach ([MultiLevelStockSheet::COST, MultiLevelStockSheet::SELLING, MultiLevelStockSheet::QTY, MultiLevelStockSheet::PER_PARENT] as $type) {
-                if ($this->filled($cell($type))) {
+            foreach ($types as $type) {
+                if ($this->meaningful($cells[$type])) {
                     $used = true;
                 }
             }
-            if (!$used) {
-                continue;
+            if ($used) {
+                $candidates[] = ['level' => $level, 'cells' => $cells];
             }
+        }
+        if ($errors) {
+            return [[], [], array_values(array_unique($errors))];
+        }
 
-            foreach ([MultiLevelStockSheet::COST, MultiLevelStockSheet::SELLING, MultiLevelStockSheet::QTY, MultiLevelStockSheet::PER_PARENT] as $type) {
-                $v = $cell($type);
-                if ($this->filled($v) && !is_numeric($v)) {
-                    $errors[] = "{$cols[$type]['heading']} must be a number.";
+        // 2. keep packaging units that can actually be converted
+        $kept = [];
+        foreach ($candidates as $cand) {
+            $level = $cand['level'];
+            $cells = $cand['cells'];
+            $isFirst = count($kept) === 0;
+            $hasConversion = $this->meaningful($cells[MultiLevelStockSheet::PER_PARENT]);
+
+            if (!$level['is_base'] && !$isFirst && !$hasConversion) {
+                if ($this->meaningful($cells[MultiLevelStockSheet::QTY])) {
+                    $errors[] = "{$level['name']} has a quantity but no '{$level['columns'][MultiLevelStockSheet::PER_PARENT]['heading']}'.";
                 }
+                continue; // not used for this product
+            }
+            $kept[] = $cand;
+        }
+
+        // 3. build the saveUnits input
+        foreach ($kept as $idx => $cand) {
+            $level = $cand['level'];
+            $cells = $cand['cells'];
+            $cols = $level['columns'];
+
+            if ($level['is_base'] && $idx > 0 && !$this->meaningful($cells[MultiLevelStockSheet::PER_PARENT])) {
+                $errors[] = "{$cols[MultiLevelStockSheet::PER_PARENT]['heading']} is required when the product uses cartons or packets.";
             }
 
             $input[$level['level']] = [
                 'name' => $level['name'],
-                'units_per_parent' => $cell(MultiLevelStockSheet::PER_PARENT),
-                'cost_price' => $this->filled($cell(MultiLevelStockSheet::COST)) ? $cell(MultiLevelStockSheet::COST) : 0,
-                'selling_price' => $this->filled($cell(MultiLevelStockSheet::SELLING)) ? $cell(MultiLevelStockSheet::SELLING) : 0,
+                'units_per_parent' => $idx > 0 ? $cells[MultiLevelStockSheet::PER_PARENT] : null,
+                'cost_price' => $this->filled($cells[MultiLevelStockSheet::COST]) ? $cells[MultiLevelStockSheet::COST] : 0,
+                'selling_price' => $this->filled($cells[MultiLevelStockSheet::SELLING]) ? $cells[MultiLevelStockSheet::SELLING] : 0,
             ];
 
-            $qty = $cell(MultiLevelStockSheet::QTY);
-            if ($this->filled($qty) && is_numeric($qty)) {
-                if ($qty < 0) {
+            $qty = $cells[MultiLevelStockSheet::QTY];
+            if ($this->filled($qty)) {
+                if ((float)$qty < 0) {
                     $errors[] = "{$cols[MultiLevelStockSheet::QTY]['heading']} cannot be negative.";
                 } elseif ((float)$qty > 0) {
                     $quantities[$level['level']] = (float)$qty;
