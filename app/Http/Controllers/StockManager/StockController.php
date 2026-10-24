@@ -88,6 +88,12 @@ class StockController extends Controller
 
         $stock_data = $request->only(Stock::$field);
 
+        if (empty($stock_data['selling_price'])) {
+            $stock_data['selling_price'] = 0;
+        }
+        if (empty($stock_data['cost_price'])) {
+            $stock_data['cost_price'] = 0;
+        }
         if (empty($stock_data['yard_selling_price'])) {
             $stock_data['yard_selling_price'] = 0;
         }
@@ -209,6 +215,12 @@ class StockController extends Controller
             if ($errors) {
                 return redirect()->back()->withInput()->withErrors(['units' => $errors]);
             }
+            unset(
+                $stock_data['selling_price'],
+                $stock_data['cost_price'],
+                $stock_data['yard_selling_price'],
+                $stock_data['yard_cost_price']
+            );
         }
 
         $stock->update($stock_data);

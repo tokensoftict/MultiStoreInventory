@@ -275,10 +275,56 @@ class StockUnitService
         $baseUnit = \App\Models\QuantityUnit::getBaseUnit();
         $baseLevel = (int)($baseUnit->level ?? 3);
 
+        $hasPrice = function ($row): bool {
+            if (!$row) return false;
+            $cp = $row['cost_price'] ?? null;
+            $sp = $row['selling_price'] ?? null;
+            return (is_numeric($cp) && (float)$cp > 0) || (is_numeric($sp) && (float)$sp > 0);
+        };
+
+        $hasConversion = function ($row): bool {
+            if (!$row) return false;
+            $upp = $row['units_per_parent'] ?? null;
+            return is_numeric($upp) && (float)$upp > 0;
+        };
+
+        // Determine which packaging levels are actually used by this product.
+        // A packaging level is used if:
+        //  - It has a positive cost or selling price, OR
+        //  - It defines a conversion to its parent (units_per_parent > 0), OR
+        //  - A child level below it defines a conversion to it.
+        // If carton and packet fields and conversions are zero or empty, only the base unit is kept.
         $levels = [];
-        foreach ($activeLevels as $level) {
+        foreach ($activeLevels as $idx => $level) {
             $row = $input[$level] ?? null;
-            if ($row && trim((string)($row['name'] ?? '')) !== '') {
+            if (!$row || trim((string)($row['name'] ?? '')) === '') {
+                continue;
+            }
+            if ($level === $baseLevel) {
+                $levels[$level] = $row;
+                continue;
+            }
+
+            // Check if this packaging level is used:
+            $used = $hasPrice($row);
+
+            // If not the top-most unit, does it specify a conversion to its parent?
+            if (!$used && $idx > 0 && $hasConversion($row)) {
+                $used = true;
+            }
+
+            // Does any child level specify a conversion?
+            if (!$used) {
+                for ($j = $idx + 1; $j < count($activeLevels); $j++) {
+                    $childLevel = $activeLevels[$j];
+                    if ($hasConversion($input[$childLevel] ?? null)) {
+                        $used = true;
+                        break;
+                    }
+                }
+            }
+
+            if ($used) {
                 $levels[$level] = $row;
             }
         }

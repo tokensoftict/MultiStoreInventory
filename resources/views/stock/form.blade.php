@@ -124,7 +124,7 @@
                                         <div class="panel-body" style="border-bottom: 1px solid #eee;">
                                             <h5><strong>Units ({!! $unitTitleChain !!})</strong></h5>
                                             @if(count($activeUnits) > 1)
-                                                <small class="text-muted">The {{ $baseUnit->name ?? 'base unit' }} is required. Prices are independent per unit. Conversion = how many of that unit make 1 of the unit above it.</small>
+                                                <small class="text-muted">The {{ $baseUnit->name ?? 'base unit' }} is required. Prices are independent per unit. Conversion = how many of that unit make 1 of the unit above it. For products sold only as pieces, packaging units and conversions can be left as 0 or empty.</small>
                                             @else
                                                 <small class="text-muted">Only the {{ $baseUnit->name ?? 'base unit' }} is enabled in settings. Packaging units are currently disabled.</small>
                                             @endif
@@ -149,7 +149,7 @@
                                                     @if($prevUnit)
                                                         <div class="form-group">
                                                             <label>{{ $qu->name }} in 1 {{ $prevUnit->name }}</label>
-                                                            <input type="number" min="0.0001" step="any" class="form-control" name="units[{{ $lvl }}][units_per_parent]" value="{{ old('units.'.$lvl.'.units_per_parent', $ur ? $ur->units_per_parent + 0 : '') }}" placeholder="e.g. 10"/>
+                                                            <input type="number" min="0" step="any" class="form-control" name="units[{{ $lvl }}][units_per_parent]" value="{{ old('units.'.$lvl.'.units_per_parent', $ur ? $ur->units_per_parent + 0 : '') }}" placeholder="e.g. 10"/>
                                                         </div>
                                                     @else
                                                         <input type="hidden" name="units[{{ $lvl }}][units_per_parent]" value="1"/>

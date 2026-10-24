@@ -84,4 +84,115 @@ class UnusableUnitsHiddenTest extends TestCase
             DB::rollBack();
         }
     }
+
+    public function test_pieces_only_product_allows_zero_or_empty_carton_and_packet_information()
+    {
+        DB::beginTransaction();
+        try {
+            // User creates a product sold only as pieces:
+            // Carton prices are 0, Packets in 1 Cartons is 0, Packet prices 0, Pieces in Packet is 0.
+            // Only Pieces cost and selling price are provided.
+            $stock = Stock::create(['name' => 'Single Piece Product', 'selling_price' => 0, 'cost_price' => 0, 'type' => 'NORMAL']);
+            $formUnits = [
+                1 => ['name' => 'Cartons', 'units_per_parent' => 1, 'cost_price' => 0, 'selling_price' => 0],
+                2 => ['name' => 'Packets', 'units_per_parent' => 0, 'cost_price' => '', 'selling_price' => 0],
+                3 => ['name' => 'Pieces', 'units_per_parent' => 0, 'cost_price' => 50, 'selling_price' => 100],
+            ];
+
+            $errors = StockUnitService::saveUnits($stock, $formUnits);
+            $this->assertEmpty($errors, 'Saving pieces-only units with zero conversions/prices for cartons & packets should succeed without errors.');
+
+            $activeUnits = \App\Models\ProductUnit::where('stock_id', $stock->id)->where('status', 1)->get();
+            $this->assertCount(1, $activeUnits);
+            $pieceUnit = $activeUnits->first();
+            $this->assertEquals(3, $pieceUnit->level);
+            $this->assertEquals('Pieces', $pieceUnit->name);
+            $this->assertNull($pieceUnit->parent_unit_id);
+            $this->assertNull($pieceUnit->units_per_parent);
+            $this->assertEquals(50, $pieceUnit->cost_price);
+            $this->assertEquals(100, $pieceUnit->selling_price);
+
+            // Stock legacy/aggregate prices reflect the piece price
+            $stock->refresh();
+            $this->assertEquals(100, $stock->selling_price);
+            $this->assertEquals(50, $stock->cost_price);
+            $this->assertEquals(100, $stock->yard_selling_price);
+            $this->assertEquals(50, $stock->yard_cost_price);
+
+            // UI units expose only Pieces
+            $uiUnits = StockUnitService::unitsForUi($stock->id, 50);
+            $this->assertCount(1, $uiUnits);
+            $this->assertEquals('Pieces', $uiUnits[0]['name']);
+            $this->assertEquals(1, $uiUnits[0]['multiplier']);
+            $this->assertEquals(50, $uiUnits[0]['available']);
+            $this->assertEquals('50 Pieces', StockUnitService::breakdownLabel($stock->id, 50));
+        } finally {
+            DB::rollBack();
+        }
+    }
+
+    public function test_stock_controller_store_and_update_with_pieces_only()
+    {
+        DB::beginTransaction();
+        try {
+            $controller = app(\App\Http\Controllers\StockManager\StockController::class);
+            $request = \Illuminate\Http\Request::create('/stock/store', 'POST', [
+                'name' => 'Controller Pieces Only',
+                'status' => 1,
+                'type' => 'NORMAL',
+                'units' => [
+                    1 => ['name' => 'Cartons', 'units_per_parent' => 1, 'cost_price' => 0, 'selling_price' => 0],
+                    2 => ['name' => 'Packets', 'units_per_parent' => 0, 'cost_price' => '', 'selling_price' => 0],
+                    3 => ['name' => 'Pieces', 'units_per_parent' => 0, 'cost_price' => 30, 'selling_price' => 60],
+                ],
+                'stock_batch' => [
+                    'units_qty' => [
+                        1 => '',
+                        2 => '0',
+                        3 => '20',
+                    ],
+                ],
+            ]);
+
+            $response = $controller->store($request);
+            $this->assertTrue($response->isRedirection());
+
+            $stock = Stock::where('name', 'Controller Pieces Only')->first();
+            $this->assertNotNull($stock);
+            $this->assertEquals(60, $stock->selling_price);
+            $this->assertEquals(30, $stock->cost_price);
+            $this->assertEquals(60, $stock->yard_selling_price);
+            $this->assertEquals(30, $stock->yard_cost_price);
+
+            // Batch created with 20 base pieces
+            $batch = $stock->stockbatches()->first();
+            $this->assertNotNull($batch);
+            $store = getActiveStore();
+            $this->assertEquals(20, $batch->{$store->yard_column});
+
+            // Update: change piece price and verify unit prices are preserved
+            $updateRequest = \Illuminate\Http\Request::create('/stock/update/' . $stock->id, 'POST', [
+                'name' => 'Controller Pieces Only Updated',
+                'status' => 1,
+                'type' => 'NORMAL',
+                'units' => [
+                    1 => ['name' => 'Cartons', 'units_per_parent' => 1, 'cost_price' => 0, 'selling_price' => 0],
+                    2 => ['name' => 'Packets', 'units_per_parent' => 0, 'cost_price' => 0, 'selling_price' => 0],
+                    3 => ['name' => 'Pieces', 'units_per_parent' => 0, 'cost_price' => 40, 'selling_price' => 75],
+                ],
+            ]);
+
+            $updateResponse = $controller->update($updateRequest, $stock->id);
+            $this->assertTrue($updateResponse->isRedirection());
+
+            $stock->refresh();
+            $this->assertEquals('Controller Pieces Only Updated', $stock->name);
+            $this->assertEquals(75, $stock->selling_price);
+            $this->assertEquals(40, $stock->cost_price);
+            $this->assertEquals(75, $stock->yard_selling_price);
+            $this->assertEquals(40, $stock->yard_cost_price);
+        } finally {
+            DB::rollBack();
+        }
+    }
 }
